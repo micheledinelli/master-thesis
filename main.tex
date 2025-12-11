@@ -1,0 +1,104 @@
+\documentclass[12pt,a4paper,openright,twoside]{book}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+
+\usepackage{indentfirst}
+\usepackage{lipsum}
+\usepackage{graphicx}
+\usepackage{newlfont}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{latexsym}
+\usepackage{amsthm}
+
+\hyphenation{mate-mati-ca recu-perare}
+\usepackage{hyperref}
+
+\usepackage{fancyhdr}
+\oddsidemargin=30pt \evensidemargin=20pt
+\pagestyle{fancy}\addtolength{\headwidth}{20pt}
+\setlength{\headheight}{14.5pt}
+\linespread{1.3}
+
+\renewcommand{\chaptermark}[1]{\markboth{\thechapter.\ #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection \ #1}{}}
+\rhead[\fancyplain{}{\bfseries\leftmark}]{\fancyplain{}{\bfseries\thepage}}
+
+\cfoot{}
+
+\begin{document}
+
+\begin{titlepage}
+\thispagestyle{empty}
+\topmargin=6.5cm 
+\raggedleft
+\large
+\em
+Dedicata a \ldots
+\newpage
+
+\clearpage{\pagestyle{empty}\cleardoublepage}
+\end{titlepage}
+
+\pagenumbering{roman}
+\chapter*{Abstract}
+\rhead[\fancyplain{}{\bfseries Abstract}]{\fancyplain{}{\bfseries\thepage}}
+\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries Abstract}}
+\input{abstract/abstract.en}
+\addcontentsline{toc}{chapter}{Abstract}
+\clearpage{\pagestyle{empty}\cleardoublepage}
+
+\pagenumbering{roman}
+\chapter*{Abstract}
+\rhead[\fancyplain{}{\bfseries Abstract}]{\fancyplain{}{\bfseries\thepage}}
+\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries Abstract}}
+\input{abstract/abstract.it}
+\clearpage{\pagestyle{empty}\cleardoublepage}
+
+\tableofcontents
+\rhead[\fancyplain{}{\bfseries\leftmark}]{\fancyplain{}{\bfseries\thepage}}
+\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries TABLE OF CONTENTS}}
+
+\clearpage{\pagestyle{empty}\cleardoublepage}
+\listoffigures
+\clearpage{\pagestyle{empty}\cleardoublepage}
+\listoftables
+
+\clearpage{\pagestyle{empty}\cleardoublepage}
+
+\pagenumbering{arabic}
+
+\input{chapters/chapter-1}
+\input{chapters/chapter-2}
+\input{chapters/chapter-3}
+
+\clearpage{\pagestyle{empty}\cleardoublepage}
+
+\chapter*{Conclusioni}
+\rhead[\fancyplain{}{\bfseries CONCLUSIONI}]{\fancyplain{}{\bfseries\thepage}}
+\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries CONCLUSIONI}}
+
+\addcontentsline{toc}{chapter}{Conclusioni}
+Queste sono le conclusioni
+
+\renewcommand{\chaptermark}[1]{\markright{\thechapter \ #1}{}}
+\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
+\appendix
+\chapter{Prima Appendice}
+First Appendix.
+
+\rhead[\fancyplain{}{\bfseries \thechapter \:Prima Appendice}]
+{\fancyplain{}{\bfseries\thepage}}
+\chapter{Seconda Appendice}
+\rhead[\fancyplain{}{\bfseries \thechapter \:Seconda Appendice}]
+{\fancyplain{}{\bfseries\thepage}}
+
+\bibliographystyle{ieeetr}
+\bibliography{refs}
+\clearpage{\pagestyle{empty}\cleardoublepage}
+
+\chapter*{Acknowledgments}
+\thispagestyle{empty}
+\input{ack}
+
+\end{document}
