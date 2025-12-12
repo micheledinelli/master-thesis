@@ -21,7 +21,7 @@ jobs:
       - name: Compile title page
         uses: xu-cheng/latex-action@v4
         with:
-          root_file: frontespizio.tex
+          root_file: front.tex
           working_directory: ./titlepage
 
       - name: Compile main document
@@ -35,7 +35,7 @@ jobs:
 
       - name: Concatenate title page and main document
         run: |
-          pdfunite titlepage/frontespizio.pdf main.pdf thesis.pdf
+          pdfunite titlepage/front.pdf main.pdf thesis.pdf
 
       - name: Prepare artifact directory
         run: |
