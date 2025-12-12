@@ -5,7 +5,7 @@
 \usepackage{indentfirst}
 \usepackage{lipsum}
 \usepackage{graphicx}
-\usepackage{newlfont}
+
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{latexsym}
@@ -41,19 +41,10 @@ Dedicata a \ldots
 \end{titlepage}
 
 \pagenumbering{roman}
-\chapter*{Abstract}
-\rhead[\fancyplain{}{\bfseries Abstract}]{\fancyplain{}{\bfseries\thepage}}
-\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries Abstract}}
 \input{abstract/abstract.en}
-\addcontentsline{toc}{chapter}{Abstract}
-\clearpage{\pagestyle{empty}\cleardoublepage}
 
 \pagenumbering{roman}
-\chapter*{Abstract}
-\rhead[\fancyplain{}{\bfseries Abstract}]{\fancyplain{}{\bfseries\thepage}}
-\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries Abstract}}
 \input{abstract/abstract.it}
-\clearpage{\pagestyle{empty}\cleardoublepage}
 
 \tableofcontents
 \rhead[\fancyplain{}{\bfseries\leftmark}]{\fancyplain{}{\bfseries\thepage}}
@@ -74,12 +65,7 @@ Dedicata a \ldots
 
 \clearpage{\pagestyle{empty}\cleardoublepage}
 
-\chapter*{Conclusioni}
-\rhead[\fancyplain{}{\bfseries CONCLUSIONI}]{\fancyplain{}{\bfseries\thepage}}
-\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries CONCLUSIONI}}
-
-\addcontentsline{toc}{chapter}{Conclusioni}
-Queste sono le conclusioni
+\input{chapters/conclusion}
 
 \renewcommand{\chaptermark}[1]{\markright{\thechapter \ #1}{}}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
