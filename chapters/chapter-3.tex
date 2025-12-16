@@ -1,4 +1,46 @@
-\chapter{Third chapter}
+\chapter{Lambda-Calculus}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
 
-\lipsum[1-10]
+The lambda calculus is a formal system introduced in the 1920s by Alonzo Church, in which all computation is reduced to the basic operations of function definition and application. It is therefore worth introducing and studying it, since it can be viewed as a simple programming language in which computations are mathematical objects that can be used for proofs \cite{types-and-programming-languages}. The key idea is that computation consists of simplifying expressions; when an expression can no longer be reduced, it represents the result of the computation. Lambda-calculus can be enriched in many ways and this section chapter will present the basis of lambda-calculus.
+
+\section{Untyped lambda-Calculus}
+Functional abstraction is one of the main ingredients of programming. It avoids code repetition and isolates meaningful pieces of code. When discussing functions in programming, particularly in functional programming, which is the focus here, common examples include the factorial function and the Fibonacci function. These examples are frequently used because of their recursive nature. For instance, the value of \verb|5| can be expressed in terms of a previous factorial as \verb|5! = 5 x 4!|. Similarly, the Fibonacci sequence is defined recursively: the value returned by the Fibonacci function, denoted by \verb|fib| satisfies \verb|fib(3) = fib(2) + fib(1)|, and more generally \verb|fib(n) = fib(n-1) + fib(n-2)|. Rather than reasoning in terms of an algorithm that explicitly manipulates memory through loops and termination conditions, the same computation can be expressed by composing previously defined functions, allowing one to reason in a more mathematical and declarative way. If \texttt{$\lambda$x.} is the function $\lambda$ that applied to \verb|x| returns something, then one can write
+\begin{lstlisting}[breaklines]
+fib = $\lambda$x. if x <= 1 then 1 else fib(x-1) + fib(x-2)
+\end{lstlisting}
+as the function that calculates the n-th Fibonacci number.
+
+The lambda calculus codifies these ideas in their purest form \cite{types-and-programming-languages}. It is a formalism in which every computation is expressed using anonymous unary functions, that is, functions that accept exactly one argument and return a single result. Functions may take other functions as arguments and return functions as results. Since functions are anonymous, they are not associated with explicit names bound to the computations they represent.
+
+The syntax of the lambda-calculus consists solely of lambda-terms. A lambda-term \verb|t| can take one of the following three forms:
+\begin{lstlisting}
+t ::= x | tt | $\lambda$x.t
+\end{lstlisting}
+Here, \verb|t| denotes a generic lambda-term. Lambda-terms are commonly represented by the symbols \verb|t, s, u, v, M, N|. One possible form of a term is \verb|x|, which represents a variable. The term \verb|tt| denotes the application of the first term to the second. Finally, the expression \texttt{$\lambda$x.t} is called a lambda-abstraction (or simply an abstraction); it represents the explicit definition of an anonymous function that binds the formal parameter \verb|x| and has body \verb|t|. In conventional mathematical notation, such a function might be written as $x \mapsto M$ or $f(x) = t$ if the the lambda-abstraction were given the name $f$. 
+
+There are some conventions for writing lambda-expressions. The first is that application is left-associative. For example, the expression \verb|tsu| is the same as \verb|(ts)u|. The second one is that application has higher precedence than abstraction. Hence, the expression \texttt{$\lambda$x.tt} is to be interpreted as \texttt{$\lambda$x.(tt)}, and not as \texttt{($\lambda$x.t)t}. The third convention is that the body of an abstraction extends as far to the right as possible. For example, \texttt{$\lambda$x.$\lambda$y.xyz} is the same as \texttt{$\lambda$x.($\lambda$y.((xy)z))}. In the last expression (\texttt{$\lambda$x.$\lambda$y.xyz}), the lambda-term \verb|z| does not appear as one of the arguments of the abstractions. In this case the lambda-term \verb|z| is said to be a free variable. An occurrence of the variable \verb|x| is said to be bound when it occurs in the
+body \verb|t| of an abstraction \texttt{$\lambda$x.t}. The $\lambda$ is also called \textit{binder}, that means it binds its argument in its body \verb|t|. In this context \verb|t| is the scope of the abstraction. When a lambda-term appear in an expression and there are no binders capturing it, then it's a free variable. For example in the expression
+\begin{lstlisting}[breaklines]
+x$\lambda$x.$\lambda$y.wxy
+\end{lstlisting}
+the first instance of \verb|x| is free, while the second one is captured by the binder. \verb|w| is also free. The set of free variables of a lambda-term \verb|t| is often denoted by $\mathrm{FV}(t)$. $\mathrm{FV}(t)$ is a recursive function defined by the following cases 
+
+\[
+\mathrm{FV}(t) = \left\{\begin{array}{lr}
+\mathrm{FV}(x)=x, & \text{for } \{x\} \text{ a variable} \\
+\mathrm{FV}(M N)=\mathrm{FV}(M) \cup \mathrm{FV}(N), & \text{for } M N \text{ expressions} \\
+\mathrm{FV}(\lambda x.t)=\mathrm{FV}(t) \setminus \{x\}, & \text{for } \lambda x. \text{ an abstraction} \\
+\end{array}\right.
+\]
+Let's consider the expression \texttt{$\lambda$x.xy($\lambda$y.yz)}. Applying the definition of $\mathrm{FV}$ the set of the free variables of \texttt{$\lambda$x.xy($\lambda$y.yz)} is
+\begin{align*}
+&\mathrm{FV}(\lambda x.xy(\lambda y.yz)) = \\
+&= \mathrm{FV}(xy(\lambda y.yz) \setminus \{x\}) = (\mathrm{FV}(x) \cup \mathrm{FV}(y) \cup \mathrm{FV}(\lambda y.yz)) \setminus \{x\} \\ 
+&= (\{x\} \cup \{y\} \cup (\mathrm{FV}(yz) \setminus \{y\})) \setminus \{x\} = \{x,y,z\} \setminus \{x\} = \{y,z\}
+\end{align*}
+
+The computation in lambda-calculus is performed only through function application. Applying functions to each other means rewriting the abstractions by substituting the bounded variables in the body. But substitution is not always safe
+
+% \section{Typed lambda-Calculus}
+% \section{lambda-BLL}
+

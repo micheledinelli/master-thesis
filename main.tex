@@ -1,10 +1,16 @@
 \documentclass[12pt,a4paper,openright,twoside]{book}
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily,
+  mathescape
+}
 
 \usepackage{indentfirst}
 \usepackage{lipsum}
 \usepackage{graphicx}
+\usepackage{csquotes}
 
 \usepackage{amssymb}
 \usepackage{amsmath}
@@ -43,7 +49,7 @@ Dedicata a \ldots
 \pagenumbering{roman}
 \input{abstract/abstract.en}
 
-\pagenumbering{roman}
+% \pagenumbering{roman}
 \input{abstract/abstract.it}
 
 \tableofcontents
@@ -67,17 +73,17 @@ Dedicata a \ldots
 
 \input{chapters/conclusion}
 
-\renewcommand{\chaptermark}[1]{\markright{\thechapter \ #1}{}}
-\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
-\appendix
-\chapter{Prima Appendice}
-First Appendix.
+% \renewcommand{\chaptermark}[1]{\markright{\thechapter \ #1}{}}
+% \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
+% \appendix
+% \chapter{Prima Appendice}
+% First Appendix.
 
-\rhead[\fancyplain{}{\bfseries \thechapter \:Prima Appendice}]
-{\fancyplain{}{\bfseries\thepage}}
-\chapter{Seconda Appendice}
-\rhead[\fancyplain{}{\bfseries \thechapter \:Seconda Appendice}]
-{\fancyplain{}{\bfseries\thepage}}
+% \rhead[\fancyplain{}{\bfseries \thechapter \:Prima Appendice}]
+% {\fancyplain{}{\bfseries\thepage}}
+% \chapter{Seconda Appendice}
+% \rhead[\fancyplain{}{\bfseries \thechapter \:Seconda Appendice}]
+% {\fancyplain{}{\bfseries\thepage}}
 
 \bibliographystyle{ieeetr}
 \bibliography{refs}
