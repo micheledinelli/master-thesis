@@ -19,8 +19,20 @@
 \usepackage{proof}
 \usepackage{ebproof}
 
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}{Lemma}
+
 \hyphenation{mate-mati-ca recu-perare}
+
 \usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=red,
+    citecolor=blue,
+    filecolor=red
+}
+
+%\usepackage[n,advantage,operators,sets,adversary,landau,probability,notions,logic,primitives,complexity,asymptotics,keys,]{cryptocode}
 
 \usepackage{fancyhdr}
 \oddsidemargin=30pt \evensidemargin=20pt
@@ -54,7 +66,7 @@ Dedicata a \ldots
 % \pagenumbering{roman}
 \input{abstract/abstract.it}
 
-\tableofcontents
+{\hypersetup{hidelinks}\tableofcontents}
 \rhead[\fancyplain{}{\bfseries\leftmark}]{\fancyplain{}{\bfseries\thepage}}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries TABLE OF CONTENTS}}
 
