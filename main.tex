@@ -24,13 +24,23 @@
 
 \hyphenation{mate-mati-ca recu-perare}
 
-\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
 \hypersetup{
-    colorlinks=true,
-    linkcolor=red,
-    citecolor=blue,
-    filecolor=red
+    colorlinks=false,
+    linkbordercolor={1 0 0},
+    citebordercolor={1 1 1},
+    pdfborder={0 0 1}
 }
+% \usepackage{hyperref}
+% \hypersetup{
+%     colorlinks=false,
+%     linkbordercolor=red,
+%     citebordercolor=blue,
+%     filebordercolor=red,
+%     pdfborder={0 0 1}
+% }
 
 %\usepackage[n,advantage,operators,sets,adversary,landau,probability,notions,logic,primitives,complexity,asymptotics,keys,]{cryptocode}
 
@@ -66,7 +76,8 @@ Dedicata a \ldots
 % \pagenumbering{roman}
 \input{abstract/abstract.it}
 
-{\hypersetup{hidelinks}\tableofcontents}
+% {\hypersetup{hidelinks}\tableofcontents}
+\tableofcontents
 \rhead[\fancyplain{}{\bfseries\leftmark}]{\fancyplain{}{\bfseries\thepage}}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries TABLE OF CONTENTS}}
 

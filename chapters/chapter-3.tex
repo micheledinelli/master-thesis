@@ -29,11 +29,18 @@ body $t$ of an abstraction $\lambda x.t$. The $\lambda$ is also called \textit{b
 x\lambda x.\lambda y.w\,x\,y
 \]
 the first instance of $x$ is free, while the second one is captured by the binder. $w$ is also free. The set of free variables of a lambda-term $t$ is often denoted by $FV(t)$. $FV(t)$ is defined inductively by
-\begin{align*}
+
+\begin{figure}[htpb]
+    \begin{align*}
     &FV(x)={x} \\
     &FV(MN)=FV(M) \cup FV(N) \\
     &FV(\lambda x.M)=FV(M) \setminus \{x\}
-\end{align*}
+    \end{align*}
+    \caption{Untyped lambda-calculus definition of free variables}
+    \label{fig:untyped-lambda-calculus-free-variables}
+\end{figure}
+
+
 Let's consider the expression $\lambda x.x\,y(\lambda y.y\,z)$. Applying the definition of $FV$ the set of the free variables of $\lambda x.x\,y(\lambda y.y\,z)$ is
 \begin{align*}
 &FV(\lambda x.xy(\lambda y.yz)) = \\
@@ -43,39 +50,46 @@ Let's consider the expression $\lambda x.x\,y(\lambda y.y\,z)$. Applying the def
 
 Whenever a lambda-term $M$ has $FV(M)=\emptyset$ then it is called combinator (or closed lambda-term).
 
-The computation in lambda-calculus is performed only through function application. Applying functions to each other means rewriting the abstractions by substituting the bounded variables in the body. But substitution is not always safe. Let $M[x:=N]$ denote the term obtained by substituting all free occurrences of the variable $x$ in $M$ with the term $N$. The substitution operation is defined inductively as follows:
-\begin{align*}
-    x[x:=N]&=N \\
-    y[x:=N]&=y \\
-    (ML)[x:=N]&=(M[x:=N])(L[x:=N]) \\
-    (\lambda x.M)[x:=N]&=\lambda x.M \\
-    (\lambda y.M)[x:=N]&=\lambda y.(M[x:=N]) \ \text{if} \ x \neq y
-\end{align*}
+The computation in lambda-calculus is performed only through function application. Applying functions to each other means rewriting the abstractions by substituting the bounded variables in the body. But substitution is not always safe. Let $M[x:=N]$ denote the term obtained by substituting all free occurrences of the variable $x$ in $M$ with the term $N$. The substitution operation is defined inductively as shown in Figure \ref{fig:untyped-lambda-calculus-substitution}
+\begin{figure}[htpb]
+    \begin{align*}
+        x[x:=N]&=N \\
+        y[x:=N]&=y \\
+        (ML)[x:=N]&=(M[x:=N])(L[x:=N]) \\
+        (\lambda x.M)[x:=N]&=\lambda x.M \\
+        (\lambda y.M)[x:=N]&=\lambda y.(M[x:=N]) \ \text{if} \ x \neq y
+    \end{align*}
+    \caption{Untyped lambda-calculus definition of substitution}
+    \label{fig:untyped-lambda-calculus-substitution}
+\end{figure}
 The last case could be extended to prevent variable capture: the bound variable $y$ may be first renamed to a \textit{fresh} variable $z$ before performing the substitution. The freshness condition ensures that $z$ does not occur free in either $M$ or $N$. Given a term $M$, the set of its free variables $FV(M)$ is finite, whereas the set of terms that are alpha-equivalent to $M$, denoted by $\stackrel{\alpha}{\equiv}$, is infinite (by \ref{eq:lc-infinite-variables}). Consequently, there always exists a term $t$ such that $M \stackrel{\alpha}{\equiv} t$, allowing bound variables to be renamed as needed to avoid capture.
 
 In the lambda calculus, each step of a computation consists of rewriting an application whose left-hand side is an abstraction, by substituting the free occurrences of the bound variable with the argument. For example the expression $(\lambda x.\lambda y.x\,y)(\lambda z.z)(\lambda z.z)$ evaluates to $(\lambda z.z)$. However, there are multiple ways to reduce the original term, depending on which reducible expression is chosen at each step. A term of the form $(\lambda x.M)$ beta-reduces to a term $u$, written by $(\lambda x.M) \to_\beta u$ if $u$ is the result of substituting $N$ for the free occurrences of $x$ in $M$, that is $u=M[x:=N]$. For example $(\lambda y.x\,y)x \to_\beta \lambda x.x\,x$. An expression of the form $(\lambda x.M)N$ is called a redex (short for reducible-expression) \cite{the-calculi-of-lambda-conversion}. The binary relation $\to_\beta$ is defined using the following inference rules 
-
-\begin{gather*}
-\begin{prooftree}
-    \hypo{}
-    \infer1[]{ (\lambda x.M)N \to_\beta M[x:=N] }
-\end{prooftree}
-\quad \quad \quad
-\begin{prooftree}
-    \hypo{M \to_\beta M'}
-    \infer1[]{ MN \to_\beta M'N }
-\end{prooftree}
-\\[2ex]
-\begin{prooftree}
-    \hypo{M \to_\beta M'}
-    \infer1[]{ NM \to_\beta NM' }
-\end{prooftree}
-\quad \quad \quad
-\begin{prooftree}
-    \hypo{M \to_\beta M'}
-    \infer1[]{ \lambda x.M \to_\beta \lambda x.M' }
-\end{prooftree}
-\end{gather*}
+\begin{figure}[htpb]
+    \begin{gather*}
+    \begin{prooftree}
+        \hypo{}
+        \infer1[]{ (\lambda x.M)N \to_\beta M[x:=N] }
+    \end{prooftree}
+    \quad \quad \quad
+    \begin{prooftree}
+        \hypo{M \to_\beta M'}
+        \infer1[]{ MN \to_\beta M'N }
+    \end{prooftree}
+    \\[2ex]
+    \begin{prooftree}
+        \hypo{M \to_\beta M'}
+        \infer1[]{ NM \to_\beta NM' }
+    \end{prooftree}
+    \quad \quad \quad
+    \begin{prooftree}
+        \hypo{M \to_\beta M'}
+        \infer1[]{ \lambda x.M \to_\beta \lambda x.M' }
+    \end{prooftree}
+    \end{gather*}
+    \caption{Untyped lambda-calculus inference rules for the binary relation $\to_\beta$}
+    \label{fig:untyped-lambda-calculus-beta-reduction}
+\end{figure}
 
 Given the formal definition of beta-reduction, and lambda-calculus' operational semantics, the binary relations $\twoheadrightarrow_\beta and =_\beta$ on $\Lambda$ are defined inductively as follows
 
@@ -114,21 +128,19 @@ This allows $Y$ to generate fixed points, where $Yf$ is equal to itself under th
 
 The lambda calculus can also encode primitive data types commonly found in most programming languages, such as booleans. These can be represented as follows:
 \begin{align*}
-\mathbf{true} &= \lambda x.\lambda y.x \\
-\mathbf{false} &= \lambda x.\lambda y.y
+\mathtt{true} &= \lambda x.\lambda y.x \\
+\mathtt{false} &= \lambda x.\lambda y.y
 \end{align*}
-Given a boolean value 
-B
-B, a conditional expression of the form
+Given a boolean value B, a conditional expression of the form
 \begin{verbatim}
 if B then M else N
 \end{verbatim}
-can be expressed by the lambda term $BMN$ since $\mathrm{\textbf{true}}MN=M$ and $\mathrm{\textbf{false}}MN=N$.
+can be expressed by the lambda term $BMN$ since $(\mathtt{true}\,MN=M)$ and $(\mathtt{false}\,MN=N)$.
 In a similar way one can construct ordered pairs using
 \begin{align*}
     [M,N] = \lambda z.z MN
 \end{align*}
-and retrieve the first or the second element using $[M,N]\mathrm{\textbf{true}}=M$ and $[M,N]\mathrm{\textbf{false}}=N$
+and retrieve the first or the second element using $([M,N]\,\mathtt{true}=M)$ and $([M,N]\,\mathtt{false}=N)$.
 
 \section{Simply Typed Lambda-Calculus}\label{sec:typed-lambda-calculus}
 In mathematics, functions are usually defined on a fixed domain and range, there is no corresponding requirement in type-free lambda-calculus \cite{Srensen2007-SRELOT}. The lambda calculus can be extended with type annotations that specify the kinds of inputs a term accepts and the kinds of outputs it produces. There are two distinct approaches to introducing types into the lambda calculus: in Church-style typing \cite{Church_1940}, variables and abstractions are explicitly annotated with their types, and each well-typed term has a unique type. In contrast, Curry-style typing \cite{functionality_in_combinatory_logic} does not require type annotations on variables; instead, types are assigned to terms after they are constructed, and typable expressions admit a unique most general type. In Church’s approach, a term’s type is a built-in part of the term itself, the modern analogy would be a programmer explicitly writing the types for all variables used in the program as in, e.g., Pascal. In Curry’s approach, a term’s type is inferred after the term has been defined, the programmer writes functions, and it is then the job of the compiler to infer the types of variables, as e.g., in ML and Haskell \cite{Raamsdonk2009LambdaCalculusAC, Srensen2007-SRELOT}. The aim of this section is to introduce the simply typed lambda calculus following Curry's approach, hence first defining terms, how they behave and then defining a basic type system. 
@@ -158,24 +170,30 @@ The possible forms of the contexts $\Gamma, \Delta, \dots$ are given by
 \]
 where $\emptyset$ denotes an empty context and $\Gamma, x: \tau$ represents the extension of the context $\Gamma$ with a new variable $x$ of type $\tau$.
 
-The typability relation on $C \times \Lambda \times T$ is defined by
-\begin{gather*}
-\begin{prooftree}
-\hypo{}
-\infer1[]{\Gamma, x:\tau \vdash x: \tau}
-\end{prooftree}
-\quad\quad
-\begin{prooftree}
-\hypo{\Gamma, x: \sigma \vdash M: \tau}
-\infer1[]{\Gamma \vdash \lambda x.M: \sigma \to \tau}
-\end{prooftree}
-\quad\quad
-\begin{prooftree}
-\hypo{\Gamma \vdash M: \sigma \to \tau \quad \Gamma \vdash N: \sigma}
-\infer1[]{\Gamma \vdash MN: \tau}
-\end{prooftree}
-\end{gather*}
-where the first and second rule require $x \notin \mathrm{dom}(\Gamma)$. If a variable $x$ is assigned the type $\tau$ in the context $\Gamma$, then $x$ has type $\tau$. To type an abstraction $\lambda x. M$, a type $\sigma$ is assumed for the argument $x$ and added to the context; if the body $M$ can then be assigned type $\tau$, the abstraction has type $\sigma \to \tau$. Finally, if a function $M$ has type $\sigma \to \tau$ and an argument $N$ has type $\sigma$, then applying the function to the argument yields a term of type $\tau$. 
+The typability relation on $C \times \Lambda \times T$ is defined by the inference rules shown in Figure \ref{fig:simply-typed-lc-typability-relations}.
+\begin{figure}[htpb]
+    \centering
+    \begin{gather*}
+    \begin{prooftree}
+    \hypo{}
+    \infer1[]{\Gamma, x:\tau \vdash x: \tau}
+    \end{prooftree}
+    \quad\quad
+    \begin{prooftree}
+    \hypo{\Gamma, x: \sigma \vdash M: \tau}
+    \infer1[]{\Gamma \vdash \lambda x.M: \sigma \to \tau}
+    \end{prooftree}
+    \quad\quad
+    \begin{prooftree}
+    \hypo{\Gamma \vdash M: \sigma \to \tau \quad \Gamma \vdash N: \sigma}
+    \infer1[]{\Gamma \vdash MN: \tau}
+    \end{prooftree}
+    \end{gather*}
+    \caption{Typability relation on $C \times \Lambda \times T$ in the simply typed lambda-calculus}
+    \label{fig:simply-typed-lc-typability-relations}
+\end{figure}
+
+The first and second rule require $x \notin \mathrm{dom}(\Gamma)$. If a variable $x$ is assigned the type $\tau$ in the context $\Gamma$, then $x$ has type $\tau$. To type an abstraction $\lambda x. M$, a type $\sigma$ is assumed for the argument $x$ and added to the context; if the body $M$ can then be assigned type $\tau$, the abstraction has type $\sigma \to \tau$. Finally, if a function $M$ has type $\sigma \to \tau$ and an argument $N$ has type $\sigma$, then applying the function to the argument yields a term of type $\tau$. 
 
 
 The simply typed lambda-calculus à la Curry is often denoted by $\Lambda$$\rightarrow$ and is the triple $(\Lambda, T, \vdash)$. 

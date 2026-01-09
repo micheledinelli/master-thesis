@@ -4,9 +4,11 @@ Modern cryptography is concerned with providing security guarantees for informat
 
 The computational model is tightly linked to complexity theory. Within this framework, notions such as secure encryption, unforgeable digital signatures have been placed on solid theoretical foundations. In the computational model, cryptographic primitives, security properties, protocols, and even adversaries are modeled as probabilistic polynomial-time (PPT) algorithms, reflecting adversaries that are bounded in computational resources and whose success is quantified probabilistically. To be effective, the computational model must impose reasonable restrictions when defining adversarial capabilities. The success of cryptography depends heavily on how well its security definitions capture realistic and unknown adversaries. Definitions that are too weak fail to provide meaningful guarantees, while overly strong definitions may render secure constructions impossible. For instance, in classical cryptography, a strong security result is achievable using the Vernam cipher under Shannon’s definition of perfect secrecy \cite{shannon-communication-theory-of-secrecy-systems, joyofcryptography}. However, its use in real-world settings is impractical, due to the fact that the key can be used only once (indeed, the Vernam cipher is also known as the one-time pad) and it must be at least as long as the messages that need encryption. The computational model serves as the reference framework for relatively simple protocols, but its use becomes less practical as protocol complexity increases. This is due to the fact that probabilistic reasoning becomes difficult as protocols grow larger and the number of participating parties increases.
 
-In contrast, the symbolic model requires very few assumptions about an adversary’s computational capabilities \cite{on-the-security-of-pk-protocols}. As a result, protocol security can be proved without relying on computational assumptions. When more complex protocols are considered the computational model often reveals its limitations in terms of analysis scalability. In the symbolic model instead, once a protocol is specified, determining whether it is secure can often be automated; indeed, the symbolic model forms the basis for model checking and semi-automated theorem proving \cite{Blanchet_2022, tamarin}. The symbolic model relies on a set of predefined cryptographic primitives that are assumed to be secure and treated as idealized black boxes. Under these assumptions, the model is effective at identifying logical flaws in protocol designs. A well-known example is the Needham–Schroeder protocol, which was shown to be vulnerable to replay attacks \cite{timestamps-in-key-distribution-protocols}; this vulnerability can be detected vert straightforwardly using any symbolic model since it's a protocol flaw and not a cryptographic primitive flaw. Several formal frameworks exist for defining symbolic models, depending on the available cryptographic primitives and the underlying theory. One particularly well-studied approach is based on multi-set rewriting \cite{multiset-rewriting-and-the-complexity-of-bounded-security-protocols, rewriting-for-cryptographic-protocol-verification}. However, tools based on the symbolic model struggle to support cryptographic primitives with rich algebraic properties. For this reason, the security guarantees provided by the symbolic model are often weaker than those offered by the computational model, and a proof of security in the symbolic model does not always imply a corresponding proof in the computational model. The connection between the two approaches (modulo additional assumptions) is established through computational soundness theorems \cite{reconciling-two-views-of-cryptography}.
+In contrast, the symbolic model requires very few assumptions about an adversary’s computational capabilities \cite{on-the-security-of-pk-protocols}. As a result, protocol security can be proved without relying on computational assumptions. When more complex protocols are considered the computational model often reveals its limitations in terms of analysis scalability. In the symbolic model instead, once a protocol is specified, determining whether it is secure can often be automated; indeed, the symbolic model forms the basis for model checking and semi-automated theorem proving \cite{Blanchet_2022, tamarin}. The symbolic model relies on a set of predefined cryptographic primitives that are assumed to be secure and treated as idealized black boxes. Cryptographic messages as first-order terms,
+together with an equational theory that represents attacker capabilities. Under these assumptions, the model is effective at identifying logical flaws in protocol designs. A well-known example is the Needham–Schroeder protocol, which was shown to be vulnerable to replay attacks \cite{timestamps-in-key-distribution-protocols}; this vulnerability can be detected vert straightforwardly using any symbolic model since it's a protocol flaw and not a cryptographic primitive vulnerability. Several formal frameworks exist for defining symbolic models, depending on the available cryptographic primitives and the underlying theory. One particularly well-studied approach is based on multi-set rewriting \cite{multiset-rewriting-and-the-complexity-of-bounded-security-protocols, rewriting-for-cryptographic-protocol-verification}. However, tools based on the symbolic model struggle to support cryptographic primitives with rich algebraic properties. For this reason, the security guarantees provided by the symbolic model are often weaker than those offered by the computational model, and a proof of security in the symbolic model does not always imply a corresponding proof in the computational model. For example, secret keys are modeled in the computational model as long bitstrings that are drawn uniformly at random while in the symbolic models they are modeled using abstract names. In symbolic models, two
+distinct secret keys are represented by different names, which cannot be equal. However, in the computational model it is possible (but very unlikely) that the sampled bitstrings are equal. 
 
-The two models have had very different outcomes with respect to the application of language-based verification techniques. The symbolic model naturally lends itself to the use of classical verification methods. In contrast, applying such techniques within the computational model is significantly more challenging.
+The two models have had very different outcomes with respect to the application of language-based verification techniques. The symbolic model naturally lends itself to the use of classical verification methods. In contrast, applying such techniques within the computational model is significantly more challenging, resulting in less flexibility and automation compared to the symbolic models. The connection between the two approaches (modulo additional assumptions) is established through computational soundness theorems \cite{reconciling-two-views-of-cryptography}.
 
 Computational (or complexity theoretic) cryptography relies on the famous $\mathcal{P}$ vs $\mathcal{NP}$ probelm. If $\mathcal{P}\neq\mathcal{NP}$ and one way functions
 exist, then one can derive most private-key cryptography \cite{one-way-functions-are-essential-for-complexity-base-cryptography}. If $\mathcal{P}=\mathcal{NP}$ then one way functions do not exist and all cryptographic
@@ -42,7 +44,8 @@ The definition of negligible functions helps formalize the extent to which an ad
 In most cases, security proofs in the computational model are reductionist. That is, given an arbitrary but computationally bounded adversary that breaks the security of a cryptographic construction with non-negligible probability, one constructs another computationally bounded adversary that breaks an underlying hardness assumption with comparable probability. This methodology is known as provable security and enables the development of rigorous and detailed mathematical proofs. As cryptography evolves, driven both by increasingly sophisticated adversaries and by the emergence of new technologies, the computational model face several challenges. In particular, it struggles to scale probabilistic reasoning and to apply formal, rigorous mathematical methods to increasingly complex protocols. These difficulties motivate the development of machine-checked frameworks that support the formal construction and automated verification of cryptographic systems. While the symbolic model naturally lends itself to model checking and semi-automated theorem proving, the computational model requires substantially more effort, since reasoning about probabilistic, resource-bounded adversaries becomes increasingly challenging as protocols grow in complexity.
 
 \section{Machine-Checked Frameworks}
-Machine-checked frameworks are automated proof systems that enable cryptographers to reason directly within the computational model while providing a formal, machine-verifiable environment for proving the security of cryptographic protocols. While many such frameworks exist for the symbolic model of cryptography, comparatively little work has been done in the computational model, largely due to the complexity of probabilistic reasoning and reduction-based proofs. Over the last two decades, however, several tools have been developed to address this gap, including EasyCrypt \cite{easy-crypy-a-tutorial}, Squirrel \cite{the-squirrel-prover-and-its-logic} and CryptoVerif \cite{a-computationally-sound-automatic-prover-for-cryptographic-protocols}.
+Machine-checked frameworks are automated proof systems that enable cryptographers to reason directly within the computational model while providing a formal, machine-verifiable environment for proving the security of cryptographic protocols. While many such frameworks exist for the symbolic model of cryptography, comparatively little work has been done in the computational model, largely due to the complexity of probabilistic reasoning and reduction-based proofs. Over the last two decades, however, several tools have been developed to address this gap, including EasyCrypt \cite{easy-crypy-a-tutorial}, Squirrel \cite{the-squirrel-prover-and-its-logic} and CryptoVerif \cite{a-computationally-sound-automatic-prover-for-cryptographic-protocols}. EasyCrypt
+performs Hoare-style proofs of programs, CryptoVerif relies on game transformations while Squirrel reasons over execution traces of protocols.
 
 \subsection{EasyCrypt}
 In EasyCrypt, security goals and hardness assumptions are modeled as probabilistic programs, called experiments (or games), which include unspecified adversarial code. EasyCrypt supports common reasoning patterns from the game-based approach, in which reductionist security proofs are decomposed into a sequence (or, more generally, a tree) of transformations called \textit{game hops}. Each hop introduces a local change to the experiment whose impact on the adversary’s distinguishing advantage can be formally bounded, making the overall proof easier to understand, structure, and check. Since each game hop relates two probabilistic programs, EasyCrypt relies on probabilistic relational Hoare logic (pRHL) to reason about pairs of programs. pRHL defines judgments of the form
@@ -82,7 +85,7 @@ A concrete example illustrating the use of pRHL involves reasoning about two pro
     &\quad \mathtt{return} (m,c)
     \end{align*}
     \end{minipage}
-    \caption{$\mathtt{OTP}$ and $\mathtt{Uniform}$ games.}
+    \caption{Example of $\mathtt{OTP}$ and $\mathtt{Uniform}$ cryptographic games.}
     \label{fig:easycrypt-sample-proof}
 \end{figure}
 In pRHL, this equivalence can be expressed by the judgment
@@ -135,8 +138,103 @@ where $c$ is a probabilistic program, $\varsigma$ and $\varphi$ are (non-relatio
 
 In EasyCrypt, both pRHL and pHL are embedded into a higher-order logic, and reasoning within this logic is supported by a core proof engine inspired by SsReflect, an extension of Coq \cite{ssreflect-coq}. To support compositional reasoning, which is essential when analyzing cryptographic systems, as they are typically constructed by composing multiple cryptographic primitives, EasyCrypt provides a module system. It enables the development of modular proofs that reflect the compositional structure of cryptographic constructions. In addition, it make easier the reasoning, organization and management of large and complex proofs involving numerous game hops and reductions at different levels of abstraction.
 
-%\section{Squirrel}
-%\section{CryptoVerif}
+\section{Squirrel}
+Squirrel is a proof assistant tool that enables automated verification techniques for the computational model. The system is based on the Computationally Complete Symbolic Attacker (CCSA) approach, which retains a symbolic reasoning framework while avoiding some of the limitations of traditional symbolic models. Rather than modeling an adversary's capabilities by explicitly specifying all actions the adversary can perform, the CCSA approach characterizes the adversary by specifying what it cannot do. Starting from the assumed security properties of cryptographic primitives, one derives inference rules that express which pairs of message sequences are computationally indistinguishable. Rules are proven sound with respect to an interpretation of terms as Probabilistic Polynomial-Time Turing Machines (PPTM). Any security proof carried out using the rules implies security in the computational model, given that the underlying cryptographic assumptions hold.
+
+The CCSA approach reasons about cryptographic protocols viewed as concurrent programs (or games) that rely on cryptographic primitives while executing in a malicious environment. A central concept in this setting is computational indistinguishability: two games are said to be indistinguishable if any probabilistic polynomial-time adversary has at most a negligible probability of distinguishing between them. The CCSA framework uses first-order logic to establish computational indistinguishability by first modeling the messages generated during a game’s execution as first-order terms, and then reasoning about indistinguishability within first-order logic using inference rules derived from the assumed security properties of the underlying cryptographic primitives. Describing cryptographic games as probabilistic imperative programs allows cryptographers to rely on an intuitive understanding of their semantics and avoids the introduction of overly complex execution models. Formally reasoning about such programs can be challenging, as it requires handling statefulness, loop invariants, and probabilistic dependencies. Moreover, while encoding complex protocols as imperative programs is possible, it is unnatural and can significantly complicate security proofs.
+
+The CCSA approach represents only the messages computed during a game, modeling them as first-order terms. These terms are pure in the functional programming sense and are therefore easier to reason about than full game descriptions that maintain mutable state. To illustrate this idea, let us consider a simple game.
+\begin{figure}[htpb]
+    \centering
+    \begin{align*}
+    &\mathtt{G}(n): \\
+    &\quad k \gets \{0,1\}^n \\
+    &\quad m \gets A() \\
+    &\quad t \gets Enc_k(m) \\
+    &\quad x \gets A(t) \\
+    &\quad\mathtt{return}\,\, x
+    \end{align*}
+    \caption{Example of a cryptographic game $\mathtt{G}$ to discuss a Squirrel proof.}
+    \label{fig:squirrel-sample-proof}
+\end{figure}
+
+A secret key $k$ of length $n$ (Squirrel normally uses $\eta$ instead of $n$) is randomly sampled. The attacker $A$ is asked to provide a message $m$ which is then encrypted using $k$ and sent back to $A$, which uses it to return a second message $x$ which is the final output of the game.
+
+The sampling of the secret key can be modeled by a name symbol $k$. The first interaction with the adversary $A$ is represented by the adversarial function symbol $\mathtt{att}_0(\cdot)$. Although the encryption function $Enc_k$ may be probabilistic may be probabilistic, Squirrel explicitly tracks probabilistic dependencies by modeling the randomness used by the encryption algorithm. This is achieved by introducing a fresh name symbol $\mathtt{r}$ and representing the encryption as the term $\mathtt{enc(att_0(\cdot),r,sk)}$. The second interaction with the adversary is then modeled by another adversarial function symbol, for instance $\mathtt{att_1(enc(att_0(\cdot),r,sk))}$. This representation models two successive calls to the stateful adversary $A$ in the game using two pure function symbols $\mathtt{att_0}$ and $\mathtt{att_1}$. Any state computed by the adversary during the first interaction and used in the second can be recomputed when modeling the second interaction as a pure function. This allows CCSA to avoid explicit state while preserving the adversary's capabilities.
+
+n Squirrel, terms are parameterized by a security parameter $\eta \in \mathbb{N}$ and by sources of randomness provided by a pair of random tapes $\rho=(\rho_h,\rho_a)$, each filled with random bits. A model $\mathbb{M}$ of Squirrel's logic provides the following interpretations:
+\begin{itemize}
+    \item For each honest function symbol $\mathtt{f}$ its interpretation as PPTM $\mathcal{M}_\mathtt{f}$
+    \item Associate to each name $\mathtt{n}$ a unique sub-sequence of $\eta$ bits in $\rho_h$ using a PPTM $\mathcal{M}_\mathtt{n}$ with access to $\rho_h$, such that distinct names use disjoint parts of $\rho_h$;
+    \item Interpret any adversarial function symbol $\mathtt{att}$ as a PPTM $\mathcal{M}_\mathtt{att}$ which can only access the random tape $\rho_a$ and not $\rho_h$.
+\end{itemize}
+A term $\mathtt{t}$ is interpreted as a function that associates to each value of the security parameter $\eta$ and random tapes $\rho$, a concrete value denoted by $[\![t]\!]_\mathbb{M}^{\eta, \rho}$. The mapping $\eta, \rho \mapsto [\![t]\!]_\mathbb{M}^{\eta, \rho}$ is computable by a PPTM.
+
+As one of the most commonly used notions to define cryptographic properties is computational indistinguishability, Squirrel's logic relies on the symbol $\sim$ to represent it. Formally, for two terms $\mathtt{u}$, $\mathtt{v}$, the predicate $\mathtt{u} \sim \mathtt{v}$ holds in a model $\mathbb{M}$ if $\mathtt{G}^\mathbb{M}_\mathtt{u} \approx \mathtt{G}^\mathbb{M}_\mathtt{v}$, and $\mathtt{G}^\mathbb{M}_\mathtt{t}$ is the game where the adversary is provided with $[\![t]\!]_\mathbb{M}^{\eta, \rho}$ and must produce a bit b, returned by the game. $\mathtt{u}$, $\mathtt{v}$ holds in $\mathbb{M}$ if exists a negligible function $\epsilon$ such that
+\begin{align*}
+\forall A \in \mathrm{PPTM}. \eta \mapsto |\mathrm{Pr}_\rho(A([\![u]\!]_\mathbb{M}^{\eta, \rho},\rho_a)=1) - \mathrm{Pr}_\rho(A([\![v]\!]_\mathbb{M}^{\eta, \rho},\rho_a)=1)| \leq \epsilon(\eta)
+\end{align*}
+Let's consider another game $\mathtt{G}_\mathtt{k}$ reported in Figure \ref{fig:squirrel-sample-proof-2}
+\begin{figure}[htpb]
+    \centering
+    \begin{align*}
+    &\mathtt{G}_\mathtt{k}(\eta): \\
+    &\quad k \gets \{0,1\}^{\eta} \\
+    &\quad m \gets A() \\
+    &\quad \mathtt{if}\,\, m = sk\,\,\mathtt{then} \\
+    &\quad\quad \mathtt{return}\,\,0 \\
+    &\quad\mathtt{else} \\
+    &\quad\quad \mathtt{return}\,\,1
+    \end{align*}
+    \caption{Example of a cryptographic game $\mathtt{G}_\mathtt{k}$ to discuss computational indistinguishability in Squirrel.}
+    \label{fig:squirrel-sample-proof-2}
+\end{figure}
+The message returned at the end of the game can be represented by the term
+\[
+\phi_k = \mathtt{if}\,\,(\mathtt{att_0} = sk) \,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1
+\]
+which outputs $0$ if the adversary correctly guesses the secret key $k$ and $1$ otherwise. Checking the indistinguishability judgment $(\phi_k \sim 1)$ amounts to verify that the corresponding game $\mathtt{G}_\mathtt{k}$ is computationally indistinguishable from the trivial game $(\mathtt{return}\,\,1)$ i.e., $G_k \approx (\mathtt{return}\,\,1)$.
+
+\begin{figure}[htpb]
+    \centering
+    \begin{gather*}
+    \begin{prooftree}
+    \hypo{}
+    \infer1[Ref]{u \sim u}
+    \end{prooftree}
+    \quad\quad
+    \begin{prooftree}
+    \hypo{(u = v)\sim \mathtt{true} }
+    \hypo{C[v]\sim w}
+    \infer2[Rew]{C[u] \sim w}
+    \end{prooftree}
+    \quad\quad
+    \begin{prooftree}
+    \hypo{}
+    \infer1[Fresh]{(t \neq \mathtt{n})\sim \mathtt{true}}
+    \end{prooftree}
+    \end{gather*}
+    \caption{Inference rules over $\sim$ in Squirrel}
+    \label{fig:inference-rules-over-sim-squirrel}
+\end{figure}
+
+Given the inference rules over $\sim$ in Squirrel represented in Figure \ref{fig:inference-rules-over-sim-squirrel} one can derive the result as follows
+
+\begin{gather*}
+    \begin{prooftree}
+    \hypo{}
+    \infer1[Fresh]{(\mathtt{att}_0(\cdot) \neq k)\sim \mathtt{true}}
+    \infer1{((\mathtt{att_0}(\cdot) = k) = \mathtt{false}) \sim \mathtt{true}}
+    \hypo{}
+    \infer1[Ref]{1\sim1}
+    \infer1{(\mathtt{if}\,\,\mathtt{false}\,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1}
+    \infer2[Rew]{(\mathtt{if}\,\,(\mathtt{att_0}(\cdot) = k) \,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1}
+    \end{prooftree}
+\end{gather*}
+
+% The key rules is the second one that states that if given $u$ indistinguishable from $v$, then  replace $u$ can be replaced with $v$ inside any context $C$ without changing the overall indistinguishability from $w$.
+
+\section{CryptoVerif}
 
 % \begin{figure}
 %     \centering
