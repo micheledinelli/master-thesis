@@ -85,7 +85,6 @@ A concrete example illustrating the use of pRHL involves reasoning about two pro
     \caption{$\mathtt{OTP}$ and $\mathtt{Uniform}$ games.}
     \label{fig:easycrypt-sample-proof}
 \end{figure}
-
 In pRHL, this equivalence can be expressed by the judgment
 \[
 [\mathtt{OTP} \sim \mathtt{Uniform}: \Phi \Longrightarrow m\langle1\rangle = m\langle2\rangle \land c\langle1\rangle = c\langle2\rangle ]
@@ -114,24 +113,28 @@ holds and we conclude that
 \]
 This shows that pRHL can formally capture standard cryptographic arguments by reasoning about couplings between probabilistic programs rather than directly manipulating probability distributions.
 
-%In EasyCrypt, security goals and hardness assumptions are modeled as probabilistic programs, called experiments (or games), which include unspecified adversarial code. EasyCrypt leverages techniques from program verification and programming language theory to rigorously justify cryptographic reasoning. Concretely, EasyCrypt supports common reasoning patterns from the game based approach, in which reductionist security proofs are decomposed into a sequence (or, more generally, a tree) of small transformations often called \textit{game hops}. Each hop introduces a local change to the experiment whose impact on the adversary’s distinguishing advantage can be formally bounded, making the overall proof easier to understand, structure and check. As each step relates two programs, EasyCrypt uses a probabilistical relational Hoare Logic (pRHL) to define judgments of the form
+Additionally in pRHL, given a valid judgment of the form
+\[
+\left[ c_1 \sim c_2: \Phi \Longrightarrow \bigwedge\limits_{i=1}^n x_i\langle1\rangle = x_i\langle2\rangle \right]
+\]
+it holds that $\mathrm{Pr}[c_1, m_1: A] = \mathrm{Pr}[c2, m_2: A]$ for every initial memories $m_1$ and $m_2$ that are related by $\Phi$ and event $A$ that only depends on $\{x_1, \dots , x_n\}$. A further generalization of observational equivalence is observational equivalence up to a
+failure event $F$
+\[
+\left[ c_1 \sim c_2: \Phi \Longrightarrow \neg F\langle2\rangle \to \bigwedge\limits_{i=1}^n x_i\langle1\rangle = x_i\langle2\rangle \right] 
+\]
+And it follows that from the above judgment that for every initial memories $m_1$ and $m_2$ that are related by $\Phi$ and event $A$ that only depends on $\{x_1, \dots , x_n\}$ it holds
+\[
+\mathrm{Pr}[c_1, m_1: A] \leq Pr [c_2, m_2 : A] + \mathrm{Pr}[c_2, m_2 : F] 
+\]
+This is useful to take into account upper bounds on the probability of some event (typically a failure).
 
-%where $c_1$ and $c_2$ are probabilistic programs, and $\Phi$ and $\Psi$ are relational assertions, i.e. first-order formulae which relate two memories an instance of a relational assertion is $x$\textlangle1\textrangle=$x$\textlangle2\textrangle which states that the value of $x$ coincides in both memories. Although pRHL judgments do not explicitly refer to probabilities, it is possible to derive probability claims from valid judgments; indeed, the validity of pRHL judgments is based on a notion of lifting, inspired from probabilistic process algebra, and from which one can derive equalities and inequalities between two probabilities. Specifically, one can derive from valid pRHL judgments of the form
+The second key component of EasyCrypt is a probabilistic Hoare Logic (pHL) that enables probabilistic reasonging about certain events in a game. Judgments in pHL have the form
+\[ 
+[c : \varsigma \Longrightarrow \varphi] \diamond p \]
+where $c$ is a probabilistic program, $\varsigma$ and $\varphi$ are (non-relational) assertions, $\diamond$ is a comparison operator and $p$ is a probability expression.
 
-%that $\mathrm{Pr}[c_1, m_1: E] \leq \mathrm{Pr} [c_2, m_2: F ]$ for every initial memories $m1$ and $m2$ that are related by $Phi$ and events $E$ and $F$. In addition, pRHL subsumes reasoning about equivalence of probabilistic programs: given a valid judgment of the form
-%\[
-%\left[ c_1 \sim c_2: \Phi \Longrightarrow \bigwedge\limits_{i=1}^n x_i\langle1\rangle = x_i\langle2\rangle \right]
-%\]
-%we have $\mathrm{Pr}[c_1, m_1: A] = \mathrm{Pr}[c2, m_2: A]$ for every initial memories $m_1$ and $m_2$
-%that are related by $\Phi$ and event $A$ that only depends on ${x_1, \dots , x_n}$. A usefulgeneralization of observational equivalence is observational equivalence up to a failure event F:
-%\[ \left[ c_1 \sim c_2: \Phi \Longrightarrow \neg F\langle2\rangle \to \bigwedge\limits_{i=1}^n x_i\langle1\rangle = x_i\langle2\rangle \right] \]
-%It follows from the above judgment that for every initial memories $m_1$ and $m_2$ that are related by $\Phi$ and event $A$ that only depends on ${x_1, \dots , x_n}$, we have:
-%\[ \mathrm{Pr}[c_1, m_1: A] \leq Pr [c_2, m_2 : A] + \mathrm{Pr}[c_2, m_2 : F] \]
-%In addition to relating the probability of events in different games, cryptographic proofs therefore require the computation of concrete upper bounds on the probability of some event, typically a failure event, in a game. A second component of EasyCrypt is a probabilistic Hoare logic to reason about the probability of events in games. The logic, called pHL, reasons about judgments of the form
-%\[ [c : \varsigma \Longrightarrow \varphi] \diamond p \]
-% where $c$ is a probabilistic program, $\varsigma$ and $\varphi$ are (non-relational) assertions, $\diamond$ is a comparison operator and $p$ is a probability expression.
+In EasyCrypt, both pRHL and pHL are embedded into a higher-order logic, and reasoning within this logic is supported by a core proof engine inspired by SsReflect, an extension of Coq \cite{ssreflect-coq}. To support compositional reasoning, which is essential when analyzing cryptographic systems, as they are typically constructed by composing multiple cryptographic primitives, EasyCrypt provides a module system. It enables the development of modular proofs that reflect the compositional structure of cryptographic constructions. In addition, it make easier the reasoning, organization and management of large and complex proofs involving numerous game hops and reductions at different levels of abstraction.
 
-%Both pRHL and pHL are embedded into a higher-order logic in which one can define operators and their associated axioms. Reasoning in this ambient logic is supported by a core proof engine inspired by the SsReflect extension of Coq. A key challenge for the formalization of cryptographic proofs is to support compositional reasoning. Indeed, many cryptographic systems achieve their functionality by combining (often in intricate ways) different cryptographic constructions, which may themselves be built from several cryptographic primitives. In order to support reasoning about such cryptographic systems, EasyCrypt features a module system which allows the construction of modular proofs that respect the layered and modular design of the cryptographic system. The module system is also useful for structuring large and complex proofs that involve a large number of game hops and perform reductions at different levels.
 %\section{Squirrel}
 %\section{CryptoVerif}
 
