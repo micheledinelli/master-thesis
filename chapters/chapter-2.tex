@@ -41,200 +41,78 @@ A function $f: \mathbb{N} \to \mathbb{R}$ is said to be negligible iff for every
 
 The definition of negligible functions helps formalize the extent to which an adversary may hope to break a cryptographic scheme being bounded in computational time. At first, however, the role of probability may appear misleading in a cryptographic setting. In this context, probability does not reflect uncertainty in the correctness of cryptographic algorithms such as encryption/decryption or signature/verification which are deterministic in their correctness guarantees. Rather, probability arises because all algorithms (hence parties) in a cryptographic protocol use randomized subroutines that are essential for achieving security. Indeed, without randomness, secrecy cannot be generated \cite{theory-of-computing}. For this reason, probabilistic reasoning and randomized computations are indispensable components of the computational model. 
 
-In most cases, security proofs in the computational model are reductionist. That is, given an arbitrary but computationally bounded adversary that breaks the security of a cryptographic construction with non-negligible probability, one constructs another computationally bounded adversary that breaks an underlying hardness assumption with comparable probability. This methodology is known as provable security and enables the development of rigorous and detailed mathematical proofs. As cryptography evolves, driven both by increasingly sophisticated adversaries and by the emergence of new technologies, the computational model face several challenges. In particular, it struggles to scale probabilistic reasoning and to apply formal, rigorous mathematical methods to increasingly complex protocols. These difficulties motivate the development of machine-checked frameworks that support the formal construction and automated verification of cryptographic systems. While the symbolic model naturally lends itself to model checking and semi-automated theorem proving, the computational model requires substantially more effort, since reasoning about probabilistic, resource-bounded adversaries becomes increasingly challenging as protocols grow in complexity.
+In most cases, security proofs in the computational model are reductionist. That is, given an arbitrary but computationally bounded adversary that breaks the security of a cryptographic construction with non-negligible probability, one constructs another computationally bounded adversary that breaks an underlying hardness assumption with comparable probability. This methodology is known as provable security and enables the development of rigorous and detailed mathematical proofs. In practice, the security of a cryptographic scheme $\Pi$ is often reduced to the security of another scheme or assumption $\Pi'$. Reductionist proofs can be viewed as proofs by contraposition since a reduction establishes an implication $(P\Rightarrow Q)$, it is equivalent to proving its contrapositive $(\neg Q \Rightarrow \neg P)$. For example, if $P$ denote the statement that $\Pi$ is secure, and $Q$ denote the statement that $\Pi'$ is secure. A proof by reduction shows that if $\Pi'$ is secure, then $\Pi$ is secure. In the same way if $\Pi$ is insecure (i.e., there exists an efficient adversary that breaks $\Pi$), then $\Pi'$ is also insecure. This means that given any adversary $A$ that breaks $\Pi$ with non-negligible probability, one can construct an adversary $B$ that uses $A$ as a subroutine and breaks $\Pi'$ with non-negligible probability. Thus, an efficient attack against $\Pi$ would imply an efficient attack against $\Pi'$, contradicting the assumed security of $\Pi'$. 
 
-\section{Machine-Checked Frameworks}
-Machine-checked frameworks are automated proof systems that enable cryptographers to reason directly within the computational model while providing a formal, machine-verifiable environment for proving the security of cryptographic protocols. While many such frameworks exist for the symbolic model of cryptography, comparatively little work has been done in the computational model, largely due to the complexity of probabilistic reasoning and reduction-based proofs. Over the last two decades, however, several tools have been developed to address this gap, including EasyCrypt \cite{easy-crypy-a-tutorial}, Squirrel \cite{the-squirrel-prover-and-its-logic} and CryptoVerif \cite{a-computationally-sound-automatic-prover-for-cryptographic-protocols}. EasyCrypt
-performs Hoare-style proofs of programs, CryptoVerif relies on game transformations while Squirrel reasons over execution traces of protocols.
+As cryptography evolves, driven both by increasingly sophisticated adversaries and by the emergence of new technologies, the computational model face several challenges. In particular, it struggles to scale probabilistic reasoning and to apply formal, rigorous mathematical methods to increasingly complex protocols. These difficulties motivate the development of machine-checked frameworks that support the formal construction and automated verification of cryptographic systems. While the symbolic model naturally lends itself to model checking and semi-automated theorem proving, the computational model requires substantially more effort, since reasoning about probabilistic, resource-bounded adversaries becomes increasingly challenging as protocols grow in complexity.
 
-\subsection{EasyCrypt}
-In EasyCrypt, security goals and hardness assumptions are modeled as probabilistic programs, called experiments (or games), which include unspecified adversarial code. EasyCrypt supports common reasoning patterns from the game-based approach, in which reductionist security proofs are decomposed into a sequence (or, more generally, a tree) of transformations called \textit{game hops}. Each hop introduces a local change to the experiment whose impact on the adversary’s distinguishing advantage can be formally bounded, making the overall proof easier to understand, structure, and check. Since each game hop relates two probabilistic programs, EasyCrypt relies on probabilistic relational Hoare logic (pRHL) to reason about pairs of programs. pRHL defines judgments of the form
-\[
-[c_1 \sim c_2 : \Phi \Longrightarrow \Psi]
-\]
-
-where $c_1$ and $c_2$ are probabilistic programs, and $\Phi$ and $\Psi$ are relational assertions on two memories. An example is $x\langle1\rangle = x\langle2\rangle$, which states that the value of $x$ coincides in both memories. pRHL judgments do not explicitly refer to probabilities but probabilistic statements can still be derived from valid judgments. The semantics of pRHL is based on a notion of \textit{lifting} which allows one to derive equalities and inequalities between probabilities of events in related programs. For instance, from pRHL judgment of the form
-\[
-[c_1 \sim c_2 : \Phi \Longrightarrow E\langle1\rangle \to F\langle2\rangle]
-\]
-one can derive that
-\[
-\mathrm{Pr}[c_1, m_1: E] \leq \mathrm{Pr} [c_2, m_2: F ]
-\]
-for all initial memories $m_1$ and $m_2$ that are related by $\Phi$, and for events $E$ and $F$.
-
-A concrete example illustrating the use of pRHL involves reasoning about two probabilistic experiments (games), shown in Figure \ref{fig:easycrypt-sample-proof}. The goal is to prove that the two games induce the same joint distribution over pairs $(m,c)$. This captures the perfect secrecy of the one-time pad, the ciphertext produced by encrypting a message with a uniformly random key is itself uniformly random and independent of the message. 
-
-\begin{figure}[htpb]
-    \centering
-    \begin{minipage}[t]{0.25\textwidth}
-    \begin{align*}
-    &\mathtt{OTP}(n): \\
-    &\quad m \gets \mathcal{M} \\
-    &\quad k \gets \{0,1\}^n \\
-    &\quad c \gets m \oplus k \\
-    &\quad \mathtt{return} (m,c)
-    \end{align*}
-    \end{minipage}
-    \hspace{2em}
-    \begin{minipage}[t]{0.25\textwidth}
-    \begin{align*}
-    &\mathtt{Uniform}(n): \\
-    &\quad m \gets \mathcal{M} \\
-    &\quad c \gets \{0,1\}^n \\
-    &\quad \mathtt{return} (m,c)
-    \end{align*}
-    \end{minipage}
-    \caption{Example of $\mathtt{OTP}$ and $\mathtt{Uniform}$ cryptographic games.}
-    \label{fig:easycrypt-sample-proof}
-\end{figure}
-In pRHL, this equivalence can be expressed by the judgment
-\[
-[\mathtt{OTP} \sim \mathtt{Uniform}: \Phi \Longrightarrow m\langle1\rangle = m\langle2\rangle \land c\langle1\rangle = c\langle2\rangle ]
-\]
-where the precondition 
-$\Phi$ relates the initial memories of the two games. In this case, since both programs start from empty memories and no inputs are assumed, 
-can simply be taken as $(\Phi = \top)$. By the soundness of pRHL, a judgment of the form
-\[[\mathtt{OTP} \sim \mathtt{Uniform}: \Phi \Longrightarrow res\langle1\rangle = res\langle2\rangle] \Longrightarrow \mathtt{OTP} \equiv \mathtt{Uniform}
-\]
-implies that the two programs are observationally equivalent. To establish the judgment, we proceed as follows. Both programs begin by sampling a message $m$ using the same distribution $\mathcal{M}$ which is assumed to be the set containing all the bit strings of length $n$. Therefore, we can couple the two samplings so that  $m\langle1\rangle=m\langle2\rangle$. Next the $\mathtt{OTP}$ game samples a key $k \gets \{0,1\}^n$ uniformly at random, while the $\mathtt{Uniform}$ game samples a ciphertext $c \gets \{0,1\}^n$ uniformly at random. We define a coupling between these samplings by setting
-\[
-c\langle2\rangle = m \oplus k
-\]
-and this is valid because, for any fixed message $m$
-m, the distribution of  $m\oplus k$ is uniform whenever $k$ is uniformly distributed. Finally, the $\mathtt{OTP}$ game sets
-\[
-c\langle1\rangle = m \oplus k
-\]
-which implies $c\langle1\rangle = c\langle2\rangle$. The postcondition 
-\[
-(m\langle1\rangle = m\langle2\rangle) \land (c\langle1\rangle = c\langle2\rangle)
-\]
-holds and we conclude that
-\[
-\mathtt{OTP} \equiv \mathtt{Uniform}
-\]
-This shows that pRHL can formally capture standard cryptographic arguments by reasoning about couplings between probabilistic programs rather than directly manipulating probability distributions.
-
-Additionally in pRHL, given a valid judgment of the form
-\[
-\left[ c_1 \sim c_2: \Phi \Longrightarrow \bigwedge\limits_{i=1}^n x_i\langle1\rangle = x_i\langle2\rangle \right]
-\]
-it holds that $\mathrm{Pr}[c_1, m_1: A] = \mathrm{Pr}[c2, m_2: A]$ for every initial memories $m_1$ and $m_2$ that are related by $\Phi$ and event $A$ that only depends on $\{x_1, \dots , x_n\}$. A further generalization of observational equivalence is observational equivalence up to a
-failure event $F$
-\[
-\left[ c_1 \sim c_2: \Phi \Longrightarrow \neg F\langle2\rangle \to \bigwedge\limits_{i=1}^n x_i\langle1\rangle = x_i\langle2\rangle \right] 
-\]
-And it follows that from the above judgment that for every initial memories $m_1$ and $m_2$ that are related by $\Phi$ and event $A$ that only depends on $\{x_1, \dots , x_n\}$ it holds
-\[
-\mathrm{Pr}[c_1, m_1: A] \leq Pr [c_2, m_2 : A] + \mathrm{Pr}[c_2, m_2 : F] 
-\]
-This is useful to take into account upper bounds on the probability of some event (typically a failure).
-
-The second key component of EasyCrypt is a probabilistic Hoare Logic (pHL) that enables probabilistic reasonging about certain events in a game. Judgments in pHL have the form
-\[ 
-[c : \varsigma \Longrightarrow \varphi] \diamond p \]
-where $c$ is a probabilistic program, $\varsigma$ and $\varphi$ are (non-relational) assertions, $\diamond$ is a comparison operator and $p$ is a probability expression.
-
-In EasyCrypt, both pRHL and pHL are embedded into a higher-order logic, and reasoning within this logic is supported by a core proof engine inspired by SsReflect, an extension of Coq \cite{ssreflect-coq}. To support compositional reasoning, which is essential when analyzing cryptographic systems, as they are typically constructed by composing multiple cryptographic primitives, EasyCrypt provides a module system. It enables the development of modular proofs that reflect the compositional structure of cryptographic constructions. In addition, it make easier the reasoning, organization and management of large and complex proofs involving numerous game hops and reductions at different levels of abstraction.
-
-\section{Squirrel}
-Squirrel is a proof assistant tool that enables automated verification techniques for the computational model. The system is based on the Computationally Complete Symbolic Attacker (CCSA) approach, which retains a symbolic reasoning framework while avoiding some of the limitations of traditional symbolic models. Rather than modeling an adversary's capabilities by explicitly specifying all actions the adversary can perform, the CCSA approach characterizes the adversary by specifying what it cannot do. Starting from the assumed security properties of cryptographic primitives, one derives inference rules that express which pairs of message sequences are computationally indistinguishable. Rules are proven sound with respect to an interpretation of terms as Probabilistic Polynomial-Time Turing Machines (PPTM). Any security proof carried out using the rules implies security in the computational model, given that the underlying cryptographic assumptions hold.
-
-The CCSA approach reasons about cryptographic protocols viewed as concurrent programs (or games) that rely on cryptographic primitives while executing in a malicious environment. A central concept in this setting is computational indistinguishability: two games are said to be indistinguishable if any probabilistic polynomial-time adversary has at most a negligible probability of distinguishing between them. The CCSA framework uses first-order logic to establish computational indistinguishability by first modeling the messages generated during a game’s execution as first-order terms, and then reasoning about indistinguishability within first-order logic using inference rules derived from the assumed security properties of the underlying cryptographic primitives. Describing cryptographic games as probabilistic imperative programs allows cryptographers to rely on an intuitive understanding of their semantics and avoids the introduction of overly complex execution models. Formally reasoning about such programs can be challenging, as it requires handling statefulness, loop invariants, and probabilistic dependencies. Moreover, while encoding complex protocols as imperative programs is possible, it is unnatural and can significantly complicate security proofs.
-
-The CCSA approach represents only the messages computed during a game, modeling them as first-order terms. These terms are pure in the functional programming sense and are therefore easier to reason about than full game descriptions that maintain mutable state. To illustrate this idea, let us consider a simple game.
+\section{Encryption Schemes}
+The notion of encryption scheme $\Pi$ in the computational model refers to a triple of algorithms $\Pi=(Gen, Enc, Dec)$ with a message space $\mathcal{M}$ and a key space $\mathcal{K}$ which is the set of all the possible keys that can be produced by $Gen$. The key-generation algorithm $Gen$ is a probabilistic algorithm that outputs a key $k \in \mathcal{K}$ chosen according to some distribution. The encryption algorithm $Enc$ takes as input a key $k \in \mathcal{K}$ (often compacted to $Enc_k$) and a message $m \in \mathcal{M}$, and outputs a ciphertext $c$. Finally $\mathcal{C}$ denote the set
+of all possible ciphertexts that can be output by $Enc_k(m)$, for all possible
+choices of $k \in \mathcal{K}$ and $m \in \mathcal{M}$. The algorithm $Dec$ is  Given the general definition of an encryption scheme, one may naturally ask whether it is secure. In the computational model, the security of an encryption scheme relies on explicit assumptions about both the computational power of the adversary and the probability with which the adversary may succeed in breaking the scheme while the scheme is still considered secure. Formalizing the notion of security in the computational model therefore constitutes the first and most fundamental set of assumptions. First of all, according to Kerckhoffs' principle, as phrased by Shannon \enquote{the enemy knows the system} \cite{shannon-communication-theory-of-secrecy-systems}, the security of an encryption scheme must not rely on the secrecy of its design or algorithms. Relying on hidden algorithms is commonly referred to as security through obscurity, a practice that is widely discouraged. The only piece of information that is always assumed to remain secret is the key $k$. This convention reflects another formulation of Kerckhoffs' principle: all of the security of a cryptographic system should be concentrated in the secrecy of the key, not in the secrecy of the algorithms themselves \cite{joyofcryptography}. If a key is leaked, generating a new one is simple and straightforward given the algorithm $Gen$, while studying and producing a new cryptographic scheme may take decades. Rather than defining security in terms of informal arguments or abstract intuition, computational cryptography formalizes security through cryptographic experiments (or games). These experiments specify the interaction between a challenger (the scheme) and an adversary and define what it means for the adversary to break a cryptographic scheme. Security is then defined by requiring that any probabilistic polynomial-time adversary succeeds in these experiments with at most negligible probability. This contrasts with the perfect-secrecy setting, where there is no notion of negligible functions: security properties rely entirely on the structural design of the scheme and its exact probabilistic behavior, rather than on computational limitations of the adversary.
+\subsection{Perfect Secrecy}
+In the context of perfect secrecy, the encryption algorithm  $Enc$ may be probabilistic, while the decryption algorithm $Dec$ is deterministic, and no other computational limitations are imposed on the algorithms involved. The processes of key generation, message selection, encryption, and decryption are all viewed as parts of a joint probabilistic experiment. By introducing random variables such as $\mathbf{K}$, $\mathbf{M}$ and $\mathbf{C}$, representing respectively the key generated by $Gen$, the message chosen for encryption, and the resulting ciphertext, it becomes possible to reason formally $\mathrm{Pr}[\mathbf{K} = k]$ where $k \in \mathcal{K}$ is a key, or $\mathrm{Pr}[\mathbf{K} = k\,\,|\,\,\mathbf{M} = m]$ where $m \in \mathcal{M}$.
+\begin{definition}
+    An encryption scheme $\Pi = (Gen, Enc, Dec)$ is said to be perfectly secret if for every message $m \in \mathcal{M}$ and every ciphertext $c \in \mathcal{C}$ such that $\mathrm{Pr}[\mathbf{C} = c] > 0$ it holds that $\mathrm{Pr}[\mathbf{M} = m\,\,|\,\, \mathbf{C} = c] = \mathrm{Pr}[\mathbf{M} = m]$
+\end{definition}
+The intuition behind this definition is that observing the ciphertext reveals absolutely no information about the plaintext. At the same time the distribution of the ciphertext is independent of the message being encrypted: for any two messages $m, m'\in \mathcal{M}$ the distribution of the ciphertext produced by encrypting $m$ is identical to the distribution of the ciphertext produced by encrypting $m'$. A scheme that definitely has such property is the Vernam's cipher also known as One-Time Pad (OTP) \footnote{One-time pad is often called Vernam’s cipher after Gilbert Vernam, a telegraph engineer who patented the scheme in 1919. However, an earlier description of one-time pad was recently discovered in a 1882 text by Frank Miller on telegraph encryption \cite{Bellovin01072011}.}. OTP is defined as a triple of algorithms $Gen, Enc, Dec$ parameterized by the security parameter $n$ (which is omitted for brevity), as reported in Figure~\ref{fig:otp}.
 \begin{figure}[htpb]
     \centering
     \begin{align*}
-    &\mathtt{G}(n): \\
-    &\quad k \gets \{0,1\}^n \\
-    &\quad m \gets A() \\
-    &\quad t \gets Enc_k(m) \\
-    &\quad x \gets A(t) \\
-    &\quad\mathtt{return}\,\, x
+    &\mathcal{K} = \mathcal{M} = \mathcal{C} = \{0,1\}^n &Gen = k \gets \{0,1\}^n;\,\,\mathtt{return}\,\,k \\
+    &Enc_k(m) = \mathtt{return}\,\, m \oplus k
+    &Dec_k(c) = \mathtt{return}\,\, c \oplus k
     \end{align*}
-    \caption{Example of a cryptographic game $\mathtt{G}$ to discuss a Squirrel proof.}
-    \label{fig:squirrel-sample-proof}
+    \caption{Definition of the OTP encryption scheme}
+    \label{fig:otp}
 \end{figure}
 
-A secret key $k$ of length $n$ (Squirrel normally uses $\eta$ instead of $n$) is randomly sampled. The attacker $A$ is asked to provide a message $m$ which is then encrypted using $k$ and sent back to $A$, which uses it to return a second message $x$ which is the final output of the game.
+Where the notation $k \gets \{0,1\}^n$ means to sample uniformly from the set of $n$-bit strings. This uniform choice of key is the only randomness in all of the one-time pad algorithms. The scheme is correct because
+\[
+Dec_k(Enc_k(m)) = (m\oplus k)\oplus k = m \oplus (k\oplus k) = m\oplus {0}^n = m
+\]
+OTP is perfectly secure in the information-theoretic sense, but it suffers from major limitations: the key length must be greater than or equal to the length of the message, and each key can be used only once.
 
-The sampling of the secret key can be modeled by a name symbol $k$. The first interaction with the adversary $A$ is represented by the adversarial function symbol $\mathtt{att}_0(\cdot)$. Although the encryption function $Enc_k$ may be probabilistic may be probabilistic, Squirrel explicitly tracks probabilistic dependencies by modeling the randomness used by the encryption algorithm. This is achieved by introducing a fresh name symbol $\mathtt{r}$ and representing the encryption as the term $\mathtt{enc(att_0(\cdot),r,sk)}$. The second interaction with the adversary is then modeled by another adversarial function symbol, for instance $\mathtt{att_1(enc(att_0(\cdot),r,sk))}$. This representation models two successive calls to the stateful adversary $A$ in the game using two pure function symbols $\mathtt{att_0}$ and $\mathtt{att_1}$. Any state computed by the adversary during the first interaction and used in the second can be recomputed when modeling the second interaction as a pure function. This allows CCSA to avoid explicit state while preserving the adversary's capabilities.
+Encryption schemes can be studied in terms of perfect secrecy, but also in terms of indistinguishability, which is an equivalent and widely used definition of secrecy for encryption schemes. To discuss the indistinguishability property of an encryption scheme, we introduce the experiment $\mathtt{PrivK}^{Eav}_{A, \Pi}$.
 
-n Squirrel, terms are parameterized by a security parameter $\eta \in \mathbb{N}$ and by sources of randomness provided by a pair of random tapes $\rho=(\rho_h,\rho_a)$, each filled with random bits. A model $\mathbb{M}$ of Squirrel's logic provides the following interpretations:
-\begin{itemize}
-    \item For each honest function symbol $\mathtt{f}$ its interpretation as PPTM $\mathcal{M}_\mathtt{f}$
-    \item Associate to each name $\mathtt{n}$ a unique sub-sequence of $\eta$ bits in $\rho_h$ using a PPTM $\mathcal{M}_\mathtt{n}$ with access to $\rho_h$, such that distinct names use disjoint parts of $\rho_h$;
-    \item Interpret any adversarial function symbol $\mathtt{att}$ as a PPTM $\mathcal{M}_\mathtt{att}$ which can only access the random tape $\rho_a$ and not $\rho_h$.
-\end{itemize}
-A term $\mathtt{t}$ is interpreted as a function that associates to each value of the security parameter $\eta$ and random tapes $\rho$, a concrete value denoted by $[\![t]\!]_\mathbb{M}^{\eta, \rho}$. The mapping $\eta, \rho \mapsto [\![t]\!]_\mathbb{M}^{\eta, \rho}$ is computable by a PPTM.
-
-As one of the most commonly used notions to define cryptographic properties is computational indistinguishability, Squirrel's logic relies on the symbol $\sim$ to represent it. Formally, for two terms $\mathtt{u}$, $\mathtt{v}$, the predicate $\mathtt{u} \sim \mathtt{v}$ holds in a model $\mathbb{M}$ if $\mathtt{G}^\mathbb{M}_\mathtt{u} \approx \mathtt{G}^\mathbb{M}_\mathtt{v}$, and $\mathtt{G}^\mathbb{M}_\mathtt{t}$ is the game where the adversary is provided with $[\![t]\!]_\mathbb{M}^{\eta, \rho}$ and must produce a bit b, returned by the game. $\mathtt{u}$, $\mathtt{v}$ holds in $\mathbb{M}$ if exists a negligible function $\epsilon$ such that
-\begin{align*}
-\forall A \in \mathrm{PPTM}. \eta \mapsto |\mathrm{Pr}_\rho(A([\![u]\!]_\mathbb{M}^{\eta, \rho},\rho_a)=1) - \mathrm{Pr}_\rho(A([\![v]\!]_\mathbb{M}^{\eta, \rho},\rho_a)=1)| \leq \epsilon(\eta)
-\end{align*}
-Let's consider another game $\mathtt{G}_\mathtt{k}$ reported in Figure \ref{fig:squirrel-sample-proof-2}
 \begin{figure}[htpb]
     \centering
     \begin{align*}
-    &\mathtt{G}_\mathtt{k}(\eta): \\
-    &\quad k \gets \{0,1\}^{\eta} \\
-    &\quad m \gets A() \\
-    &\quad \mathtt{if}\,\, m = sk\,\,\mathtt{then} \\
-    &\quad\quad \mathtt{return}\,\,0 \\
-    &\quad\mathtt{else} \\
-    &\quad\quad \mathtt{return}\,\,1
+    &\mathtt{PrivK}^{Eav}_{A,\Pi}(n): \\
+    &\quad m_0, m_1 \gets A \\
+    &\quad k \gets Gen \\
+    &\quad b \gets \{0,1\} \\
+    &\quad c \gets Enc_k(m_b) \\
+    &\quad b^* \gets A(c) \\
+    &\quad \mathtt{return}\,\, \neg(b \oplus b^*)
     \end{align*}
-    \caption{Example of a cryptographic game $\mathtt{G}_\mathtt{k}$ to discuss computational indistinguishability in Squirrel.}
-    \label{fig:squirrel-sample-proof-2}
+    \caption{Pseudocode for the $\mathtt{PrivK}^{Eav}_{A, \Pi}$ experiment}
+    \label{fig:privk-eav}
 \end{figure}
-The message returned at the end of the game can be represented by the term
+
+One may ask what the maximum probability is with which an adversary can cause the experiment to output $1$, namely
 \[
-\phi_k = \mathtt{if}\,\,(\mathtt{att_0} = sk) \,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1
+\mathrm{Pr}[\mathtt{PrivK}^{Eav}_{A, \Pi} = 1].
 \]
-which outputs $0$ if the adversary correctly guesses the secret key $k$ and $1$ otherwise. Checking the indistinguishability judgment $(\phi_k \sim 1)$ amounts to verify that the corresponding game $\mathtt{G}_\mathtt{k}$ is computationally indistinguishable from the trivial game $(\mathtt{return}\,\,1)$ i.e., $G_k \approx (\mathtt{return}\,\,1)$.
+A natural question is whether it would make sense to require
+\[
+\mathrm{Pr}[\mathtt{PrivK}^{Eav}_{A, \Pi} = 1] = 0.
+\]
+This requirement is clearly too strong, since an adversary $A$ can trivially succeed with probability $1/2$ by outputting a random guess. Perfect indistinguishability instead requires that no adversary can achieve a success probability strictly greater than $1/2$.
 
-\begin{figure}[htpb]
-    \centering
-    \begin{gather*}
-    \begin{prooftree}
-    \hypo{}
-    \infer1[Ref]{u \sim u}
-    \end{prooftree}
-    \quad\quad
-    \begin{prooftree}
-    \hypo{(u = v)\sim \mathtt{true} }
-    \hypo{C[v]\sim w}
-    \infer2[Rew]{C[u] \sim w}
-    \end{prooftree}
-    \quad\quad
-    \begin{prooftree}
-    \hypo{}
-    \infer1[Fresh]{(t \neq \mathtt{n})\sim \mathtt{true}}
-    \end{prooftree}
-    \end{gather*}
-    \caption{Inference rules over $\sim$ in Squirrel}
-    \label{fig:inference-rules-over-sim-squirrel}
-\end{figure}
-
-Given the inference rules over $\sim$ in Squirrel represented in Figure \ref{fig:inference-rules-over-sim-squirrel} one can derive the result as follows
-
-\begin{gather*}
-    \begin{prooftree}
-    \hypo{}
-    \infer1[Fresh]{(\mathtt{att}_0(\cdot) \neq k)\sim \mathtt{true}}
-    \infer1{((\mathtt{att_0}(\cdot) = k) = \mathtt{false}) \sim \mathtt{true}}
-    \hypo{}
-    \infer1[Ref]{1\sim1}
-    \infer1{(\mathtt{if}\,\,\mathtt{false}\,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1}
-    \infer2[Rew]{(\mathtt{if}\,\,(\mathtt{att_0}(\cdot) = k) \,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1}
-    \end{prooftree}
-\end{gather*}
-
-% The key rules is the second one that states that if given $u$ indistinguishable from $v$, then  replace $u$ can be replaced with $v$ inside any context $C$ without changing the overall indistinguishability from $w$.
-
-\section{CryptoVerif}
+\begin{definition}
+An encryption scheme $\Pi = (Gen, Enc, Dec)$ has indistinguishable encryptions if and only if for every adversary $A$,
+\[
+\mathrm{Pr}[\mathtt{PrivK}^{Eav}_{A, \Pi} = 1] = \frac{1}{2}.
+\]
+\end{definition}
+It then immediately follows that:
+\begin{theorem}
+An encryption scheme $\Pi$ is perfectly secret if and only if it is perfectly indistinguishable.
+\end{theorem}
+The limitations of perfect secrecy 
+\begin{theorem}
+Let $\Pi = (Gen, Enc, Dec)$ be a perfectly secret encryption scheme over a message space $\mathcal{M}$ and a key space $\mathcal{K}$. Then $|\mathcal{K}| \geq |\mathcal{M}|$.
+\end{theorem}
 
 % \begin{figure}
 %     \centering

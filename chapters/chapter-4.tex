@@ -1,2 +1,221 @@
-\chapter{Lambda-BLL}
+\chapter{Lambda-Calculus}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
+
+The lambda calculus is a formal system introduced in the 1920s by Alonzo Church \cite{the-calculi-of-lambda-conversion}, in which all computation is reduced to the basic operations of function definition and application. It can be viewed as a simple, but still Turing complete programming language in which computations are mathematical objects that can be used for proofs \cite{types-and-programming-languages}. The key idea is that computation consists of simplifying expressions; when an expression can no longer be reduced, the computation ends. Lambda-calculus can be enriched in many ways. Section \ref{sec:untyped-lambda-calculus} will present the basis of untyped lambda-calculus while Section \ref{sec:typed-lambda-calculus} will introduce the typed lambda-calculus.
+
+\section{Untyped Lambda-Calculus}\label{sec:untyped-lambda-calculus}
+Functional abstraction is one of the main ingredients of programming. It avoids code repetition and isolates meaningful pieces of code. When discussing functions in programming, particularly in functional programming, which is the focus here, common examples include the factorial function and the Fibonacci function. These examples are frequently used because of their recursive nature. For instance, the value of \verb|5!| can be expressed in terms of previous factorials as \verb|5! = 5 x 4!|. Similarly, the Fibonacci sequence is defined recursively: the value returned by the function that calculates the n-th Fibonacci number, for $n>2$ and denoted by \verb|fib| satisfies
+\begin{lstlisting}
+fib(n) = fib(n-1) + fib(n-2)
+\end{lstlisting}
+Rather than reasoning in terms of an algorithm that explicitly manipulates memory through loops and termination conditions, the same computation can be expressed by composing previously defined functions, allowing one to reason in a more mathematical and declarative way. If \texttt{$\lambda$x.} is the function $\lambda$ that applied to \verb|x| returns something, then one can write
+\begin{lstlisting}[breaklines]
+fib = $\lambda$x. if x <= 1 then 1 else fib(x-1) + fib(x-2)
+\end{lstlisting}
+as the recursive function that calculates the n-th Fibonacci number.
+
+The lambda calculus codifies these ideas in their purest form \cite{types-and-programming-languages}. It is a formalism in which every computation is expressed using anonymous unary functions, that is, functions that accept exactly one argument and yields a single output. Functions in lambda-calculus may also take other functions as argument and return them as results. Since functions are anonymous, they are not associated with explicit names bound to the computations they represent.
+
+The syntax of the lambda-calculus consists solely of lambda-terms. The set of lambda-terms $\Lambda$ is built up from an infinite set of variables $V=\{v_1, v_2, \dots, \}$ using application and function abstraction:
+\begin{align}
+&V ::= v \mid V' \label{eq:lc-infinite-variables} \\
+&\Lambda ::= v \mid \Lambda \Lambda \mid \lambda V.\Lambda \label{eq:lc-syntax}
+\end{align}
+Arbitrary lambda-terms are commonly represented by $M, N, L, \dots$ while $x,y,z, \dots$ usually denote arbitrary variables. In \ref{eq:lc-syntax} one possible form of a lambda-term is $v$, which represents a variable. The term $\Lambda \Lambda$ denotes the application of the first term to the second. The expression $\lambda V.\Lambda$ is called a lambda-abstraction (or simply an abstraction) and it represents the explicit definition of an anonymous function that binds its formal parameter $V$ and has body $\Lambda$. In conventional mathematical notation, such a function might be written as $x \mapsto M$ or $f(x) = t$ if the the lambda-abstraction were given the name $f$ and if it were written as $\lambda x.M$. 
+
+There are some conventions for writing lambda-expressions. The first is that application is left-associative. For example, the expression $(t\,s\,u)$ is the same as $(t\,s)u$. The second one is that application has higher precedence than abstraction. Hence, the expression $\lambda x.tt$ is to be interpreted as $\lambda x.(tt)$, and not as $(\lambda x.t)t$. The third convention is that the body of an abstraction extends as far to the right as possible. For example, $\lambda x.\lambda y.x\,y\,z$ is the same as $\lambda x.(\lambda y.((x\,y)z))$. In the last expression $(\lambda x.\lambda y.x\,y\,z)$, the lambda-term $z$ does not appear as one of the arguments of the abstractions. In this case the lambda-term $z$ is said to be a free variable. An occurrence of the variable $x$ is said to be bound when it occurs in the
+body $t$ of an abstraction $\lambda x.t$. The $\lambda$ is also called \textit{binder}, because it said it binds its argument ($x$ in the last example) in its body $t$. In this context $t$ is called the scope of the abstraction. When a lambda-term appear in an expression and there are no binders capturing it, then it's a free variable. For example in the expression
+\[
+x\lambda x.\lambda y.w\,x\,y
+\]
+the first instance of $x$ is free, while the second one is captured by the binder. $w$ is also free. The set of free variables of a lambda-term $t$ is often denoted by $FV(t)$. $FV(t)$ is defined inductively by
+
+\begin{figure}[htpb]
+    \begin{align*}
+    &FV(x)={x} \\
+    &FV(MN)=FV(M) \cup FV(N) \\
+    &FV(\lambda x.M)=FV(M) \setminus \{x\}
+    \end{align*}
+    \caption{Definition of free variables in the untyped lambda-calculus.}
+    \label{fig:untyped-lambda-calculus-free-variables}
+\end{figure}
+
+
+Let's consider the expression $\lambda x.x\,y(\lambda y.y\,z)$. Applying the definition of $FV$ the set of the free variables of $\lambda x.x\,y(\lambda y.y\,z)$ is
+\begin{align*}
+&FV(\lambda x.xy(\lambda y.yz)) = \\
+&= FV(xy(\lambda y.yz) \setminus \{x\}) = (FV(x) \cup FV(y) \cup FV(\lambda y.yz)) \setminus \{x\} \\ 
+&= (\{x\} \cup \{y\} \cup (FV(yz) \setminus \{y\})) \setminus \{x\} = \{x,y,z\} \setminus \{x\} = \{y,z\}
+\end{align*}
+
+Whenever a lambda-term $M$ has $FV(M)=\emptyset$ then it is called combinator (or closed lambda-term).
+
+The computation in lambda-calculus is performed only through function application. Applying functions to each other means rewriting the abstractions by substituting the bounded variables in the body. But substitution is not always safe. Let $M[x:=N]$ denote the term obtained by substituting all free occurrences of the variable $x$ in $M$ with the term $N$. The substitution operation is defined inductively as shown in Figure \ref{fig:untyped-lambda-calculus-substitution}
+\begin{figure}[htpb]
+    \begin{align*}
+        x[x:=N]&=N \\
+        y[x:=N]&=y \\
+        (ML)[x:=N]&=(M[x:=N])(L[x:=N]) \\
+        (\lambda x.M)[x:=N]&=\lambda x.M \\
+        (\lambda y.M)[x:=N]&=\lambda y.(M[x:=N]) \ \text{if} \ x \neq y
+    \end{align*}
+    \caption{Definition of substitution in the untyped lambda-calculus.}
+    \label{fig:untyped-lambda-calculus-substitution}
+\end{figure}
+The last case could be extended to prevent variable capture: the bound variable $y$ may be first renamed to a \textit{fresh} variable $z$ before performing the substitution. The freshness condition ensures that $z$ does not occur free in either $M$ or $N$. Given a term $M$, the set of its free variables $FV(M)$ is finite, whereas the set of terms that are alpha-equivalent to $M$, denoted by $\stackrel{\alpha}{\equiv}$, is infinite (by \ref{eq:lc-infinite-variables}). Consequently, there always exists a term $t$ such that $M \stackrel{\alpha}{\equiv} t$, allowing bound variables to be renamed as needed to avoid capture.
+
+In the lambda calculus, each step of a computation consists of rewriting an application whose left-hand side is an abstraction, by substituting the free occurrences of the bound variable with the argument. For example the expression $(\lambda x.\lambda y.x\,y)(\lambda z.z)(\lambda z.z)$ evaluates to $(\lambda z.z)$. However, there are multiple ways to reduce the original term, depending on which reducible expression is chosen at each step. A term of the form $(\lambda x.M)$ beta-reduces to a term $u$, written by $(\lambda x.M) \to_\beta u$ if $u$ is the result of substituting $N$ for the free occurrences of $x$ in $M$, that is $u=M[x:=N]$. For example $(\lambda y.x\,y)x \to_\beta \lambda x.x\,x$. An expression of the form $(\lambda x.M)N$ is called a redex (short for reducible-expression) \cite{the-calculi-of-lambda-conversion}. The binary relation $\to_\beta$ is defined using the following inference rules 
+\begin{figure}[htpb]
+    \begin{gather*}
+    \begin{prooftree}
+        \hypo{}
+        \infer1[]{ (\lambda x.M)N \to_\beta M[x:=N] }
+    \end{prooftree}
+    \quad \quad \quad
+    \begin{prooftree}
+        \hypo{M \to_\beta M'}
+        \infer1[]{ MN \to_\beta M'N }
+    \end{prooftree}
+    \\[2ex]
+    \begin{prooftree}
+        \hypo{M \to_\beta M'}
+        \infer1[]{ NM \to_\beta NM' }
+    \end{prooftree}
+    \quad \quad \quad
+    \begin{prooftree}
+        \hypo{M \to_\beta M'}
+        \infer1[]{ \lambda x.M \to_\beta \lambda x.M' }
+    \end{prooftree}
+    \end{gather*}
+    \caption{Inference rules for the binary relation $\to_\beta$ untyped lambda-calculus.}
+    \label{fig:untyped-lambda-calculus-beta-reduction}
+\end{figure}
+
+Given the formal definition of beta-reduction, and lambda-calculus' operational semantics, the binary relations $\twoheadrightarrow_\beta and =_\beta$ on $\Lambda$ are defined inductively as follows
+
+\begin{enumerate}
+    \item \begin{enumerate}
+        \item $M \twoheadrightarrow_\beta M$;
+        \item $M \to_\beta N \Rightarrow M \twoheadrightarrow_\beta N$; 
+        \item $M \twoheadrightarrow_\beta N, N \twoheadrightarrow_\beta L \Rightarrow M \twoheadrightarrow_\beta L$.
+    \end{enumerate}
+    \item \begin{enumerate}
+        \item $M \twoheadrightarrow_\beta N \Rightarrow M =_\beta N;$
+        \item $M =_\beta N \Rightarrow N =_\beta M;$
+        \item $M =_\beta N, N =_\beta L \Rightarrow M =_\beta L.$
+    \end{enumerate}
+\end{enumerate}
+The relation $\twoheadrightarrow_\beta$ is the transitive reflexive closure of $\to_\beta$, while $=_\beta$ is a congruence relation \cite{Barendregt2013-BARLCW}.
+Beta-reduction introduces non-determinism into computation, since the order in which redexes are reduced may lead to different reduction sequences. This choice is known as an evaluation strategy. Several strategies have been studied: full beta reduction, where any redex may be reduced at any time; normal order, where the leftmost outermost redex is reduced first; call by name, which is similar to normal order but forbids reduction inside abstractions; and call by value, where only outermost redexes are reduced and a redex is contracted only when its argument has been reduced to a normal form \cite{types-and-programming-languages}. 
+
+A term $M$ is said to be in \textit{normal form} if $M$ contains no beta-redex; that is, no subterm of the form $(\lambda x.P)Q$. 
+
+Let $M$ be a term, $M$ is \textit{weakly normalisable} if there exists some $M'$ in normal form such that $M \twoheadrightarrow_\beta N'$. We say that M is \textit{strongly normalisable} if there does not exist an infinite beta-reduction path starting from $M$. There exist terms in the untyped lambda-calculus which are neither strongly nor weakly
+normalisable, for example $(\lambda x.xx)(\lambda x.xx)$, as well as terms which are weakly but not
+strongly normalisable such as $(\lambda x. \lambda y.y)((\lambda x.xx)(\lambda x.xx))$. However in the simply typed lambda-calculus every lambda-term is strongly normalisable \cite{Girard1989-GIRPAT}.
+
+Up to this point, the lambda calculus may appear promising as a practical programming language. However, since every term is an anonymous unary function, two questions may arise: how can functions that take multiple arguments be expressed, and how can iteration in the form of recursion be encoded? In the lambda calculus, a binary function $f(x, y) = g(x, y)$ is represented as $\lambda x.\lambda y.g\,x\,y$. More generally, functions of arbitrary arity are encoded by using a sequence of abstractions, each taking one argument at a time. This representation also enables partial function application. For example, the expression $((\lambda x.\lambda y.x+y)1)$ reduces to $\lambda y.1+y$, which denotes a function that always increments its argument by \verb|1|. Regarding the encoding of recursion in the lambda calculus, let's consider a set \( A \) and a function \( f: A \to A \). An element \( x \in A \) is called a fixed point of \( f \) if and only if \( f(x) = x \). In mathematics, functions do not in general admit fixed points; for example, the function \( f(x) = x + 1 \) has no fixed points. In computer science, however, the notion of a function differs from the classical mathematical definition. While a mathematical function associates exactly one output with each input in its domain, computational functions may be partial or divergent, meaning that they may fail to return a result for some inputs. In the lambda calculus, a lambda term \(t\) is a fixed point of \(f\) if and only if \( f(t) =_\beta t \). Unlike the classical mathematical setting, fixed points always exist in the untyped lambda calculus. For example, the term 
+\[ 
+(\lambda x. f(x \, x)) (\lambda x. f(x \, x))
+\] 
+is a fixed point of \( f \) since 
+\[ f((\lambda x. f(x \, x)) (\lambda x. f(x \, x)))=_\beta (\lambda x. f(x \, x)) (\lambda x. f(x \, x)) \]
+A lambda term $Y$ is called a fixed-point operator if, for every lambda term $f$, the term $Yf$ is a fixed point of $f$. A standard example of such an operator is
+\[ 
+Y \equiv \lambda f.((\lambda x. f(x \, x)) (\lambda x. f(x \, x))) 
+\]
+This allows $Y$ to generate fixed points, where $Yf$ is equal to itself under the function $f$, creating recursion without explicit self-reference (since lambda-terms are anonymous). In this way, the untyped lambda calculus models recursion through self-application.
+
+The lambda calculus can also encode primitive data types commonly found in most programming languages, such as booleans. These can be represented as follows:
+\begin{align*}
+\mathtt{true} &= \lambda x.\lambda y.x \\
+\mathtt{false} &= \lambda x.\lambda y.y
+\end{align*}
+Given a boolean value B, a conditional expression of the form
+\begin{verbatim}
+if B then M else N
+\end{verbatim}
+can be expressed by the lambda term $BMN$ since $(\mathtt{true}\,MN=M)$ and $(\mathtt{false}\,MN=N)$.
+In a similar way one can construct ordered pairs using
+\begin{align*}
+    [M,N] = \lambda z.z MN
+\end{align*}
+and retrieve the first or the second element using $([M,N]\,\mathtt{true}=M)$ and $([M,N]\,\mathtt{false}=N)$.
+
+\section{Simply Typed Lambda-Calculus}\label{sec:typed-lambda-calculus}
+In mathematics, functions are usually defined on a fixed domain and range, there is no corresponding requirement in type-free lambda-calculus \cite{Srensen2007-SRELOT}. The lambda calculus can be extended with type annotations that specify the kinds of inputs a term accepts and the kinds of outputs it produces. There are two distinct approaches to introducing types into the lambda calculus: in Church-style typing \cite{Church_1940}, variables and abstractions are explicitly annotated with their types, and each well-typed term has a unique type. In contrast, Curry-style typing \cite{functionality_in_combinatory_logic} does not require type annotations on variables; instead, types are assigned to terms after they are constructed, and typable expressions admit a unique most general type. In Church’s approach, a term’s type is a built-in part of the term itself, the modern analogy would be a programmer explicitly writing the types for all variables used in the program as in, e.g., Pascal. In Curry’s approach, a term’s type is inferred after the term has been defined, the programmer writes functions, and it is then the job of the compiler to infer the types of variables, as e.g., in ML and Haskell \cite{Raamsdonk2009LambdaCalculusAC, Srensen2007-SRELOT}. The aim of this section is to introduce the simply typed lambda calculus following Curry's approach, hence first defining terms, how they behave and then defining a basic type system. 
+
+At the end of Section \ref{sec:untyped-lambda-calculus}, the expression $((\lambda x.\lambda y.x+y)1)$ was introduced as an example of a term that reduces to another function, namely $\lambda y.1+y$, which increments its argument by \verb|1|. However, one may ask what happens if the formal argument $y$ is instantiated with a function instead of a number, for example in the expression $(\lambda y.1+y)(\lambda x.x)$. In this case, the meaning of applying the \verb|+| operator to a number and a function is unclear. This is a common situation in which type systems capture errors early, preventing erroneous behaviour. Such errors correspond to terms that cannot be reduced and therefore become stuck, since no reduction rules can be applied to them \cite{types-and-programming-languages}.
+
+Given the syntax of terms
+\begin{align*}
+&V ::= v \mid V' \\
+&\Lambda ::= v \mid \Lambda \Lambda \mid \lambda V.\Lambda
+\end{align*}
+let $T$ denote a denumerably infinite alphabet whose members will be called type variables, the set $T$ of simple types is the set of strings defined by the grammar
+\[
+\Pi ::= U \mid (\Pi \to \Pi)
+\]
+Usually $\alpha, \beta, \gamma$ denotes type variables, and $\sigma, \tau$ arbitrary types. $(\Pi \to \Pi)$ denotes the type of functions that accept an argument of type $\Pi$ and return a result of type $\Pi$, conventionally $\to$ is right-associative. The set $C$ of contexts is the set of all sets of pairs of the form
+\[
+C ::= \{x_1: \tau_1, \dots x_n: \tau_n\}
+\]
+where $\{x_1, \dots x_n\} \in \Lambda$ and $\{\tau_1, \dots x_n\} \in T$ and $x_i \neq x_j$ for $i \neq j$. The domain of a context $\Gamma = \{x_1: \tau_1, \dots x_n: \tau_n\}$ is defined by:
+\[
+\mathrm{dom}(\Gamma) = \{x_1, \dots , x_n\}
+\]
+The possible forms of the contexts $\Gamma, \Delta, \dots$ are given by
+\[
+\Gamma ::= \emptyset \mid \Gamma, x: \tau
+\]
+where $\emptyset$ denotes an empty context and $\Gamma, x: \tau$ represents the extension of the context $\Gamma$ with a new variable $x$ of type $\tau$.
+
+The typability relation on $C \times \Lambda \times T$ is defined by the inference rules shown in Figure \ref{fig:simply-typed-lc-typability-relations}.
+\begin{figure}[htpb]
+    \centering
+    \begin{gather*}
+    \begin{prooftree}
+    \hypo{}
+    \infer1[]{\Gamma, x:\tau \vdash x: \tau}
+    \end{prooftree}
+    \quad\quad
+    \begin{prooftree}
+    \hypo{\Gamma, x: \sigma \vdash M: \tau}
+    \infer1[]{\Gamma \vdash \lambda x.M: \sigma \to \tau}
+    \end{prooftree}
+    \quad\quad
+    \begin{prooftree}
+    \hypo{\Gamma \vdash M: \sigma \to \tau \quad \Gamma \vdash N: \sigma}
+    \infer1[]{\Gamma \vdash MN: \tau}
+    \end{prooftree}
+    \end{gather*}
+    \caption{Typability relation on $C \times \Lambda \times T$ in the simply typed lambda-calculus.}
+    \label{fig:simply-typed-lc-typability-relations}
+\end{figure}
+
+The first and second rule require $x \notin \mathrm{dom}(\Gamma)$. If a variable $x$ is assigned the type $\tau$ in the context $\Gamma$, then $x$ has type $\tau$. To type an abstraction $\lambda x. M$, a type $\sigma$ is assumed for the argument $x$ and added to the context; if the body $M$ can then be assigned type $\tau$, the abstraction has type $\sigma \to \tau$. Finally, if a function $M$ has type $\sigma \to \tau$ and an argument $N$ has type $\sigma$, then applying the function to the argument yields a term of type $\tau$. 
+
+
+The simply typed lambda-calculus à la Curry is often denoted by $\Lambda$$\rightarrow$ and is the triple $(\Lambda, T, \vdash)$. 
+
+If $\Gamma \vdash M: \sigma$ then $M$ has type $\sigma$ in $\Gamma$. $M \in \Lambda$ is typable if there are $\Gamma$ and $\sigma$ such that $\Gamma \vdash M: \sigma$ and is a ternary relation. Here, $\Gamma$ is called the typing context and consists of a finite set of assumptions about the free variables of $M$, containing the association of each variable with its type. A formal proof of $\Gamma \vdash M: \tau $ is given by a finite tree whose nodes are labelled by pairs of form $(\Gamma', M': \tau')$, which will also be written satisfying the following conditions:
+\begin{itemize}
+    \item The root node is $\Gamma \vdash M: \tau$;
+    \item All leaves are labelled by axioms;
+    \item The label of each father node is obtained from the labels of the sons using one of the rules.
+\end{itemize}
+Let's consider the expression $(\lambda f.\lambda x.fx)$ and apply the typing rules to derive its type in the empty context $\epsilon$.
+
+\begin{gather*}
+\begin{prooftree}
+\hypo[]{f: \sigma \to \tau, x: \sigma \vdash f: \sigma \to \tau}
+\hypo[]{f: \sigma \to \tau, x: \sigma \vdash x: \sigma}
+\infer2[]{f: \sigma \to \tau, x: \sigma \vdash f x: \tau}
+\infer1[]{f: \sigma \to \tau \vdash \lambda x. fx: \sigma \to \tau}
+\infer1[]{\vdash \lambda f.\lambda x.fx: (\sigma \to \tau) \to \sigma \to \tau}
+\end{prooftree}
+\end{gather*}
+
+Thus the term $(\lambda f.\lambda x.fx)$ has type $(\sigma \to \tau) \to \sigma \to \tau$ in the empty context. However, not all terms are typable in simply typed lambda calculus. Attempting to type the term $(\lambda x.xx)$ (the self-application combinator $\omega$) leads to a requirement for an infinite type. This is intentional, as it prevents the construction of general recursion ensuring that all typable terms in the system are strongly normalizing hence guaranteed to converge to a normal form.
+
+While the untyped lambda calculus is a universal model of computation, its expressiveness has some drawbacks. In an untyped setting, any term may be applied to any other term, which allows the formation of meaningless expressions and non-terminating computations, such as the $\omega$ combinator ($\lambda x.xx$) or the ill term $(\lambda y.1+y)(\lambda x.x)$. Type systems impose a formal structure on terms in order to address these issues, with two objectives: logical consistency and guarantee on termination. Early formulations of the lambda calculus were shown to be logically inconsistent when interpreted as foundations for mathematics \cite{The_Inconsistency_of_Certain_Formal_Logics}. Type systems, such as Church’s simply typed lambda calculus, were introduced to restore consistency by restricting the class of valid terms and eliminating problematic forms as the self-reference. Another benefit of many typed systems is the property of strong normalization, which guarantees that every well-typed term reduces to a normal form. In the simply typed lambda calculus, self-application (such as $\omega$) is untypable, preventing the construction of terms that lead to infinite reduction sequences. As a result, every typable computation is guaranteed to terminate, ensuring that evaluation always produces a normal form \cite{Girard1989-GIRPAT}.
