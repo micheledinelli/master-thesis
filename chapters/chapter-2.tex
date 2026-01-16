@@ -15,29 +15,31 @@ exist, then one can derive most private-key cryptography \cite{one-way-functions
 constructions that relies on complexity theoretic security are useless.
 Cryptography is concerned with the construction of efficient schemes for which it is infeasible to violate the intended security properties. The computational model clarifies the notions of efficient and infeasible computation by formally defining the computational resources available to legitimate users and adversaries. The computations performed by honest parties are required to be efficient, while any attempt by an adversary to violate the security guarantees of the scheme should be computationally infeasible. Efficiency is commonly modeled by restricting computations to run in polynomial time in a security parameter. Adversarial computations are likewise assumed to be polynomially bounded, although the specific polynomial is not fixed in advance. Under this assumption, adversaries are restricted to the class of polynomial-time computations, and any computation requiring super-polynomial resources is considered infeasible \cite{theory-of-computing}. This framework implies a relaxation of the classical notion of perfect secrecy \cite{shannon-communication-theory-of-secrecy-systems}. Perfect secrecy requires that absolutely no information about the plaintext is leaked by the ciphertext, even to adversaries with unbounded computational power. This strong notion of security can be relaxed in order to obtain efficient protocols that are not perfectly secure in the information-theoretic sense, but are still considered secure in real-world scenarios. In the computational model, protocols may be deemed secure even if they leak a negligible amount of information to computationally bounded adversaries, provided that any such information can be exploited only with negligible probability. Security definitions that restrict adversaries by their computational power are referred to as computational security, in contrast to information-theoretic security, which makes no such assumptions \cite{introduction-to-modern-cryptography}. Of course the relaxations need very well definitions in order to capture the right amount of adversaries but still enabling efficient protocols for legitimate users. In the computational model two different approaches exits: the concrete approach and the asymptotic approach.
 
+\section{Concrete Approach}
 In the concrete approach, an encryption scheme is defined $(t, \epsilon)$-secure, if every adversary running for time at most $t$ succeeds in breaking the scheme with probability at most $\epsilon$. Of course, the notion of breaking a scheme must be precisely defined before such an analysis can be carried out. This approach differs from asymptotic computational security in that security is quantified using explicit, concrete parameters rather than asymptotic bounds. Instead of requiring security against all polynomial-time adversaries with negligible success probability, the concrete approach provides explicit guarantees relating an adversary’s running time to its maximum achievable success probability. The concrete approach is useful in practice because it yields explicit security guarantees for a cryptographic protocol, expressed in terms of the probabilities of concrete events, such as a successful key recovery. However, such guarantees are often difficult to obtain, since probability estimates typically depend on assumptions about the efficiency of the underlying hardware available to the adversary. As an illustrative example, suppose the key length is $n$, so that the key space has size $2^n$, and the key is a uniformly random bitstring of length 
 $n$. A brute-force attack performed by an adversary running for $t$ CPU cycles succeeds with probability approximately $ct/2^n$, for some constant $c$ depending on the implementation. If 
 $n=60$ and the adversary uses a desktop computer running at 4GHz (that is, $4\times10^9$ cycles per second), then a full brute-force search would require approximately $2^{60}/(4 \times 10^9)$ seconds which is about 9 years. A modern exascale supercomputer is capable of performing approximately $2 \times 10^{18}$ operations per second and would require it roughly $2^{60}/(2 \times 10^{18})$ seconds to break the scheme. It is on the order of half a second \cite{introduction-to-modern-cryptography}. Nonetheless a key length of $n=128$ deters even the most powerful supercomputer since $2^{128}/(2 \times 10^{18}) \approx 1,7 \times 10^{20}$ which is $5,39 \times 10^{12}$ (5,39 trillion years). This clearly show some of the major limitations of the concrete security approach, which often struggles to provide meaningful guarantees without making additional assumptions about an adversary’s hardware capabilities or the availability of highly optimized algorithms implemented on specialized hardware for specific tasks.
 
+\section{Asymptotic Approach}
 The asymptotic approach is rooted in complexity theory. All parties involved in a cryptographic protocol are modeled as algorithms that take as input a security parameter, usually denoted by 
 $n$. The notion of efficiency is formalized using probabilistic polynomial-time (PPT) algorithms. An efficient adversary is defined as a probabilistic algorithm whose running time is bounded by a polynomial in the security parameter; that is, there exists a polynomial $p$ such that the adversary runs in time at most $p(n)$. The notion of small \textit{probability of success} is given by the introduction of negligible functions.
 
-\begin{definition}
+\begin{definition}[Negligible Functions]
 A function $f: \mathbb{N} \to \mathbb{R}$ is said to be negligible iff for every polynomial $p: \mathbb{N} \to \mathbb{N}$ there is a $N$ such that for every $n > N$ it holds that $f(n) < 1/p(n)$. 
 \end{definition}
 
-%\begin{lemma}
-%    The set of all negligible functions $\mathcal{NGL}$ is closed for sum, product and product by an arbitrary polynomial.
-%\end{lemma}
-%\begin{proof}
-%Let $f(n)$ be a negligible function and let $q(n)$ be any polynomial that is positive for sufficiently large $n$. We must show that the function $h(n) = q(n) f(n)$ is negligible. Let $p(n)$ be an arbitrary polynomial. Define a new polynomial $p'(n) = p(n) q(n)$. Since the product of two polynomials is itself a polynomial, $p'(n)$ is a polynomial. Because $f(n)$ is negligible, there exists an integer $N$ such that
-%\[ f(n) < \frac{1}{p'(n)} \quad \forall n > N. \]
-%Substituting $p'(n) = p(n) q(n)$, we obtain
-%\[ f(n) < \frac{1}{p(n) q(n)} \quad \forall n > N. \]
-%Multiplying both sides by $q(n)$ yields
-%\[ q(n) f(n) < \frac{1}{p(n)} \quad \forall n > N. \]
-% Because $p(n)$ was arbitrary, it follows that $h(n)$ is negligible.
-%\end{proof}
+\begin{lemma}\label{lemma:closure-ngl}
+   The set of all negligible functions $\mathcal{NGL}$ is closed for sum, product and product by an arbitrary polynomial.
+\end{lemma}
+\begin{proof}
+Let $f(n)$ be a negligible function and let $q(n)$ be any polynomial that is positive for sufficiently large $n$. We must show that the function $h(n) = q(n) f(n)$ is negligible. Let $p(n)$ be an arbitrary polynomial. Define a new polynomial $p'(n) = p(n) q(n)$. Since the product of two polynomials is itself a polynomial, $p'(n)$ is a polynomial. Because $f(n)$ is negligible, there exists an integer $N$ such that
+\[ f(n) < \frac{1}{p'(n)} \quad \forall n > N. \]
+Substituting $p'(n) = p(n) q(n)$, we obtain
+\[ f(n) < \frac{1}{p(n) q(n)} \quad \forall n > N. \]
+Multiplying both sides by $q(n)$ yields
+\[ q(n) f(n) < \frac{1}{p(n)} \quad \forall n > N. \]
+Because $p(n)$ was arbitrary, it follows that $h(n)$ is negligible. Closure under addition and multiplication of negligible functions follows by similar arguments.
+\end{proof}
 
 The definition of negligible functions helps formalize the extent to which an adversary may hope to break a cryptographic scheme being bounded in computational time. At first, however, the role of probability may appear misleading in a cryptographic setting. In this context, probability does not reflect uncertainty in the correctness of cryptographic algorithms such as encryption/decryption or signature/verification which are deterministic in their correctness guarantees. Rather, probability arises because all algorithms (hence parties) in a cryptographic protocol use randomized subroutines that are essential for achieving security. Indeed, without randomness, secrecy cannot be generated \cite{theory-of-computing}. For this reason, probabilistic reasoning and randomized computations are indispensable components of the computational model. 
 
@@ -45,13 +47,13 @@ In most cases, security proofs in the computational model are reductionist. That
 
 As cryptography evolves, driven both by increasingly sophisticated adversaries and by the emergence of new technologies, the computational model face several challenges. In particular, it struggles to scale probabilistic reasoning and to apply formal, rigorous mathematical methods to increasingly complex protocols. These difficulties motivate the development of machine-checked frameworks that support the formal construction and automated verification of cryptographic systems. While the symbolic model naturally lends itself to model checking and semi-automated theorem proving, the computational model requires substantially more effort, since reasoning about probabilistic, resource-bounded adversaries becomes increasingly challenging as protocols grow in complexity.
 
-\section{Encryption Schemes}
+\section{Perfect Secrecy}\label{sec:perfect-secrecy}
 The notion of encryption scheme $\Pi$ in the computational model refers to a triple of algorithms $\Pi=(Gen, Enc, Dec)$ with a message space $\mathcal{M}$ and a key space $\mathcal{K}$ which is the set of all the possible keys that can be produced by $Gen$. The key-generation algorithm $Gen$ is a probabilistic algorithm that outputs a key $k \in \mathcal{K}$ chosen according to some distribution. The encryption algorithm $Enc$ takes as input a key $k \in \mathcal{K}$ (often compacted to $Enc_k$) and a message $m \in \mathcal{M}$, and outputs a ciphertext $c$. Finally $\mathcal{C}$ denote the set
 of all possible ciphertexts that can be output by $Enc_k(m)$, for all possible
-choices of $k \in \mathcal{K}$ and $m \in \mathcal{M}$. The algorithm $Dec$ is  Given the general definition of an encryption scheme, one may naturally ask whether it is secure. In the computational model, the security of an encryption scheme relies on explicit assumptions about both the computational power of the adversary and the probability with which the adversary may succeed in breaking the scheme while the scheme is still considered secure. Formalizing the notion of security in the computational model therefore constitutes the first and most fundamental set of assumptions. First of all, according to Kerckhoffs' principle, as phrased by Shannon \enquote{the enemy knows the system} \cite{shannon-communication-theory-of-secrecy-systems}, the security of an encryption scheme must not rely on the secrecy of its design or algorithms. Relying on hidden algorithms is commonly referred to as security through obscurity, a practice that is widely discouraged. The only piece of information that is always assumed to remain secret is the key $k$. This convention reflects another formulation of Kerckhoffs' principle: all of the security of a cryptographic system should be concentrated in the secrecy of the key, not in the secrecy of the algorithms themselves \cite{joyofcryptography}. If a key is leaked, generating a new one is simple and straightforward given the algorithm $Gen$, while studying and producing a new cryptographic scheme may take decades. Rather than defining security in terms of informal arguments or abstract intuition, computational cryptography formalizes security through cryptographic experiments (or games). These experiments specify the interaction between a challenger (the scheme) and an adversary and define what it means for the adversary to break a cryptographic scheme. Security is then defined by requiring that any probabilistic polynomial-time adversary succeeds in these experiments with at most negligible probability. This contrasts with the perfect-secrecy setting, where there is no notion of negligible functions: security properties rely entirely on the structural design of the scheme and its exact probabilistic behavior, rather than on computational limitations of the adversary.
-\subsection{Perfect Secrecy}
+choices of $k \in \mathcal{K}$ and $m \in \mathcal{M}$. The algorithm $Dec$ is  Given the general definition of an encryption scheme, one may naturally ask whether it is secure. In the computational model, the security of an encryption scheme relies on explicit assumptions about both the computational power of the adversary and the probability with which the adversary may succeed in breaking the scheme while the scheme is still considered secure. Formalizing the notion of security in the computational model therefore constitutes the first and most fundamental set of assumptions. First of all, according to Kerckhoffs' principle, as phrased by Shannon \enquote{the enemy knows the system} \cite{shannon-communication-theory-of-secrecy-systems}, the security of an encryption scheme must not rely on the secrecy of its design or algorithms. Relying on hidden algorithms is commonly referred to as security through obscurity, a practice that is widely discouraged. The only piece of information that is always assumed to remain secret is the key $k$. This convention reflects another formulation of Kerckhoffs' principle: all of the security of a cryptographic system should be concentrated in the secrecy of the key, not in the secrecy of the algorithms themselves \cite{joyofcryptography}. If a key is leaked, generating a new one is simple and straightforward given the algorithm $Gen$, while studying and producing a new cryptographic scheme may take decades. Rather than defining security in terms of informal arguments or abstract intuition, computational cryptography formalizes security through cryptographic experiments (or games). These experiments specify the interaction between a challenger (the scheme) and an adversary and define what it means for the adversary to break a cryptographic scheme. Security is then defined by requiring that any probabilistic polynomial-time adversary succeeds in these experiments with at most negligible probability. This contrasts with the perfect-secrecy setting, where there is no notion of negligible functions: security properties rely entirely on the structural design of the scheme and its exact probabilistic behaviour, rather than on computational limitations of the adversary.
+
 In the context of perfect secrecy, the encryption algorithm  $Enc$ may be probabilistic, while the decryption algorithm $Dec$ is deterministic, and no other computational limitations are imposed on the algorithms involved. The processes of key generation, message selection, encryption, and decryption are all viewed as parts of a joint probabilistic experiment. By introducing random variables such as $\mathbf{K}$, $\mathbf{M}$ and $\mathbf{C}$, representing respectively the key generated by $Gen$, the message chosen for encryption, and the resulting ciphertext, it becomes possible to reason formally $\mathrm{Pr}[\mathbf{K} = k]$ where $k \in \mathcal{K}$ is a key, or $\mathrm{Pr}[\mathbf{K} = k\,\,|\,\,\mathbf{M} = m]$ where $m \in \mathcal{M}$.
-\begin{definition}
+\begin{definition}[Perfect Secrecy]
     An encryption scheme $\Pi = (Gen, Enc, Dec)$ is said to be perfectly secret if for every message $m \in \mathcal{M}$ and every ciphertext $c \in \mathcal{C}$ such that $\mathrm{Pr}[\mathbf{C} = c] > 0$ it holds that $\mathrm{Pr}[\mathbf{M} = m\,\,|\,\, \mathbf{C} = c] = \mathrm{Pr}[\mathbf{M} = m]$
 \end{definition}
 The intuition behind this definition is that observing the ciphertext reveals absolutely no information about the plaintext. At the same time the distribution of the ciphertext is independent of the message being encrypted: for any two messages $m, m'\in \mathcal{M}$ the distribution of the ciphertext produced by encrypting $m$ is identical to the distribution of the ciphertext produced by encrypting $m'$. A scheme that definitely has such property is the Vernam's cipher also known as One-Time Pad (OTP) \footnote{One-time pad is often called Vernam’s cipher after Gilbert Vernam, a telegraph engineer who patented the scheme in 1919. However, an earlier description of one-time pad was recently discovered in a 1882 text by Frank Miller on telegraph encryption \cite{Bellovin01072011}.}. OTP is defined as a triple of algorithms $Gen, Enc, Dec$ parameterized by the security parameter $n$ (which is omitted for brevity), as reported in Figure~\ref{fig:otp}.
@@ -66,7 +68,7 @@ The intuition behind this definition is that observing the ciphertext reveals ab
     \label{fig:otp}
 \end{figure}
 
-Where the notation $k \gets \{0,1\}^n$ means to sample uniformly from the set of $n$-bit strings. This uniform choice of key is the only randomness in all of the one-time pad algorithms. The scheme is correct because
+Where the notation $k \gets \{0,1\}^n$ means to sample uniformly from the set of $n$-bitstrings. This uniform choice of key is the only randomness in all of the one-time pad algorithms. The scheme is correct because
 \[
 Dec_k(Enc_k(m)) = (m\oplus k)\oplus k = m \oplus (k\oplus k) = m\oplus {0}^n = m
 \]
@@ -99,20 +101,77 @@ A natural question is whether it would make sense to require
 \]
 This requirement is clearly too strong, since an adversary $A$ can trivially succeed with probability $1/2$ by outputting a random guess. Perfect indistinguishability instead requires that no adversary can achieve a success probability strictly greater than $1/2$.
 
-\begin{definition}
+\begin{definition}[Indistinguishable Encryptions]
 An encryption scheme $\Pi = (Gen, Enc, Dec)$ has indistinguishable encryptions if and only if for every adversary $A$,
 \[
 \mathrm{Pr}[\mathtt{PrivK}^{Eav}_{A, \Pi} = 1] = \frac{1}{2}.
 \]
 \end{definition}
 It then immediately follows that:
-\begin{theorem}
+\begin{theorem}[Perfect Secrecy Via Indistinguishability]
 An encryption scheme $\Pi$ is perfectly secret if and only if it is perfectly indistinguishable.
 \end{theorem}
-The limitations of perfect secrecy 
+The limitations of perfect secrecy stem from the fact that any perfectly secret encryption scheme must have a key space that is at least as large as the message space. If all keys have the same length and the message space consists of all strings of some fixed length, this implies that the key must be at least as long as the message, and this requirement is unavoidable. If two users wish to privately convey an $n$-bit message, they must first privately agree on an $n$-bit key. This also leads to the conclusion that the key length used in the one-time pad is optimal. Another important limitation is that the key can only be used once. A modified scheme, such as the so-called two-time pad, is inevitably insecure and vulnerable to attacks, most notably crib-dragging attacks. Nonetheless, the most fundamental limitation of perfect secrecy is captured by the following theorem.
+
 \begin{theorem}
 Let $\Pi = (Gen, Enc, Dec)$ be a perfectly secret encryption scheme over a message space $\mathcal{M}$ and a key space $\mathcal{K}$. Then $|\mathcal{K}| \geq |\mathcal{M}|$.
 \end{theorem}
+
+\section{Private Key Encryption}
+As stated in Section~\ref{sec:perfect-secrecy}, perfect secrecy requires that absolutely no information about an encrypted message is leaked, even to an eavesdropper with unlimited computational power \cite{introduction-to-modern-cryptography}. In computational cryptography, this strong notion is weakened in favor of cryptographic schemes that are still considered secure, but only against efficient adversaries with a low probability of success. The notion of efficiency in the computational model is captured by bounding the running time of adversaries by a polynomial in a security parameter. Recall that an algorithm (or adversary) $A$ runs in polynomial time if there exists a polynomial $p$ such that, for every input $x \in {0,1}^n$, the computation of $A(x)$ terminates within at most $p(n)$ steps. The requirement of a low probability of success is formalized through the notion of negligible functions.
+
+The computational model, which is the \emph{de facto} standard for analysing the security properties of cryptographic schemes using rigorous mathematical tools, relies on concepts from computational complexity theory. In particular, it requires that the size of inputs be well defined. For this reason, it is customary to assume, without loss of generality, that keys, messages, and ciphertexts are represented as bitstrings. Another essential requirement is that all algorithms be probabilistic. This can be viewed as each algorithm being provided, in addition to its input, with access to a uniformly distributed random tape of sufficient length, whose bits it may use as needed throughout its execution. The design choices underlying the computational model, and in particular the asymptotic approach are neither arbitrary nor accidental. One advantage of using (probabilistic) polynomial time as the measure of efficiency is that one doesn't have to precisely specify a concrete model of computation. Indeed, the extended Church-Turing thesis asserts that all reasonable models of computation are polynomially equivalent. If the analysis shows polynomial-time execution, then any reasonable implementation will also run in polynomial time. Another advantage of restricting attention to (probabilistic) polynomial-time algorithms is that they have desirable closure properties. In particular, an algorithm that makes polynomially many calls to polynomial-time subroutines, and performs only polynomially bounded additional computation, will itself run in polynomial time (see proof of Lemma \ref{lemma:closure-ngl}).
+
+\section{Message Authentication Codes}
+Message Authentication Codes (MACs) address the problem of message authentication over insecure channels. In this setting, messages are not required to be secret, but it must be possible to authenticate them, namely, each party should be able to verify that a message it receives was indeed sent by the party claiming to be the sender. In other words, MACs provide integrity and authenticity rather than confidentiality. 
+
+Schemes based solely on pseudorandom generators are insufficient to solve this problem. For instance, consider an encryption scheme $\Pi^G$ based on a pseudorandom generator $G$, where encryption is defined as $Enc_k(m) = G_k \oplus m$ and decryption as $Dec_k(m) = G_k \oplus c$. An adversary who observes a ciphertext can easily construct a valid ciphertext for a related message, hence impersonating the legitimate sender. Even more directly, flipping any bit in the ciphertext $c = G_k \oplus m$ results in the same bit being flipped in the plaintext after decryption. Thus, given a ciphertext $c$ that encrypts a message $m$, it is possible to generate a modified ciphertext $c'$ such that $m' = Dec_k(c')$ is equal to $m$ except for one or more flipped bits. This illustrates that pseudorandomness alone does not guarantee message integrity. Authentication requires dedicated mechanisms beyond encryption.
+
+\newcommand{\vrfy}[0]{V\!r\!f\!y}
+
+Two users who wish to communicate in an authenticated manner begin by generating and securely sharing a secret key $k$ prior to communication. When one party wants to send a message $m$ to the other, she computes a MAC tag (or simply a tag) $t$ based on the message and the shared key, and sends the pair $(m, t)$ to the receiver. The tag is computed using a tag-generation algorithm, denoted by $Mac$. That is, the sender computes the tag $t$ as $Mac_k(m)$ and transmits $(m, t)$. Upon receiving $(m, t)$, the receiver checks whether $t$ is a valid tag for the message $m$ with respect to the key $k$. Verification is performed by a deterministic algorithm$\vrfy$, which takes as input the key, the message, and the tag, and outputs a bit indicating acceptance or rejection of the tag on the message.
+
+Formally, a MAC is a triple $\Pi = (Gen, Mac, \vrfy)$ of PPT algorithms such that:
+\begin{itemize}
+\item $Gen$ takes as input a unary representation of the security parameter $1^n$ and outputs a secret key $k$, where typically $|k| \geq n$;
+\item $Mac$ takes as input a key $k$ and a message $m$, and outputs a tag $t$;
+\item $\vrfy$ takes as input a key $k$, a message $m$, and a tag $t$, and outputs a bit $b$, with $b = 1$ meaning valid and $b = 0$ meaning invalid.
+\end{itemize}
+
+A MAC is said to be correct if for all keys $k$ generated by $Gen$ and all messages $m$, it holds that
+
+\[
+\vrfy_k(m,Mac_k(m))=1
+\]
+
+Correctness ensures that honestly generated tags are always accepted by the verification algorithm.
+
+\newcommand{\macforge}[0]{\mathtt{MacForge}_{A,\Pi}(n)}
+
+The security goal for message authentication codes (MACs) can be stated informally as follows: no efficient adversary should be able to forge a valid tag for any message that was not previously sent and authenticated by one of the legitimate communicating parties. Equivalently, even after interacting with the system, the adversary should not be able to produce a new message–tag pair that will be accepted as valid. More precisely, the adversary is given oracle access to $Mac_k(\cdot)$ and may query the oracle to obtain valid pairs $(m,t)$, where $m$ is a message and $t$ is its corresponding tag. Any pair obtained directly from the oracle is, by definition, not considered a forgery. In practice, this models an adversary who passively observes the communication between honest parties and is able to see all transmitted messages together with their associated MAC tags. The security requirement is that, despite this access, any PPT adversary cannot generate a valid tag for any new message that was not previously authenticated. This can be formalized through an experiment called $\macforge$ which is described in Figure~\ref{fig:macforge}.
+
+\begin{figure}
+    \centering
+    \begin{align*}
+    &\macforge: \\
+    &\quad k \gets Gen(1^n) \\
+    &\quad (m,t) \gets A^{Mac_k(\cdot)}(1^n) \\
+    &\quad \mathbb{Q} \gets \{m \ | \ A \ \text{queries} \ Mac_k(m) \} \\
+    &\quad \mathtt{return}\,\,(m \notin \mathbb{Q} \land \vrfy_k(m,t) = 1)
+    \end{align*}
+    \caption{Pseudocode for $\macforge$ Experiment}
+    \label{fig:macforge}
+\end{figure}
+
+Given the experiment $\macforge$ a MAC is said to be secure
+
+\begin{definition}[MAC security]
+A MAC $\Pi$ is secure if and only if for every PPT adversary $A$ there exists a negligible function $\epsilon$ such that 
+\[
+\mathrm{Pr}[\macforge = 1] \leq \epsilon(n)
+\]
+\end{definition}
+This definition of MAC security is simultaneously strong and weak. On one hand, it is strong because it considers the scheme broken even if the adversary forges a valid tag for a message that is meaningless. Any successful forgery is considered a violation of security. On the other hand, the definition is weak in that it does not protect against replay attacks. An adversary who records a previously transmitted and authenticated pair $(m,t)$ can resend the same pair at a later time, and it will still be accepted as valid by the receiver. Since replayed messages are not considered new forgeries under the standard definition, preventing such attacks requires additional mechanisms (such as nonces, timestamps, or sequence numbers) that go beyond basic MAC security.
 
 % \begin{figure}
 %     \centering
