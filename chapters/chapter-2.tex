@@ -22,7 +22,7 @@ $n=60$ and the adversary uses a desktop computer running at 4GHz (that is, $4\ti
 
 \section{Asymptotic Approach}
 The asymptotic approach is rooted in complexity theory. All parties involved in a cryptographic protocol are modeled as algorithms that take as input a security parameter, usually denoted by 
-$n$. The notion of efficiency is formalized using probabilistic polynomial-time (PPT) algorithms. An efficient adversary is defined as a probabilistic algorithm whose running time is bounded by a polynomial in the security parameter; that is, there exists a polynomial $p$ such that the adversary runs in time at most $p(n)$. The notion of small \textit{probability of success} is given by the introduction of negligible functions.
+$n$. The notion of efficiency is formalized using PPT algorithms. An efficient adversary is defined as a probabilistic algorithm whose running time is bounded by a polynomial in the security parameter; that is, there exists a polynomial $p$ such that the adversary runs in time at most $p(n)$. The notion of small \textit{probability of success} is given by the introduction of negligible functions.
 
 \begin{definition}[Negligible Functions]
 A function $f: \mathbb{N} \to \mathbb{R}$ is said to be negligible iff for every polynomial $p: \mathbb{N} \to \mathbb{N}$ there is a $N$ such that for every $n > N$ it holds that $f(n) < 1/p(n)$. 
@@ -33,11 +33,11 @@ A function $f: \mathbb{N} \to \mathbb{R}$ is said to be negligible iff for every
 \end{lemma}
 \begin{proof}
 Let $f(n)$ be a negligible function and let $q(n)$ be any polynomial that is positive for sufficiently large $n$. We must show that the function $h(n) = q(n) f(n)$ is negligible. Let $p(n)$ be an arbitrary polynomial. Define a new polynomial $p'(n) = p(n) q(n)$. Since the product of two polynomials is itself a polynomial, $p'(n)$ is a polynomial. Because $f(n)$ is negligible, there exists an integer $N$ such that
-\[ f(n) < \frac{1}{p'(n)} \quad \forall n > N. \]
+\[ f(n) < \frac{1}{p'(n)} \quad \forall n > N \]
 Substituting $p'(n) = p(n) q(n)$, we obtain
-\[ f(n) < \frac{1}{p(n) q(n)} \quad \forall n > N. \]
+\[ f(n) < \frac{1}{p(n) q(n)} \quad \forall n > N \]
 Multiplying both sides by $q(n)$ yields
-\[ q(n) f(n) < \frac{1}{p(n)} \quad \forall n > N. \]
+\[ q(n) f(n) < \frac{1}{p(n)} \quad \forall n > N \]
 Because $p(n)$ was arbitrary, it follows that $h(n)$ is negligible. Closure under addition and multiplication of negligible functions follows by similar arguments.
 \end{proof}
 
@@ -56,11 +56,11 @@ In the context of perfect secrecy, the encryption algorithm  $Enc$ may be probab
 \begin{definition}[Perfect Secrecy]
     An encryption scheme $\Pi = (Gen, Enc, Dec)$ is said to be perfectly secret if for every message $m \in \mathcal{M}$ and every ciphertext $c \in \mathcal{C}$ such that $\mathrm{Pr}[\mathbf{C} = c] > 0$ it holds that $\mathrm{Pr}[\mathbf{M} = m\,\,|\,\, \mathbf{C} = c] = \mathrm{Pr}[\mathbf{M} = m]$
 \end{definition}
-The intuition behind this definition is that observing the ciphertext reveals absolutely no information about the plaintext. At the same time the distribution of the ciphertext is independent of the message being encrypted: for any two messages $m, m'\in \mathcal{M}$ the distribution of the ciphertext produced by encrypting $m$ is identical to the distribution of the ciphertext produced by encrypting $m'$. A scheme that definitely has such property is the Vernam's cipher also known as One-Time Pad (OTP) \footnote{One-time pad is often called Vernam’s cipher after Gilbert Vernam, a telegraph engineer who patented the scheme in 1919. However, an earlier description of one-time pad was recently discovered in a 1882 text by Frank Miller on telegraph encryption \cite{Bellovin01072011}.}. OTP is defined as a triple of algorithms $Gen, Enc, Dec$ parameterized by the security parameter $n$ (which is omitted for brevity), as reported in Figure~\ref{fig:otp}.
+The intuition behind this definition is that observing the ciphertext reveals absolutely no information about the plaintext. At the same time the distribution of the ciphertext is independent of the message being encrypted: for any two messages $m, m'\in \mathcal{M}$ the distribution of the ciphertext produced by encrypting $m$ is identical to the distribution of the ciphertext produced by encrypting $m'$. A scheme that definitely has such property is the Vernam's cipher also known as One-Time Pad (OTP) \footnote{One-time pad is often called Vernam’s cipher after Gilbert Vernam, a telegraph engineer who patented the scheme in 1919. However, an earlier description of one-time pad was recently discovered in a 1882 text by Frank Miller on telegraph encryption \cite{Bellovin01072011}.}. OTP is defined as a triple of algorithms $Gen, Enc, Dec$ reported in Figure~\ref{fig:otp}.
 \begin{figure}[htpb]
     \centering
     \begin{align*}
-    &\mathcal{K} = \mathcal{M} = \mathcal{C} = \{0,1\}^n &Gen = k \gets \{0,1\}^n;\,\,\mathtt{return}\,\,k \\
+    &\mathcal{K} = \mathcal{M} = \mathcal{C} = \{0,1\}^n &Gen(n) = k \gets \{0,1\}^n;\,\,\mathtt{return}\,\,k \\
     &Enc_k(m) = \mathtt{return}\,\, m \oplus k
     &Dec_k(c) = \mathtt{return}\,\, c \oplus k
     \end{align*}
@@ -68,59 +68,160 @@ The intuition behind this definition is that observing the ciphertext reveals ab
     \label{fig:otp}
 \end{figure}
 
-Where the notation $k \gets \{0,1\}^n$ means to sample uniformly from the set of $n$-bitstrings. This uniform choice of key is the only randomness in all of the one-time pad algorithms. The scheme is correct because
-\[
-Dec_k(Enc_k(m)) = (m\oplus k)\oplus k = m \oplus (k\oplus k) = m\oplus {0}^n = m
-\]
+Where the notation $k \gets \{0,1\}^n$ means to sample uniformly from the set of $n$-bitstrings. This uniform choice of key is the only randomness in all of the one-time pad algorithms. The scheme is correct because $Dec_k(Enc_k(m)) = (m\oplus k)\oplus k = m \oplus (k\oplus k) = m\oplus {0}^n = m$
 OTP is perfectly secure in the information-theoretic sense, but it suffers from major limitations: the key length must be greater than or equal to the length of the message, and each key can be used only once.
 
-Encryption schemes can be studied in terms of perfect secrecy, but also in terms of indistinguishability, which is an equivalent and widely used definition of secrecy for encryption schemes. To discuss the indistinguishability property of an encryption scheme, we introduce the experiment $\mathtt{PrivK}^{Eav}_{A, \Pi}$.
+\newcommand{\privkeav}[0]{\mathtt{PrivK}^{eav}_{A,\Pi}}
+
+Encryption schemes can be studied in terms of perfect secrecy, but also in terms of indistinguishability, which is an equivalent and widely used definition of secrecy for encryption schemes. To discuss the indistinguishability property of an encryption scheme, we introduce the experiment $\privkeav$.
 
 \begin{figure}[htpb]
     \centering
     \begin{align*}
-    &\mathtt{PrivK}^{Eav}_{A,\Pi}(n): \\
+    &\privkeav(n): \\
     &\quad m_0, m_1 \gets A \\
-    &\quad k \gets Gen \\
+    &\quad k \gets Gen(1^n) \\
     &\quad b \gets \{0,1\} \\
     &\quad c \gets Enc_k(m_b) \\
     &\quad b^* \gets A(c) \\
     &\quad \mathtt{return}\,\, \neg(b \oplus b^*)
     \end{align*}
-    \caption{Pseudocode for the $\mathtt{PrivK}^{Eav}_{A, \Pi}$ experiment}
-    \label{fig:privk-eav}
+    \caption{Pseudocode for the $\privkeav$ experiment}
+    \label{fig:privk-eav-perfect-secrecy}
 \end{figure}
 
 One may ask what the maximum probability is with which an adversary can cause the experiment to output $1$, namely
 \[
-\mathrm{Pr}[\mathtt{PrivK}^{Eav}_{A, \Pi} = 1].
+\mathrm{Pr}[\mathtt{PrivK}^{Eav}_{A, \Pi} = 1]
 \]
 A natural question is whether it would make sense to require
 \[
-\mathrm{Pr}[\mathtt{PrivK}^{Eav}_{A, \Pi} = 1] = 0.
+\mathrm{Pr}[\mathtt{PrivK}^{Eav}_{A, \Pi} = 1] = 0
 \]
 This requirement is clearly too strong, since an adversary $A$ can trivially succeed with probability $1/2$ by outputting a random guess. Perfect indistinguishability instead requires that no adversary can achieve a success probability strictly greater than $1/2$.
 
 \begin{definition}[Indistinguishable Encryptions]
 An encryption scheme $\Pi = (Gen, Enc, Dec)$ has indistinguishable encryptions if and only if for every adversary $A$,
-\[
-\mathrm{Pr}[\mathtt{PrivK}^{Eav}_{A, \Pi} = 1] = \frac{1}{2}.
-\]
+\begin{align}
+\mathrm{Pr}[\mathtt{PrivK}^{Eav}_{A, \Pi} = 1] = \frac{1}{2}
+\end{align}
 \end{definition}
 It then immediately follows that:
 \begin{theorem}[Perfect Secrecy Via Indistinguishability]
 An encryption scheme $\Pi$ is perfectly secret if and only if it is perfectly indistinguishable.
 \end{theorem}
 The limitations of perfect secrecy stem from the fact that any perfectly secret encryption scheme must have a key space that is at least as large as the message space. If all keys have the same length and the message space consists of all strings of some fixed length, this implies that the key must be at least as long as the message, and this requirement is unavoidable. If two users wish to privately convey an $n$-bit message, they must first privately agree on an $n$-bit key. This also leads to the conclusion that the key length used in the one-time pad is optimal. Another important limitation is that the key can only be used once. A modified scheme, such as the so-called two-time pad, is inevitably insecure and vulnerable to attacks, most notably crib-dragging attacks. Nonetheless, the most fundamental limitation of perfect secrecy is captured by the following theorem.
-
 \begin{theorem}
 Let $\Pi = (Gen, Enc, Dec)$ be a perfectly secret encryption scheme over a message space $\mathcal{M}$ and a key space $\mathcal{K}$. Then $|\mathcal{K}| \geq |\mathcal{M}|$.
 \end{theorem}
+This makes perfect secrecy almost impossible in a real world setting. Just imagine the keys required to encrypt videos or very large files.
 
 \section{Private Key Encryption}
 As stated in Section~\ref{sec:perfect-secrecy}, perfect secrecy requires that absolutely no information about an encrypted message is leaked, even to an eavesdropper with unlimited computational power \cite{introduction-to-modern-cryptography}. In computational cryptography, this strong notion is weakened in favor of cryptographic schemes that are still considered secure, but only against efficient adversaries with a low probability of success. The notion of efficiency in the computational model is captured by bounding the running time of adversaries by a polynomial in a security parameter. Recall that an algorithm (or adversary) $A$ runs in polynomial time if there exists a polynomial $p$ such that, for every input $x \in {0,1}^n$, the computation of $A(x)$ terminates within at most $p(n)$ steps. The requirement of a low probability of success is formalized through the notion of negligible functions.
 
 The computational model, which is the \emph{de facto} standard for analysing the security properties of cryptographic schemes using rigorous mathematical tools, relies on concepts from computational complexity theory. In particular, it requires that the size of inputs be well defined. For this reason, it is customary to assume, without loss of generality, that keys, messages, and ciphertexts are represented as bitstrings. Another essential requirement is that all algorithms be probabilistic. This can be viewed as each algorithm being provided, in addition to its input, with access to a uniformly distributed random tape of sufficient length, whose bits it may use as needed throughout its execution. The design choices underlying the computational model, and in particular the asymptotic approach are neither arbitrary nor accidental. One advantage of using (probabilistic) polynomial time as the measure of efficiency is that one doesn't have to precisely specify a concrete model of computation. Indeed, the extended Church-Turing thesis asserts that all reasonable models of computation are polynomially equivalent. If the analysis shows polynomial-time execution, then any reasonable implementation will also run in polynomial time. Another advantage of restricting attention to (probabilistic) polynomial-time algorithms is that they have desirable closure properties. In particular, an algorithm that makes polynomially many calls to polynomial-time subroutines, and performs only polynomially bounded additional computation, will itself run in polynomial time (see proof of Lemma \ref{lemma:closure-ngl}).
+
+In the setting of private-key encryption, two parties share a secret key and use it to communicate confidentially. Formally, a private-key encryption scheme is a tuple of probabilistic polynomial-time algorithms $\Pi = (Gen, Enc, Dec)$, defined over a message space $\mathcal{M}$ and a key space $\mathcal{K}$, such that:
+\begin{itemize}
+\item The key-generation algorithm $Gen$ takes as input a string of the form $1^n$, interpreted as the security parameter, and outputs a key $k$ such that $|k| \geq n$.
+\item The encryption algorithm $Enc$ may be probabilistic; that is, it may produce different ciphertexts when invoked multiple times on the same message--key pair $(m,k)$.
+\item The decryption algorithm $Dec$ is deterministic, since correctness would otherwise not be guaranteed.
+\end{itemize}
+
+The scheme is assumed to be correct, meaning that for all keys $k \in \mathcal{K}$ generated by $Gen$ and all messages $m \in \mathcal{M}$ it is true that $Dec_k(Enc_k(m)) = m$. Often, the encryption algorithm $Enc_k$ is defined only for messages whose length is equal to some function $\ell(n)$ of the security parameter $n$. In this case, the encryption scheme is said to be a fixed-length encryption scheme with length parameter $\ell$.
+
+In order to define security for such an encryption scheme let's introduce a modified notion of the experiment $\privkeav$ reported in Figure~\ref{fig:privk-eav}.
+
+\begin{figure}[htpb]
+    \centering
+    \begin{align*}
+    &\privkeav(n): \\
+    &\quad (m_0, m_1) \gets A \\
+    &\quad \mathtt{if}\,\,|m_0| \neq |m_1| \\
+    &\quad\quad \mathtt{return}\,\,0 \\
+    &\quad k \gets Gen(1^n) \\
+    &\quad b \gets \{0,1\} \\
+    &\quad c \gets Enc_k(m_b) \\
+    &\quad b^* \gets A(c) \\
+    &\quad \mathtt{return}\,\, \neg(b \oplus b^*)
+    \end{align*}
+    \caption{Pseudocode for the modified $\privkeav$ experiment}
+    \label{fig:privk-eav}
+\end{figure}
+
+In the experiment $\privkeav$, the adversary $A$ is given the security parameter as input and outputs a pair of messages $(m_0, m_1)$. If the two messages have different lengths, the experiment immediately returns $0$. Otherwise, a key $k$ is generated by running $Gen(1^n)$, and a uniformly random bit $b \in \{0,1\}$ is sampled. The adversary is then given the ciphertext $c = Enc_k(m_b)$ and it has to output a single bit $b^*$. The experiment returns $1$ if $b^* = b$, meaning that the adversary has successfully guessed which message was encrypted.
+
+The definition of security in the form of a indistinguishability, for a scheme $\Pi$ with respect of $\privkeav$ is preented in Definition~\ref{def:sec-eav}.
+
+\begin{definition}[Security Against Passive Attacks]\label{def:sec-eav}
+An encryption scheme $\Pi$ is said to be secure against passive attacks or secure with respect to $\privkeav$ if and only if for every PPT adversary $A$ there exists a negligible function $\epsilon$ such that
+\begin{align}
+\mathrm{Pr}[\privkeav]= \frac{1}{2} + \epsilon(n)
+\end{align}
+\end{definition}
+Once again, adversaries are restricted to probabilistic polynomial-time algorithms, and their probability of success is not required to be zero. Such a requirement would be unreasonable, since an adversary can always guess randomly and succeed with probability $1/2$. Instead, security requires that any adversary’s advantage over random guessing be negligible. The class of attacks considered with respect to the experiment $\privkeav$ consists of \emph{passive attacks}, namely attacks in which the adversary only observes information without actively interfering with the protocol execution. In particular, the adversary may have access either to a collection of ciphertexts $c_1, \dots, c_n$, or to a list of message–ciphertext pairs $(m_1, c_1), \dots, (m_n, c_n)$, where each $c_i$ is the ciphertext corresponding to $m_i$.
+
+To construct an encryption scheme satisfying this notion of security, one must address the requirement that $|\mathcal{K}| < |\mathcal{M}|$. As seen in the case of perfect secrecy, this condition renders schemes impractical in real-world settings. There is therefore a need for algorithms that use relatively short keys while still inducing a cryptographic scheme that is secure according to Definition~\ref{def:sec-eav}. A fundamental tool for achieving this goal is the pseudorandom generator.
+
+A pseudorandom generator is an efficient, deterministic algorithm that transforms a short, uniformly random string, called a \emph{seed}, into a longer string that appears uniform to any efficient adversary. In other words, a pseudorandom generator uses a small amount of true randomness to generate a large amount of pseudorandomness. Let $\ell : \mathbb{N} \to \mathbb{N}$ be a polynomial, called the \emph{expansion factor}, and let $G$ be a deterministic algorithm that, for every input $s \in \{0,1\}^*$, outputs a string $G(s)\in\{0,1\}^{\ell(|s|)}$. Then $G$ is a \emph{pseudorandom generator (PRG)} if and only if the following conditions hold:
+\begin{itemize}
+\item For every $n \in \mathbb{N}$, $\ell(n) > n$.
+\item $G$ runs in probabilistic polynomial time.
+\item For every PPT distinguisher $D$, there exists a negligible function $\epsilon$ such that \begin{align} |\mathrm{Pr}[D(G(s))=1]| - \mathrm{Pr}[D(r)=1] \leq \epsilon(n) \end{align}\label{eq:prng}
+\end{itemize}
+
+Here, the first probability is taken over the uniform choice of $s \in \{0,1\}^n$ and the internal randomness of $D$, while the second probability is taken over the uniform choice of $r \in \{0,1\}^{\ell(n)}$ and the internal randomness of $D$.
+
+As stated above, a pseudorandom generator is not random in a strict information-theoretic sense. If the expansion factor $\ell$ is fixed, for example $\ell(n) = 2n$, then the set of all possible bitstrings of length $2n$ has size $2^{2n}$, the generator $G$, being deterministic, can produce at most $2^n$ distinct outputs one for each possible seed. Thus, the distribution induced by $G(s)$ has support of size at most $2^n$, which is clearly smaller than the full space $2^{2n}$. Consequently, there always exists a distinguisher $D$ that can separate the output of $G$ from the uniform distribution with high probability. However, such a distinguisher necessarily has exponential complexity. Since the definition of pseudorandomness only considers efficient (polynomial-time) distinguishers, this does not contradict Equation~\ref{eq:prng} and for all PPT distinguishers, the distinguishing advantage remains negligible.
+
+Given the notion of a pseudorandom generator, one can construct a PRG-induced encryption scheme that is secure against passive (eavesdropping) attacks. Formally, this scheme is a triple of algorithms $\Pi^G = (Gen, Enc, Dec)$ defined as follows:
+\begin{itemize}
+    \item The algorithm $Gen$ on input $1^n$ outputs each string of length $n$ with same probability $1/2^n$.
+    \item The algorithm $Enc$ is defined as $Enc_k(m) = m \oplus G_k$
+    \item The algorithm $Dec$ is defined as $Dec_k(c) = c \oplus G_k$
+\end{itemize}
+
+The scheme $\Pi^G$ is correct because $G$ is deterministic. Indeed, for every key $k$ and message $m$ it is true that $Dec_k(Enc_k(m)) = Dec_k(m \oplus G_k) = ((G_k \oplus m) \oplus G_k)  = m$. The scheme $\Pi^G$ is defined for messages of fixed length $\ell(n)$, where $\ell$ is the expansion factor of the pseudorandom generator $G$.
+
+\newcommand{\privkmult}[0]{\mathtt{PrivK}^{mult}_{A,\Pi}}
+
+In the context of the experiment $\privkeav$, the considered attacks are \emph{passive}. This means that the adversary cannot actively interfere with the execution of the protocol, but can only observe its surroundings. In particular, the communicating parties transmit a single ciphertext, which may be observed by an eavesdropper. It would be desirable, however, for the communicating parties to be able to exchange multiple ciphertexts generated using the same secret key even in the presence of an eavesdropper who can observe all of them. To model such scenarios an encryption scheme is required to remains secure under the encryption of multiple messages, and has to behave accordingly with respect of a new security experiment, shown in Figure~\ref{fig:privk-mult}.
+
+\begin{figure}[htpb]
+    \centering
+    \begin{align*}
+    &\privkmult(n): \\
+    &\quad (\vec{M_0}, \vec{M_1}) \gets A \\
+    &\quad \mathtt{if}\,\,\exists i. |m_{0,i}| \neq |m_{1,i}| \\
+    &\quad\quad \mathtt{return}\,\,0 \\
+    &\quad k \gets Gen(1^n) \\
+    &\quad b \gets \{0,1\} \\
+    &\quad \vec{C} \gets Enc_k(\vec{M}_b) \\
+    &\quad b^* \gets A(c) \\
+    &\quad \mathtt{return}\,\, \neg(b \oplus b^*)
+    \end{align*}
+    \caption{Pseudocode for the $\privkmult$ experiment}
+    \label{fig:privk-mult}
+\end{figure}
+In the experiment $\privkmult$, the adversary is allowed to output two vectors of messages of length $t$, namely $\vec{M_0} = (m_{0,0}, \dots , m_{1,t-1}), \vec{M_1} = (m_0^1, \dots , m_{0,t-1})$. A random bit $b$ is chosen, and the challenger encrypts the entire vector $\vec{M}_b$ under the same key $k$, producing a ciphertext vector $\vec{C} = (c_0, \dots, c_{t-1})$ which is then given to the adversary.
+\begin{definition}[Security Against Multiple Encryptions]
+A scheme $\Pi$ is said to be secure against multiple encryptions if for every PPT adversary $A$ there exists a negligible function $\epsilon$ such that
+\begin{align}
+\Pr[\privkmult = 1] \leq \tfrac{1}{2} + \epsilon(n).
+\end{align}
+\end{definition}
+
+It immediately follows that:
+
+\begin{lemma}
+The scheme $\Pi^G$ is not secure with respect to $\privkmult$, even if $G$ is a pseudorandom generator.
+\end{lemma}
+
+What at first appears to be a strong limitation is in fact fundamental.
+
+\begin{theorem}
+If the encryption algorithm $Enc$ is stateless and deterministic, then the scheme $\Pi = (Gen, Enc, Dec)$ cannot be secure with respect to $\privkmult$.
+\end{theorem}
 
 \section{Message Authentication Codes}
 Message Authentication Codes (MACs) address the problem of message authentication over insecure channels. In this setting, messages are not required to be secret, but it must be possible to authenticate them, namely, each party should be able to verify that a message it receives was indeed sent by the party claiming to be the sender. In other words, MACs provide integrity and authenticity rather than confidentiality. 
@@ -159,19 +260,30 @@ The security goal for message authentication codes (MACs) can be stated informal
     &\quad \mathbb{Q} \gets \{m \ | \ A \ \text{queries} \ Mac_k(m) \} \\
     &\quad \mathtt{return}\,\,(m \notin \mathbb{Q} \land \vrfy_k(m,t) = 1)
     \end{align*}
-    \caption{Pseudocode for $\macforge$ Experiment}
+    \caption{Pseudocode for $\macforge$ experiment}
     \label{fig:macforge}
 \end{figure}
 
-Given the experiment $\macforge$ a MAC is said to be secure
+Given the experiment $\macforge$ the notion of security for a scheme MAC $\Pi$ is captured by Definition~\ref{def:mac-security}
 
-\begin{definition}[MAC security]
+\begin{definition}[MAC security]\label{def:mac-security}
 A MAC $\Pi$ is secure if and only if for every PPT adversary $A$ there exists a negligible function $\epsilon$ such that 
-\[
+\begin{align}
 \mathrm{Pr}[\macforge = 1] \leq \epsilon(n)
-\]
+\end{align}
 \end{definition}
-This definition of MAC security is simultaneously strong and weak. On one hand, it is strong because it considers the scheme broken even if the adversary forges a valid tag for a message that is meaningless. Any successful forgery is considered a violation of security. On the other hand, the definition is weak in that it does not protect against replay attacks. An adversary who records a previously transmitted and authenticated pair $(m,t)$ can resend the same pair at a later time, and it will still be accepted as valid by the receiver. Since replayed messages are not considered new forgeries under the standard definition, preventing such attacks requires additional mechanisms (such as nonces, timestamps, or sequence numbers) that go beyond basic MAC security.
+This definition of MAC security is simultaneously strong and weak. On the one hand, it is strong because it considers the scheme broken even if the adversary forges a valid tag for a message that is meaningless. Any successful forgery, regardless of the message content, translates to a violation of security. On the other hand, the definition is weak in that it does not protect against replay attacks. An adversary who records a previously transmitted and authenticated pair $(m,t)$ can resend the same pair at a later time, and it will still be accepted as valid by the receiver. Since replayed messages are not considered new forgeries under the standard definition, preventing such attacks requires additional mechanisms, such as nonces, timestamps, or sequence numbers, which go beyond basic MAC security.
+
+A well-known result in cryptography states that pseudorandom functions can be used to construct secure message authentication codes. Given a pseudorandom function $F$, the construction $\mathrm{MAC}^F$ yields a secure MAC. Formally, let $\Pi^F = (Gen, Mac, Vrfy)$ be the triple of algorithms defined as follows:
+\begin{itemize}
+\item The key-generation algorithm $Gen$ takes as input the security parameter $1^n$ and outputs a uniformly random bitstring $k \in {0,1}^n$, each with probability $2^{-n}$;
+\item The tag generation algorithm is defined as $Mac_k(m) = F_k(m)$;
+\item The verification algorithm is defined as $\vrfy_k(m,t) = (F_k(m) \stackrel{?}{=} t)$.
+\end{itemize}
+
+\begin{theorem}[Security of $\mathrm{MAC}^F$]
+If $F$ is a pseudorandom function, then the MAC scheme $\Pi^F$ is a secure fixed-length message authentication code for messages of length $n$.
+\end{theorem}
 
 % \begin{figure}
 %     \centering
