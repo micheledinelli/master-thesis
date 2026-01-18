@@ -86,7 +86,7 @@ Encryption schemes can be studied in terms of perfect secrecy, but also in terms
     &\quad b^* \gets A(c) \\
     &\quad \mathtt{return}\,\, \neg(b \oplus b^*)
     \end{align*}
-    \caption{Pseudocode for the $\privkeav$ experiment}
+    \caption{Pseudocode for the $\mathtt{PrivK}^{eav}$ experiment}
     \label{fig:privk-eav-perfect-secrecy}
 \end{figure}
 
@@ -145,7 +145,7 @@ In order to define security for such an encryption scheme let's introduce a modi
     &\quad b^* \gets A(c) \\
     &\quad \mathtt{return}\,\, \neg(b \oplus b^*)
     \end{align*}
-    \caption{Pseudocode for the modified $\privkeav$ experiment}
+    \caption{Pseudocode for the modified $\mathtt{PrivK}^{eav}$ experiment}
     \label{fig:privk-eav}
 \end{figure}
 
@@ -200,10 +200,10 @@ In the context of the experiment $\privkeav$, the considered attacks are \emph{p
     &\quad b^* \gets A(c) \\
     &\quad \mathtt{return}\,\, \neg(b \oplus b^*)
     \end{align*}
-    \caption{Pseudocode for the $\privkmult$ experiment}
+    \caption{Pseudocode for the $\mathtt{PrivK}^{mult}$ experiment}
     \label{fig:privk-mult}
 \end{figure}
-In the experiment $\privkmult$, the adversary is allowed to output two vectors of messages of length $t$, namely $\vec{M_0} = (m_{0,0}, \dots , m_{1,t-1}), \vec{M_1} = (m_0^1, \dots , m_{0,t-1})$. A random bit $b$ is chosen, and the challenger encrypts the entire vector $\vec{M}_b$ under the same key $k$, producing a ciphertext vector $\vec{C} = (c_0, \dots, c_{t-1})$ which is then given to the adversary.
+In the experiment $\privkmult$, the adversary is allowed to output two vectors of messages of length $t$, namely $\vec{M_0} = (m_{0,0}, \dots , m_{0,t-1})$ and $\vec{M_1} = (m_{1,0}, \dots , m_{1,t-1})$. A random bit $b$ is chosen, and the challenger encrypts the entire vector $\vec{M}_b$ under the same key $k$, producing a ciphertext vector $\vec{C} = (c_0, \dots, c_{t-1})$ which is then given to the adversary.
 \begin{definition}[Security Against Multiple Encryptions]
 A scheme $\Pi$ is said to be secure against multiple encryptions if for every PPT adversary $A$ there exists a negligible function $\epsilon$ such that
 \begin{align}
@@ -221,6 +221,74 @@ What at first appears to be a strong limitation is in fact fundamental.
 
 \begin{theorem}
 If the encryption algorithm $Enc$ is stateless and deterministic, then the scheme $\Pi = (Gen, Enc, Dec)$ cannot be secure with respect to $\privkmult$.
+\end{theorem}
+
+\newcommand{\privkcpa}[0]{\mathtt{PrivK}^{cpa}_{A,\Pi}}
+
+Another important class of attacks consists of \emph{active} attacks, in which adversaries are allowed to play an active role. In this setting, the adversary may obtain encryptions of messages of its choice by interacting with an encryption oracle $Enc_k(\cdot)$ (chosen-plaintext attacks), or may even have access to a decryption oracle $Dec_k(\cdot)$ (chosen-ciphertext attacks). In both cases, the secret key $k$ is unknown to the adversary. Chosen-plaintext attacks (CPA) are particularly useful for introducing a stronger and more realistic security notion. In this scenario, the adversary $A$ is allowed to interact with the encryption oracle and query it on messages of its choice, for a polynomial number of queries in the security parameter $n$. This interaction is formalized by the experiment shown in Figure~\ref{fig:privk-cpa}.
+\begin{figure}[htpb]
+    \centering
+    \begin{align*}
+    &\privkcpa(n): \\
+    &\quad k \gets \{0,1\}^n \\
+    &\quad (m_0, m_1) \gets A^{Enc_k(\cdot)}(1^n) \\
+    &\quad b \gets \{0,1\} \\
+    &\quad c \gets Enc_k(m_b) \\
+    &\quad g \gets A(c, Enc_k(\cdot)) \\
+    &\quad \mathtt{return}\,\,(b=g)
+    \end{align*}
+    \caption{Pseudocode for $\mathtt{PrivK}^{cpa}$ experiment}
+    \label{fig:privk-cpa}
+\end{figure}
+In the experiment $\privkcpa$, the adversary first obtains access to the encryption oracle and outputs two messages $m_0$ and $m_1$ of equal length. A random bit $b$ is then sampled, and the challenge ciphertext $c = Enc_k(m_b)$ is returned to the adversary. The adversary continues to have access to the encryption oracle and must output a guess $g$ for the value of $b$. When the algorithm $Enc$ is randomized, the
+oracle uses fresh randomness each time it answers a query. 
+
+Security against chosen-plaintext attacks requires that no efficient adversary can guess the value of $b$ with probability significantly greater than $1/2$. This is captured by the following definition.
+\begin{definition}[CPA Security]
+An encryption scheme $\Pi$ is said to be secure against chosen-plaintext attacks if and only if for every PPT adversary $A$ there exists a negligible function $\epsilon$ such that
+\begin{align}
+\Pr[\privkcpa(n) = 1] \leq \frac{1}{2} + \epsilon(n)
+\end{align}
+where the probability is taken over the randomness used by A, as well as the randomness used in the experiment.
+\end{definition}
+
+An immediate consequence of the definition of security with respect to $\privkcpa$ is that the encryption algorithm must be probabilistic. This observation reinforces the need to rely on cryptographic primitives that introduce randomness into the encryption.
+\begin{lemma}
+Any encryption scheme $\Pi = (Gen, Enc, Dec)$ that is secure with respect to $\mathtt{PrivK}^{cpa}$ must have a probabilistic encryption algorithm $Enc$.
+\end{lemma}
+This requirement also provides a solution to the problem of security under multiple encryptions, which was shown to be unachievable when relying only on pseudorandom generators. Indeed, probabilistic encryption achieve security even when the same key is used to encrypt multiple messages, as captured by the following theorem.
+\begin{theorem}
+Every encryption scheme that is CPA-secure is also secure in the presence of multiple encryptions.
+\end{theorem}
+
+To construct a CPA-secure encryption scheme, it is necessary to introduce the notion of a \emph{pseudorandom function} (PRF). Informally, a pseudorandom function captures the idea of pseudorandomness for a distribution over functions. Such a distribution is induced by considering \emph{keyed functions}, defined as follows. A keyed function is a two-input function $F: \{0, 1\}^* \times \{0, 1\}^* \to \{0, 1\}^*$ where the first input is the key and is denoted by $k$. Typically a key $k$ is chosen once and fixed. One then considers the single-input function $F:\{0,1\}^* \to \{0,1\}^*$ denoted by $F_k$. By choosing a key $k \in \{0,1\}^n$ uniformly at random, the keyed function $F$ induces a distribution over single-input functions $F_k$, so a PRF is not a single function, but a family of functions indexed by a key, for each key fixed there is a function. The intuition is that $F$ is pseudorandom if the distribution is computationally indistinguishable from the uniform distribution over all functions with the same domain and range. Meaning that no efficient adversary should be able to tell whether it is interacting with $F_k$ for a uniformly chosen key $k$, or with a truly random function $f$. 
+
+A very important consideration concerns the size of the set of truly random functions from $\{0,1\}^n$ to $\{0,1\}^n$. The number of all such functions is $2^{n 2^n}$ since for each of the $2^n$ possible inputs one may independently choose any of the $2^n$ possible outputs. By contrast, when fixing a key $k \in \{0,1\}^n$ for a keyed function $F$, the resulting function $F_k$ is just a single deterministic function. As $k$ ranges over all $n$-bit strings, the family ${F_k}$ contains at most $2^n$ distinct functions. This induces a distribution over functions supported on at most 
+$2^n$ functions if all keys define distinct functions, then each occurs with probability $1/2^n$. Requiring that no efficient adversary be able to distinguish a truly random function from a pseudorandom function amounts to an extremely strong requirement. It asks the adversary to be unable to distinguish between a uniform distribution over an astronomically large set of size $2^{n 2^n}$ where each function has probability $1/2^{n 2^n}$ and a distribution supported on \enquote{only} $2^n$ functions, each occurring with probability $1/2^n$. These two distributions are vastly different. Nevertheless, the defining property of a pseudorandom function is that this difference cannot be exploited by any PPT adversary.
+
+To formally define pseudorandom function let's introduce also the following notions
+\begin{itemize}
+    \item A binary partial function is a partial function from $\{0,1\}^n$ to $\{0,1\}^n$
+    \item A binary partial function $F$ is length-preserving iif $F(k,x)$ is defined iif $|k|= |x|$ and in that case $|F(k,x)| = |x|$.
+    \item A binary partial function efficient if there exists a PPT algorithm that computes it.
+\end{itemize}
+\begin{definition}
+Let $F: \{0, 1\}^* \times \{0, 1\}^* \to \{0, 1\}^*$ be an efficient, length-preserving, keyed function. $F$ is a pseudorandom function if for all PPT distinguishers $D$, there is a negligible function $\epsilon$ such that:
+\begin{align}
+\mathrm{Pr}[D^{F_k(\cdot)}(1^n) = 1] - \mathrm{Pr}[D^{f(\cdot)}(1^n) = 1] \leq \epsilon(n)
+\end{align}
+where $k$ is  uniformly chosen among all strings of length $n$ and $f(\cdot)$ is uniformly chosen among all functions from $\{0,1\}^n$ to $\{0,1\}^n$.
+\end{definition}
+
+Given a pseudorandom function, one can construct a private-key encryption scheme that is secure with respect to the experiment $\mathtt{PrivK}^{cpa}$. The resulting scheme, denoted by ($\Pi^F = (Gen, Enc, Dec)$), is defined as follows.
+\begin{itemize}
+    \item The algorithm $Gen$ on input $1^n$ outputs each string of length $n$ with same probability $1/2^n$.
+    \item Given a pseudorandom function $F$, the algorithm $Enc_k(m)$ is defined as the (binary encoding of the) pair $\langle r, F_k(r) \oplus m\rangle$, where $r$ is a random string $|k|$ bits long.
+    \item $Dec_k(c)$ returns $F_k(r) \oplus s$ anytime $c$ is the (binary encoding of the) pair $\langle r, s\rangle$.
+\end{itemize}
+
+\begin{theorem}
+If $F$ is a PRF, then $\Pi^F$ is secure against CPA attacks.
 \end{theorem}
 
 \section{Message Authentication Codes}
@@ -247,24 +315,24 @@ A MAC is said to be correct if for all keys $k$ generated by $Gen$ and all messa
 
 Correctness ensures that honestly generated tags are always accepted by the verification algorithm.
 
-\newcommand{\macforge}[0]{\mathtt{MacForge}_{A,\Pi}(n)}
+\newcommand{\macforge}[0]{\mathtt{MacForge}_{A,\Pi}}
 
-The security goal for message authentication codes (MACs) can be stated informally as follows: no efficient adversary should be able to forge a valid tag for any message that was not previously sent and authenticated by one of the legitimate communicating parties. Equivalently, even after interacting with the system, the adversary should not be able to produce a new message–tag pair that will be accepted as valid. More precisely, the adversary is given oracle access to $Mac_k(\cdot)$ and may query the oracle to obtain valid pairs $(m,t)$, where $m$ is a message and $t$ is its corresponding tag. Any pair obtained directly from the oracle is, by definition, not considered a forgery. In practice, this models an adversary who passively observes the communication between honest parties and is able to see all transmitted messages together with their associated MAC tags. The security requirement is that, despite this access, any PPT adversary cannot generate a valid tag for any new message that was not previously authenticated. This can be formalized through an experiment called $\macforge$ which is described in Figure~\ref{fig:macforge}.
+The security goal for message authentication codes (MACs) can be stated informally as follows: no efficient adversary should be able to forge a valid tag for any message that was not previously sent and authenticated by one of the legitimate communicating parties. Equivalently, even after interacting with the system, the adversary should not be able to produce a new message–tag pair that will be accepted as valid. More precisely, the adversary is given oracle access to $Mac_k(\cdot)$ and may query the oracle to obtain valid pairs $(m,t)$, where $m$ is a message and $t$ is its corresponding tag. Any pair obtained directly from the oracle is, by definition, not considered a forgery. In practice, this models an adversary who passively observes the communication between honest parties and is able to see all transmitted messages together with their associated MAC tags. The security requirement is that, despite this access, any PPT adversary cannot generate a valid tag for any new message that was not previously authenticated. This can be formalized through an experiment called $\mathtt{MacForge}$ which is described in Figure~\ref{fig:macforge}.
 
 \begin{figure}
     \centering
     \begin{align*}
-    &\macforge: \\
+    &\macforge(n): \\
     &\quad k \gets Gen(1^n) \\
     &\quad (m,t) \gets A^{Mac_k(\cdot)}(1^n) \\
     &\quad \mathbb{Q} \gets \{m \ | \ A \ \text{queries} \ Mac_k(m) \} \\
     &\quad \mathtt{return}\,\,(m \notin \mathbb{Q} \land \vrfy_k(m,t) = 1)
     \end{align*}
-    \caption{Pseudocode for $\macforge$ experiment}
+    \caption{Pseudocode for $\mathtt{MacForge}$ experiment}
     \label{fig:macforge}
 \end{figure}
 
-Given the experiment $\macforge$ the notion of security for a scheme MAC $\Pi$ is captured by Definition~\ref{def:mac-security}
+Given the experiment $\mathtt{MacForge}$ the notion of security for a scheme MAC $\Pi$ is captured by Definition~\ref{def:mac-security}.
 
 \begin{definition}[MAC security]\label{def:mac-security}
 A MAC $\Pi$ is secure if and only if for every PPT adversary $A$ there exists a negligible function $\epsilon$ such that 
@@ -276,26 +344,14 @@ This definition of MAC security is simultaneously strong and weak. On the one ha
 
 A well-known result in cryptography states that pseudorandom functions can be used to construct secure message authentication codes. Given a pseudorandom function $F$, the construction $\mathrm{MAC}^F$ yields a secure MAC. Formally, let $\Pi^F = (Gen, Mac, Vrfy)$ be the triple of algorithms defined as follows:
 \begin{itemize}
-\item The key-generation algorithm $Gen$ takes as input the security parameter $1^n$ and outputs a uniformly random bitstring $k \in {0,1}^n$, each with probability $2^{-n}$;
+\item The key-generation algorithm $Gen$ takes as input the security parameter $1^n$ and outputs a uniformly random bitstring $k \in {0,1}^n$, each with probability $1/2^n$;
 \item The tag generation algorithm is defined as $Mac_k(m) = F_k(m)$;
 \item The verification algorithm is defined as $\vrfy_k(m,t) = (F_k(m) \stackrel{?}{=} t)$.
 \end{itemize}
 
 \begin{theorem}[Security of $\mathrm{MAC}^F$]
 If $F$ is a pseudorandom function, then the MAC scheme $\Pi^F$ is a secure fixed-length message authentication code for messages of length $n$.
+\begin{proof}
+And then it's proven
+\end{proof}
 \end{theorem}
-
-% \begin{figure}
-%     \centering
-%     \begin{align*}
-%     &\mathtt{PrivK}^{CPA}_{A,\Pi}(n): \\
-%     &\quad k \gets \{0,1\}^n \\
-%     &\quad m_0, m_1 \gets A^{Enc_k(\cdot)}(1^n) \\
-%     &\quad b \gets \{0,1\} \\
-%     &\quad c \gets Enc_k(m_b) \\
-%     &\quad g \gets A(c, Enc_k(\cdot)) \\
-%     &\quad \mathtt{return}\,\,(b=g)
-%     \end{align*}
-%     \caption{Pseudocode for $\mathtt{PrivK}^{CPA}$ Experiment}
-%     \label{fig:placeholder}
-% \end{figure}
