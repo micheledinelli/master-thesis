@@ -2,7 +2,7 @@
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
 Modern cryptography is concerned with providing security guarantees for information systems, ensuring that malicious users cannot compromise their intended behaviour by corrupting data, stealing information, or disrupting system operation. Security in cryptography is therefore closely tied to formal properties defined and analysed using the language of mathematics. To study and reason about these security properties, two main lines of research exist: the computational model \cite{theory-of-computing, introduction-to-modern-cryptography} and the symbolic model, also known as the Dolev–Yao model \cite{on-the-security-of-pk-protocols}.
 
-The computational model is tightly linked to complexity theory. Within this framework, notions such as secure encryption, unforgeable digital signatures have been placed on solid theoretical foundations. In the computational model, cryptographic primitives, security properties, protocols, and even adversaries are modeled as probabilistic polynomial-time (PPT) algorithms, reflecting adversaries that are bounded in computational resources and whose success is quantified probabilistically. To be effective, the computational model must impose reasonable restrictions when defining adversarial capabilities. The success of cryptography depends heavily on how well its security definitions capture realistic and unknown adversaries. Definitions that are too weak fail to provide meaningful guarantees, while overly strong definitions may render secure constructions impossible. For instance, in classical cryptography, a strong security result is achievable using the Vernam cipher under Shannon’s definition of perfect secrecy \cite{shannon-communication-theory-of-secrecy-systems, joyofcryptography}. However, its use in real-world settings is impractical, due to the fact that the key can be used only once (indeed, the Vernam cipher is also known as the one-time pad) and it must be at least as long as the messages that need encryption. The computational model serves as the reference framework for relatively simple protocols, but its use becomes less practical as protocol complexity increases. This is due to the fact that probabilistic reasoning becomes difficult as protocols grow larger and the number of participating parties increases.
+The computational model is tightly linked to complexity theory. Within this framework, notions such as secure encryption, unforgeable digital signatures have been placed on solid theoretical foundations. In the computational model, cryptographic primitives, security properties, protocols, and even adversaries are modelled as probabilistic polynomial-time (PPT) algorithms, reflecting adversaries that are bounded in computational resources and whose success is quantified probabilistically. To be effective, the computational model must impose reasonable restrictions when defining adversarial capabilities. The success of cryptography depends heavily on how well its security definitions capture realistic and unknown adversaries. Definitions that are too weak fail to provide meaningful guarantees, while overly strong definitions may render secure constructions impossible. For instance, in classical cryptography, a strong security result is achievable using the Vernam cipher under Shannon’s definition of perfect secrecy \cite{shannon-communication-theory-of-secrecy-systems, joyofcryptography}. However, its use in real-world settings is impractical, due to the fact that the key can be used only once (indeed, the Vernam cipher is also known as the one-time pad) and it must be at least as long as the messages that need encryption. The computational model serves as the reference framework for relatively simple protocols, but its use becomes less practical as protocol complexity increases. This is due to the fact that probabilistic reasoning becomes difficult as protocols grow larger and the number of participating parties increases.
 
 In contrast, the symbolic model requires very few assumptions about an adversary’s computational capabilities \cite{on-the-security-of-pk-protocols}. As a result, protocol security can be proved without relying on computational assumptions. When more complex protocols are considered the computational model often reveals its limitations in terms of analysis scalability. In the symbolic model instead, once a protocol is specified, determining whether it is secure can often be automated; indeed, the symbolic model forms the basis for model checking and semi-automated theorem proving \cite{Blanchet_2022, tamarin}. The symbolic model relies on a set of predefined cryptographic primitives that are assumed to be secure and treated as idealized black boxes. Cryptographic messages as first-order terms,
 together with an equational theory that represents attacker capabilities. Under these assumptions, the model is effective at identifying logical flaws in protocol designs. A well-known example is the Needham–Schroeder protocol, which was shown to be vulnerable to replay attacks \cite{timestamps-in-key-distribution-protocols}; this vulnerability can be detected vert straightforwardly using any symbolic model since it's a protocol flaw and not a cryptographic primitive vulnerability. Several formal frameworks exist for defining symbolic models, depending on the available cryptographic primitives and the underlying theory. One particularly well-studied approach is based on multi-set rewriting \cite{multiset-rewriting-and-the-complexity-of-bounded-security-protocols, rewriting-for-cryptographic-protocol-verification}. However, tools based on the symbolic model struggle to support cryptographic primitives with rich algebraic properties. For this reason, the security guarantees provided by the symbolic model are often weaker than those offered by the computational model, and a proof of security in the symbolic model does not always imply a corresponding proof in the computational model. For example, secret keys are modeled in the computational model as long bitstrings that are drawn uniformly at random while in the symbolic models they are modeled using abstract names. In symbolic models, two
@@ -167,7 +167,7 @@ A pseudorandom generator is an efficient, deterministic algorithm that transform
 \begin{itemize}
 \item For every $n \in \mathbb{N}$, $\ell(n) > n$.
 \item $G$ runs in probabilistic polynomial time.
-\item For every PPT distinguisher $D$, there exists a negligible function $\epsilon$ such that \begin{align} |\mathrm{Pr}[D(G(s))=1]| - \mathrm{Pr}[D(r)=1] \leq \epsilon(n) \end{align}\label{eq:prng}
+\item For every PPT distinguisher $D$, there exists a negligible function $\epsilon$ such that \begin{align}\label{eq:prng} |\mathrm{Pr}[D(G(s))=1]| - \mathrm{Pr}[D(r)=1] \leq \epsilon(n).\end{align}
 \end{itemize}
 
 Here, the first probability is taken over the uniform choice of $s \in \{0,1\}^n$ and the internal randomness of $D$, while the second probability is taken over the uniform choice of $r \in \{0,1\}^{\ell(n)}$ and the internal randomness of $D$.
@@ -177,8 +177,8 @@ As stated above, a pseudorandom generator is not random in a strict information-
 Given the notion of a pseudorandom generator, one can construct a PRG-induced encryption scheme that is secure against passive (eavesdropping) attacks. Formally, this scheme is a triple of algorithms $\Pi^G = (Gen, Enc, Dec)$ defined as follows:
 \begin{itemize}
     \item The algorithm $Gen$ on input $1^n$ outputs each string of length $n$ with same probability $1/2^n$.
-    \item The algorithm $Enc$ is defined as $Enc_k(m) = m \oplus G_k$
-    \item The algorithm $Dec$ is defined as $Dec_k(c) = c \oplus G_k$
+    \item The algorithm $Enc$ is defined as $Enc_k(m) = m \oplus G_k$.
+    \item The algorithm $Dec$ is defined as $Dec_k(c) = c \oplus G_k$.
 \end{itemize}
 
 The scheme $\Pi^G$ is correct because $G$ is deterministic. Indeed, for every key $k$ and message $m$ it is true that $Dec_k(Enc_k(m)) = Dec_k(m \oplus G_k) = ((G_k \oplus m) \oplus G_k)  = m$. The scheme $\Pi^G$ is defined for messages of fixed length $\ell(n)$, where $\ell$ is the expansion factor of the pseudorandom generator $G$.
@@ -263,7 +263,7 @@ Every encryption scheme that is CPA-secure is also secure in the presence of mul
 
 To construct a CPA-secure encryption scheme, it is necessary to introduce the notion of a \emph{pseudorandom function} (PRF). Informally, a pseudorandom function captures the idea of pseudorandomness for a distribution over functions. Such a distribution is induced by considering \emph{keyed functions}, defined as follows. A keyed function is a two-input function $F: \{0, 1\}^* \times \{0, 1\}^* \to \{0, 1\}^*$ where the first input is the key and is denoted by $k$. Typically a key $k$ is chosen once and fixed. One then considers the single-input function $F:\{0,1\}^* \to \{0,1\}^*$ denoted by $F_k$. By choosing a key $k \in \{0,1\}^n$ uniformly at random, the keyed function $F$ induces a distribution over single-input functions $F_k$, so a PRF is not a single function, but a family of functions indexed by a key, for each key fixed there is a function. The intuition is that $F$ is pseudorandom if the distribution is computationally indistinguishable from the uniform distribution over all functions with the same domain and range. Meaning that no efficient adversary should be able to tell whether it is interacting with $F_k$ for a uniformly chosen key $k$, or with a truly random function $f$. 
 
-A very important consideration concerns the size of the set of truly random functions from $\{0,1\}^n$ to $\{0,1\}^n$. The number of all such functions is $2^{n 2^n}$ since for each of the $2^n$ possible inputs one may independently choose any of the $2^n$ possible outputs. By contrast, when fixing a key $k \in \{0,1\}^n$ for a keyed function $F$, the resulting function $F_k$ is just a single deterministic function. As $k$ ranges over all $n$-bit strings, the family ${F_k}$ contains at most $2^n$ distinct functions. This induces a distribution over functions supported on at most 
+A very important consideration concerns the size of the set of truly random functions from $\{0,1\}^n$ to $\{0,1\}^n$. The number of all such functions is $2^{n 2^n}$ since for each of the $2^n$ possible inputs one may independently choose any of the $2^n$ possible outputs and is usually denoted by $\mathsf{Func}_n$. When fixing a key $k \in \{0,1\}^n$ for a keyed function $F$, the resulting function $F_k$ is just a single deterministic function. As $k$ ranges over all $n$-bit strings, the family ${F_k}$ contains at most $2^n$ distinct functions. This induces a distribution over functions supported on at most 
 $2^n$ functions if all keys define distinct functions, then each occurs with probability $1/2^n$. Requiring that no efficient adversary be able to distinguish a truly random function from a pseudorandom function amounts to an extremely strong requirement. It asks the adversary to be unable to distinguish between a uniform distribution over an astronomically large set of size $2^{n 2^n}$ where each function has probability $1/2^{n 2^n}$ and a distribution supported on \enquote{only} $2^n$ functions, each occurring with probability $1/2^n$. These two distributions are vastly different. Nevertheless, the defining property of a pseudorandom function is that this difference cannot be exploited by any PPT adversary.
 
 To formally define pseudorandom function let's introduce also the following notions
@@ -275,7 +275,7 @@ To formally define pseudorandom function let's introduce also the following noti
 \begin{definition}
 Let $F: \{0, 1\}^* \times \{0, 1\}^* \to \{0, 1\}^*$ be an efficient, length-preserving, keyed function. $F$ is a pseudorandom function if for all PPT distinguishers $D$, there is a negligible function $\epsilon$ such that:
 \begin{align}
-\mathrm{Pr}[D^{F_k(\cdot)}(1^n) = 1] - \mathrm{Pr}[D^{f(\cdot)}(1^n) = 1] \leq \epsilon(n)
+\left| \mathrm{Pr}[D^{F_k(\cdot)}(1^n) = 1] - \mathrm{Pr}[D^{f(\cdot)}(1^n) = 1] \right| \leq \epsilon(n)
 \end{align}
 where $k$ is  uniformly chosen among all strings of length $n$ and $f(\cdot)$ is uniformly chosen among all functions from $\{0,1\}^n$ to $\{0,1\}^n$.
 \end{definition}
@@ -319,7 +319,7 @@ Correctness ensures that honestly generated tags are always accepted by the veri
 
 The security goal for message authentication codes (MACs) can be stated informally as follows: no efficient adversary should be able to forge a valid tag for any message that was not previously sent and authenticated by one of the legitimate communicating parties. Equivalently, even after interacting with the system, the adversary should not be able to produce a new message–tag pair that will be accepted as valid. More precisely, the adversary is given oracle access to $Mac_k(\cdot)$ and may query the oracle to obtain valid pairs $(m,t)$, where $m$ is a message and $t$ is its corresponding tag. Any pair obtained directly from the oracle is, by definition, not considered a forgery. In practice, this models an adversary who passively observes the communication between honest parties and is able to see all transmitted messages together with their associated MAC tags. The security requirement is that, despite this access, any PPT adversary cannot generate a valid tag for any new message that was not previously authenticated. This can be formalized through an experiment called $\mathtt{MacForge}$ which is described in Figure~\ref{fig:macforge}.
 
-\begin{figure}
+\begin{figure}[htpb]
     \centering
     \begin{align*}
     &\macforge(n): \\
@@ -349,9 +349,50 @@ A well-known result in cryptography states that pseudorandom functions can be us
 \item The verification algorithm is defined as $\vrfy_k(m,t) = (F_k(m) \stackrel{?}{=} t)$.
 \end{itemize}
 
-\begin{theorem}[Security of $\mathrm{MAC}^F$]
+\newcommand{\tildepi}[0]{\widetilde{\Pi}=(\widetilde{Gen}, \widetilde{Mac}, \widetilde{\vrfy})}
+
+\begin{theorem}[Security of $\mathrm{MAC}^F$]\label{theorem:mac-security}
 If $F$ is a pseudorandom function, then the MAC scheme $\Pi^F$ is a secure fixed-length message authentication code for messages of length $n$.
-\begin{proof}
-And then it's proven
-\end{proof}
 \end{theorem}
+\begin{proof}
+Let $A$ be a PPT adversary. Consider the message authentication code $\widetilde{\Pi}$, which is mostly identical to $\mathrm{MAC}^F$ except that it uses a truly random function $f$ instead of the pseudorandom function $F_k$. The algorithm $\widetilde{Gen}(1^n)$ samples uniformly a truly random function from the set of all functions $\{0,1\}^n \to \{0,1\}^n$, and the algorithm $\widetilde{Mac}(m)$ computes the tag $t = f(m)$.
+
+It is clear that
+\begin{align}\label{eq:security-tildepi}
+\mathrm{Pr}[\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1] \leq \frac{1}{2^n}
+\end{align}
+since for any message $m \notin \mathcal{Q}$, the value $t = f(m)$ is uniformly distributed in $\{0,1\}^n$ and independent of all previous oracle responses. Because $2^{-n}$ is a negligible function, the MAC scheme $\widetilde{\Pi}$ is secure with respect to the experiment $\mathtt{MacForge}$.
+
+The goal of the proof is to show that
+\begin{align}\label{eq:pr-diff}
+\left| \mathrm{Pr}[\mathtt{MacForge}_{A,\Pi^F}(n) = 1] - \mathrm{Pr}[\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1] \right| \leq \epsilon(n)
+\end{align}
+for some negligible function $\epsilon$. That is, the probability that any PPT adversary succeeds in forging a valid MAC under $\mathrm{MAC}^F$ differs only negligibly from the probability that the same adversary succeeds when the MAC is computed using a truly random function. Combining Equation~\ref{eq:pr-diff} with Equation~\ref{eq:security-tildepi}, we obtain
+\begin{align}\label{eq:security-macf}
+\mathrm{Pr}[\mathtt{MacForge}_{A,\Pi^F}(n) = 1] \leq \frac{1}{2^n} + \epsilon(n)
+\end{align}
+which proves the theorem because of the closure of negligible functions (see Lemma~\ref{lemma:closure-ngl}).
+
+To prove Equation~\ref{eq:pr-diff}, we construct from any adversary $A$ that succeeds in the $\mathtt{MacForge}$ experiment, a distinguisher $D_A$ for the pseudorandom function $F_k$. The distinguisher $D_A$ is given oracle access to a function $\mathcal{O}: \{0,1\}^n \to \{0,1\}^n$ and must determine whether $\mathcal{O}$ is a pseudorandom function of the form $F_k$ for a uniformly random key $k \in \{0,1\}^n$, or a truly random function $f$. The distinguisher $D_A^{\mathcal{O}}$ emulates the MAC-forgery experiment for $A$ in such a way that $D_A^{F_k(\cdot)}$ behaves exactly like $\mathtt{MacForge}_{A,\Pi^F}$, while $D_A^{f(\cdot)}$ behaves like $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, where $\widetilde{\Pi}$ is the MAC scheme based on a truly random function. The distinguisher is defined as follows:
+
+\begin{flushleft}
+$D_A^{\mathcal{O}}$:
+\end{flushleft}
+\begin{enumerate}
+\item Run $A(1^n)$. Whenever $A$ queries its MAC oracle on a message $m \in \{0,1\}^n$, answer the query by returning $t \gets \mathcal{O}(m)$. Record the queried message $m$ in the set $\mathcal{Q}$.
+\item Eventually, $A$ outputs a pair $(m^*, t^*)$.
+\item If $m^* \notin \mathcal{Q}$ and $t^* = \mathcal{O}(m^*)$, then output $1$ and $0$ otherwise.
+\end{enumerate}
+$D_A^{\mathcal{O}}$ runs in probabilistic polynomial time, since it only runs $A$ and makes a polynomial number of oracle queries. There are two cases:
+\begin{itemize}
+    \item If $\mathcal{O} = F_k$, then the simulation provided by $D_A$ is distributed identically to the view of $A$ in the experiment $\mathtt{MacForge}_{A,\Pi^F}$, and therefore $D$ outputs 1 exactly when $\mathtt{MacForge}_{A,\Pi}(n) = 1$ \[ \mathrm{Pr}[D_A^{F_k(\cdot)}(1^n) = 1] = \mathrm{Pr}[\mathtt{MacForge}_{A,\Pi^F}(n) = 1] \]
+    \item If instead $\mathcal{O} = f$, where $f$ is a truly random function, then the simulation is distributed identically to the view of $A$ in the experiment $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, and hence $D$ outputs 1 exactly when $\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1$ \[ \mathrm{Pr}[D_A^{f(\cdot)}(1^n) = 1] = \mathrm{Pr}[\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1] \]
+    where $f \in \mathsf{Func}_n$ is chosen uniformly.
+\end{itemize}
+
+Since $F$ is a pseudorandom function, by definition the advantage of any PPT distinguisher against $F$ is negligible (and $D$ runs in polynomial time), there exists a negligible function $\epsilon$ such that
+\begin{align}
+\left|\mathrm{Pr}[D_A^{F_k(\cdot)}(1^n) = 1] - \mathrm{Pr}[D_A^{f(\cdot)}(1^n) = 1] \right| \leq \epsilon(n)
+\end{align}
+This implies Equation~\ref{eq:pr-diff} and therefore completes the reduction.
+\end{proof}

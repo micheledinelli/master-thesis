@@ -129,7 +129,7 @@ A term $\mathtt{t}$ is interpreted as a function that associates to each value o
 
 As one of the most commonly used notions to define cryptographic properties is computational indistinguishability, Squirrel's logic relies on the symbol $\sim$ to represent it. Formally, for two terms $\mathtt{u}$, $\mathtt{v}$, the predicate $\mathtt{u} \sim \mathtt{v}$ holds in a model $\mathbb{M}$ if $\mathtt{G}^\mathbb{M}_\mathtt{u} \approx \mathtt{G}^\mathbb{M}_\mathtt{v}$, and $\mathtt{G}^\mathbb{M}_\mathtt{t}$ is the game where the adversary is provided with $[\![t]\!]_\mathbb{M}^{\eta, \rho}$ and must produce a bit b, returned by the game. $\mathtt{u}$, $\mathtt{v}$ holds in $\mathbb{M}$ if exists a negligible function $\epsilon$ such that
 \begin{align*}
-\forall A \in \mathrm{PPTM}. \eta \mapsto |\mathrm{Pr}_\rho(A([\![u]\!]_\mathbb{M}^{\eta, \rho},\rho_a)=1) - \mathrm{Pr}_\rho(A([\![v]\!]_\mathbb{M}^{\eta, \rho},\rho_a)=1)| \leq \epsilon(\eta)
+\forall A \in \mathrm{PPTM}. \eta \mapsto \left|\mathrm{Pr}_\rho(A([\![u]\!]_\mathbb{M}^{\eta, \rho},\rho_a)=1) - \mathrm{Pr}_\rho(A([\![v]\!]_\mathbb{M}^{\eta, \rho},\rho_a)=1)\right| \leq \epsilon(\eta)
 \end{align*}
 Let's consider another game $\mathtt{G}_\mathtt{k}$ reported in Figure \ref{fig:squirrel-sample-proof-2}.
 \begin{figure}[htpb]
