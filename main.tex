@@ -7,12 +7,17 @@
   mathescape
 }
 
+\usepackage{tikz}
+\usetikzlibrary{arrows,arrows.meta,positioning}
+\usepackage{adjustbox}
 \usepackage{enumitem}
 \usepackage{indentfirst}
 \usepackage{lipsum}
 \usepackage{graphicx}
 \usepackage{csquotes}
 
+\usepackage{amsfonts}
+\usepackage{mathtools} 
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{latexsym}
@@ -44,6 +49,8 @@
 \cfoot{}
 
 \begin{document}
+
+\input{macros}
 
 \begin{titlepage}
 \thispagestyle{empty}
@@ -82,6 +89,7 @@ Dedicata a \ldots
 \input{chapters/chapter-3}
 \input{chapters/chapter-4}
 \input{chapters/chapter-5}
+\input{chapters/chapter-6}
 
 \clearpage{\pagestyle{empty}\cleardoublepage}
 

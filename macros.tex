@@ -1,0 +1,34 @@
+\newcommand{\privkeav}[0]{\mathtt{PrivK}^{eav}_{A,\Pi}}
+\newcommand{\privkmult}[0]{\mathtt{PrivK}^{mult}_{A,\Pi}}
+\newcommand{\privkcpa}[0]{\mathtt{PrivK}^{cpa}_{A,\Pi}}
+\newcommand{\vrfy}[0]{V\!r\!f\!y}
+\newcommand{\macforge}[0]{\mathtt{MacForge}_{A,\Pi}}
+\newcommand{\tildepi}[0]{\widetilde{\Pi}=(\widetilde{Gen}, \widetilde{Mac}, \widetilde{\vrfy})}
+\def\Oracle{\mathit{Oracle}}
+
+\newcommand{\BB}{\mathbb{B}}
+\renewcommand{\SS}{\mathbb{S}}
+\newcommand{\GG}{\mathbb{G}}
+\newcommand{\UU}{\mathbb{U}}
+\newcommand{\true}{\mathbf{t}}
+\newcommand{\false}{\mathbf{f}}
+\newcommand{\lis}[1]{\langle #1 \rangle}
+\newcommand{\bang}{\mathord{!}}
+\newcommand{\arrowRef}[1]{\oset{#1}{\multimap}}
+\makeatletter
+\newcommand{\oset}[3][0ex]{%
+	\mathrel{\mathop{#3}\limits^{
+			\vbox to#1{\kern-2\ex@
+				\hbox{$\scriptstyle#2$}\vss}}}}
+\makeatother
+\newcommand{\Val}{\mathcal{V}}
+\newcommand{\return}{\mathtt{return}\,}
+\newcommand{\der}{\mathtt{der}}
+\newcommand{\letin}[2]{\mathtt{let}\,#1\,\mathtt{in}\, #2}
+\newcommand{\loopp}[3]{\mathtt{loop}\,#1\,#2\,\mathtt{times \, from}\, #3}
+\newcommand{\setr}[2]{\mathtt{set}\,#1\, #2}
+\newcommand{\ifthen}[3]{\mathtt{if}\,#1\,\mathtt{then}\, #2\,\mathtt{else}\; #3}
+\newcommand{\get}{\mathtt{get}\,}
+\newcommand{\lamBLL}{{\lambda}\mathbf{BLL}}
+
+\def\coarseq{\asymp}

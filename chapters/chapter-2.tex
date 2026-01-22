@@ -1,4 +1,4 @@
-\chapter{Computational Cryptography}
+\chapter{Computational Cryptography}\label{sec:computational-cryptography}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
 Modern cryptography is concerned with providing security guarantees for information systems, ensuring that malicious users cannot compromise their intended behaviour by corrupting data, stealing information, or disrupting system operation. Security in cryptography is therefore closely tied to formal properties defined and analysed using the language of mathematics. To study and reason about these security properties, two main lines of research exist: the computational model \cite{theory-of-computing, introduction-to-modern-cryptography} and the symbolic model, also known as the Dolev–Yao model \cite{on-the-security-of-pk-protocols}.
 
@@ -70,8 +70,6 @@ The intuition behind this definition is that observing the ciphertext reveals ab
 
 Where the notation $k \gets \{0,1\}^n$ means to sample uniformly from the set of $n$-bitstrings. This uniform choice of key is the only randomness in all of the one-time pad algorithms. The scheme is correct because $Dec_k(Enc_k(m)) = (m\oplus k)\oplus k = m \oplus (k\oplus k) = m\oplus {0}^n = m$
 OTP is perfectly secure in the information-theoretic sense, but it suffers from major limitations: the key length must be greater than or equal to the length of the message, and each key can be used only once.
-
-\newcommand{\privkeav}[0]{\mathtt{PrivK}^{eav}_{A,\Pi}}
 
 Encryption schemes can be studied in terms of perfect secrecy, but also in terms of indistinguishability, which is an equivalent and widely used definition of secrecy for encryption schemes. To discuss the indistinguishability property of an encryption scheme, we introduce the experiment $\privkeav$.
 
@@ -183,8 +181,6 @@ Given the notion of a pseudorandom generator, one can construct a PRG-induced en
 
 The scheme $\Pi^G$ is correct because $G$ is deterministic. Indeed, for every key $k$ and message $m$ it is true that $Dec_k(Enc_k(m)) = Dec_k(m \oplus G_k) = ((G_k \oplus m) \oplus G_k)  = m$. The scheme $\Pi^G$ is defined for messages of fixed length $\ell(n)$, where $\ell$ is the expansion factor of the pseudorandom generator $G$.
 
-\newcommand{\privkmult}[0]{\mathtt{PrivK}^{mult}_{A,\Pi}}
-
 In the context of the experiment $\privkeav$, the considered attacks are \emph{passive}. This means that the adversary cannot actively interfere with the execution of the protocol, but can only observe its surroundings. In particular, the communicating parties transmit a single ciphertext, which may be observed by an eavesdropper. It would be desirable, however, for the communicating parties to be able to exchange multiple ciphertexts generated using the same secret key even in the presence of an eavesdropper who can observe all of them. To model such scenarios an encryption scheme is required to remains secure under the encryption of multiple messages, and has to behave accordingly with respect of a new security experiment, shown in Figure~\ref{fig:privk-mult}.
 
 \begin{figure}[htpb]
@@ -222,8 +218,6 @@ What at first appears to be a strong limitation is in fact fundamental.
 \begin{theorem}
 If the encryption algorithm $Enc$ is stateless and deterministic, then the scheme $\Pi = (Gen, Enc, Dec)$ cannot be secure with respect to $\privkmult$.
 \end{theorem}
-
-\newcommand{\privkcpa}[0]{\mathtt{PrivK}^{cpa}_{A,\Pi}}
 
 Another important class of attacks consists of \emph{active} attacks, in which adversaries are allowed to play an active role. In this setting, the adversary may obtain encryptions of messages of its choice by interacting with an encryption oracle $Enc_k(\cdot)$ (chosen-plaintext attacks), or may even have access to a decryption oracle $Dec_k(\cdot)$ (chosen-ciphertext attacks). In both cases, the secret key $k$ is unknown to the adversary. Chosen-plaintext attacks (CPA) are particularly useful for introducing a stronger and more realistic security notion. In this scenario, the adversary $A$ is allowed to interact with the encryption oracle and query it on messages of its choice, for a polynomial number of queries in the security parameter $n$. This interaction is formalized by the experiment shown in Figure~\ref{fig:privk-cpa}.
 \begin{figure}[htpb]
@@ -296,8 +290,6 @@ Message Authentication Codes (MACs) address the problem of message authenticatio
 
 Schemes based solely on pseudorandom generators are insufficient to solve this problem. For instance, consider an encryption scheme $\Pi^G$ based on a pseudorandom generator $G$, where encryption is defined as $Enc_k(m) = G_k \oplus m$ and decryption as $Dec_k(m) = G_k \oplus c$. An adversary who observes a ciphertext can easily construct a valid ciphertext for a related message, hence impersonating the legitimate sender. Even more directly, flipping any bit in the ciphertext $c = G_k \oplus m$ results in the same bit being flipped in the plaintext after decryption. Thus, given a ciphertext $c$ that encrypts a message $m$, it is possible to generate a modified ciphertext $c'$ such that $m' = Dec_k(c')$ is equal to $m$ except for one or more flipped bits. This illustrates that pseudorandomness alone does not guarantee message integrity. Authentication requires dedicated mechanisms beyond encryption.
 
-\newcommand{\vrfy}[0]{V\!r\!f\!y}
-
 Two users who wish to communicate in an authenticated manner begin by generating and securely sharing a secret key $k$ prior to communication. When one party wants to send a message $m$ to the other, she computes a MAC tag (or simply a tag) $t$ based on the message and the shared key, and sends the pair $(m, t)$ to the receiver. The tag is computed using a tag-generation algorithm, denoted by $Mac$. That is, the sender computes the tag $t$ as $Mac_k(m)$ and transmits $(m, t)$. Upon receiving $(m, t)$, the receiver checks whether $t$ is a valid tag for the message $m$ with respect to the key $k$. Verification is performed by a deterministic algorithm$\vrfy$, which takes as input the key, the message, and the tag, and outputs a bit indicating acceptance or rejection of the tag on the message.
 
 Formally, a MAC is a triple $\Pi = (Gen, Mac, \vrfy)$ of PPT algorithms such that:
@@ -314,8 +306,6 @@ A MAC is said to be correct if for all keys $k$ generated by $Gen$ and all messa
 \]
 
 Correctness ensures that honestly generated tags are always accepted by the verification algorithm.
-
-\newcommand{\macforge}[0]{\mathtt{MacForge}_{A,\Pi}}
 
 The security goal for message authentication codes (MACs) can be stated informally as follows: no efficient adversary should be able to forge a valid tag for any message that was not previously sent and authenticated by one of the legitimate communicating parties. Equivalently, even after interacting with the system, the adversary should not be able to produce a new message–tag pair that will be accepted as valid. More precisely, the adversary is given oracle access to $Mac_k(\cdot)$ and may query the oracle to obtain valid pairs $(m,t)$, where $m$ is a message and $t$ is its corresponding tag. Any pair obtained directly from the oracle is, by definition, not considered a forgery. In practice, this models an adversary who passively observes the communication between honest parties and is able to see all transmitted messages together with their associated MAC tags. The security requirement is that, despite this access, any PPT adversary cannot generate a valid tag for any new message that was not previously authenticated. This can be formalized through an experiment called $\mathtt{MacForge}$ which is described in Figure~\ref{fig:macforge}.
 
@@ -349,8 +339,6 @@ A well-known result in cryptography states that pseudorandom functions can be us
 \item The verification algorithm is defined as $\vrfy_k(m,t) = (F_k(m) \stackrel{?}{=} t)$.
 \end{itemize}
 
-\newcommand{\tildepi}[0]{\widetilde{\Pi}=(\widetilde{Gen}, \widetilde{Mac}, \widetilde{\vrfy})}
-
 \begin{theorem}[Security of $\mathrm{MAC}^F$]\label{theorem:mac-security}
 If $F$ is a pseudorandom function, then the MAC scheme $\Pi^F$ is a secure fixed-length message authentication code for messages of length $n$.
 \end{theorem}
@@ -374,6 +362,12 @@ for some negligible function $\epsilon$. That is, the probability that any PPT a
 which proves the theorem because of the closure of negligible functions (see Lemma~\ref{lemma:closure-ngl}).
 
 To prove Equation~\ref{eq:pr-diff}, we construct from any adversary $A$ that succeeds in the $\mathtt{MacForge}$ experiment, a distinguisher $D_A$ for the pseudorandom function $F_k$. The distinguisher $D_A$ is given oracle access to a function $\mathcal{O}: \{0,1\}^n \to \{0,1\}^n$ and must determine whether $\mathcal{O}$ is a pseudorandom function of the form $F_k$ for a uniformly random key $k \in \{0,1\}^n$, or a truly random function $f$. The distinguisher $D_A^{\mathcal{O}}$ emulates the MAC-forgery experiment for $A$ in such a way that $D_A^{F_k(\cdot)}$ behaves exactly like $\mathtt{MacForge}_{A,\Pi^F}$, while $D_A^{f(\cdot)}$ behaves like $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, where $\widetilde{\Pi}$ is the MAC scheme based on a truly random function. The distinguisher is defined as follows:
+
+\begin{align*}
+&D_A^{\mathcal{O}}: \\
+& &D_A^{\mathcal{O}}: \\
+& & &D_A^{\mathcal{O}}: \\
+\end{align*}
 
 \begin{flushleft}
 $D_A^{\mathcal{O}}$:
