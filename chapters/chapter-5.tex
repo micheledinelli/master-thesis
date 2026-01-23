@@ -1,7 +1,7 @@
 \chapter{Lambda-BLL}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
 
-This chapter introduces the $\lambda$-BLL calculus~\cite{lago2024computationalindistinguishabilitylogicalrelations}, a typed probabilistic $\lambda$-calculus designed to model polynomial-time cryptographic computation. Its design principles and language features capture the essential for expressing cryptographic experiments, adversaries, and reductions.
+This chapter introduces the $\lambda$-BLL calculus~\cite{lago2024computationalindistinguishabilitylogicalrelations}, a typed probabilistic $\lambda$-calculus to model polynomial-time cryptographic computation. Its design principles and language features capture the essential for expressing cryptographic experiments, adversaries, and reductions.
 
 $\lamBLL$ provides a programming-language framework in which computational complexity is enforced statically by the type system. In particular, it supports probabilistic polynomial-time computation, bounded interaction with oracles, shared mutable state and higher-order reasoning about cryptographic constructions. These features make it well-suited for formalizing experiment-based cryptographic proofs.
 
@@ -11,7 +11,7 @@ p ::= 1 \mid i \mid p + p \mid p * p
 \end{align*}
 where the variable $i$ represents the security parameter.
 
-The calculus follows a call-by-push-value (CBPV) discipline~\cite{levy2012call}, distinguishing between \emph{positive types} (which classify values) and general types (which may classify computations). This separation restricts function application to positive arguments and provides fine-grained control over evaluation and resource usage.
+The calculus follows a call-by-push-value (CBPV) discipline~\cite{levy2012call}, distinguishing between positive types and general types. This separation permits to restrict function application to positive arguments only.
 
 The base of the type system consists of ground types:
 \begin{align*}
@@ -28,21 +28,21 @@ namely pairs formed with the tensor products $P \otimes P$, and the graded comon
 \begin{figure}[htpb]
   \centering
   \begin{align*}
-    G &::= \UU \mid \BB \mid \SS[p] \\
-    P &::= G \mid P \otimes P \mid \bang_p A \\
-    A &::= P \mid P \multimap A
+    G &::= \UU \mid \BB \mid \SS[p] \tag{Ground types} \\
+    P &::= G \mid P \otimes P \mid \bang_p A \tag{Positive types} \\
+    A &::= P \mid P \multimap A \tag{Types}
   \end{align*}
   \caption{Types of $\lambda$-BLL}
   \label{fig:types}
 \end{figure}
 
-$\lambda$-BLL extends the pure $\lambda$-calculus with features necessary for modelling cryptographic computation. The language define a collection of function symbols $\mathcal{F}$ representing probabilistic polynomial-time algorithms. Each function symbol $f \in \mathcal{F}$ has a type denoted by $\mathtt{typeof}$ of the form
+$\lamBLL$ extends the pure lambda-calculus with features necessary for modelling cryptographic computation. The language define a collection of function symbols $\mathcal{F}$. Each function symbol $f \in \mathcal{F}$ has a type denoted by $\mathtt{typeof}$ of the form
 \begin{align*}
-f : G_1 \times \dots \times G_m \to G
+\mathtt{typeof}(f): G_1 \times \dots \times G_m \to G
 \end{align*}
-and operates on ground types, thus $G_1, \dots, G_m$ and $G$ are ground. For each polynomial $p$, a corresponding constructor $f_p$ represents a resource-bounded invocation of $f$, with the grade $p$ accounting for its computational cost within the type system.
+where $G_1, \dots, G_m$ and $G$ are ground types. For each polynomial $p$, a corresponding constructor $f_p$ represents a resource-bounded invocation of $f$, with the grade $p$ accounting for its computational cost within the type system.
 
-Values represent data that can be passed, stored or paired but not directly executed, while computations represent effectful execution. Ground values include $\star$, booleans, and bitstrings. Positive values additionally include variables, pairs, and suspended computations of the form $!M$. Computations follow the CBPV structure: values are injected using $\return$, suspended computations are forced using $\der$, and functions may be applied only to positive arguments.
+Values represent data that can be passed, stored or paired but not directly executed, while computations represent effectful execution. Ground values include $\star$, booleans, and bitstrings. Positive values include variables, pairs, and suspended computations of the form $!M$. Computations follow the CBPV structure so values are injected using $\return$, suspended computations are forced using $\der$, and applications is defined only on positive arguments.
 
 \begin{figure}[htpb]
   \centering
@@ -60,12 +60,21 @@ Values represent data that can be passed, stored or paired but not directly exec
   \label{fig:syntax}
 \end{figure}
 
-To model cryptographic experiments involving shared state, $\lamBLL$ includes global references. References store ground values (and ground only) and are manipulated via $\setr{r}{Z}$ and $\get r$. This ensures that stateful effects do not introduce higher-order behavior beyond what is explicitly admitted by the type system. The language provides also control constructs such as conditionals, let-bindings, and pattern matching on pairs. Bounded iteration is expressed using the construct $\loopp{V}{p}{M}$, which executes the computation $M$ at most $p$ times. This is essential for encoding polynomial-time adversaries and simulations.
+To model cryptographic experiments involving shared state, $\lamBLL$ includes global references. References store ground values (and ground only) and are manipulated via $\setr{r}{Z}$ and $\get r$. This ensures that stateful effects do not introduce higher-order behavior beyond what is explicitly admitted by the type system. The language provides also control constructs such as conditionals, let-bindings, and pattern matching on pairs. Bounded iteration is expressed using the construct $\loopp{V}{p}{M}$, which executes the computation $M$ at most $p$ times.
 
-Variables in $\lamBLL$ are classified according to their types. A variable is \emph{ground} if its type contains no function arrows, preventing ground terms from encoding higher-order behavior thus being dangerous as global references.
+Since variables in $\lamBLL$ are classified according to their types, a variable is said to be ground if its type contains no function arrows, preventing ground terms from encoding higher-order behavior thus being dangerous as global references. To track higher-order dependencies, the calculus distinguishes the set of free higher-order variables of a term $M$, denoted $\mathit{HOFV}(M)$. This set contains exactly those free variables whose types include at least one occurrence of the function type constructor $(\multimap)$.
 
-To track higher-order dependencies, the calculus distinguishes the set of free higher-order variables of a term $M$, denoted $\mathit{HOFV}(M)$. This set contains exactly those free variables whose types include at least one occurrence of the function type constructor $(\multimap)$.
-
+$\lamBLL$ considers two different typing contexts
+\begin{align*}
+\Gamma &::= \emptyset \mid \Gamma, x: P \tag{Variable context} \\
+\Theta &::= \emptyset \mid \Theta, r: P \tag{Reference context}
+\end{align*}
+The context $\Gamma$ contains term variables with positive types only, which are not computations, while the reference context $\Theta$ contains references which are can only be ground types. Fixed a reference context $\Theta$ then there are two typing judgments with respect to $\Theta$
+\begin{align*}
+\Gamma &\vdash_v^\Theta V: A \tag{Value typing} \\
+\Gamma &\vdash_c^\Theta M: A \tag{Computation typing}
+\end{align*}
+Computations may access references, but references never contain computations.
 % % \begin{figure}[h]
 % % 	\centering
 % % 	\begin{tikzpicture}[]
