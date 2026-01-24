@@ -153,39 +153,30 @@ The message returned at the end of the game can be represented by the term
 which outputs $0$ if the adversary correctly guesses the secret key $k$ and $1$ otherwise. Checking the indistinguishability judgment $(\phi_k \sim 1)$ amounts to verify that the corresponding game $\mathtt{G}_\mathtt{k}$ is computationally indistinguishable from the trivial game $(\mathtt{return}\,\,1)$ i.e., $G_k \approx (\mathtt{return}\,\,1)$.
 
 \begin{figure}[htpb]
-    \centering
-    \begin{gather*}
-    \begin{prooftree}
-    \hypo{}
-    \infer1[Ref]{u \sim u}
-    \end{prooftree}
-    \quad\quad
-    \begin{prooftree}
-    \hypo{(u = v)\sim \mathtt{true} }
-    \hypo{C[v]\sim w}
-    \infer2[Rew]{C[u] \sim w}
-    \end{prooftree}
-    \quad\quad
-    \begin{prooftree}
-    \hypo{}
-    \infer1[Fresh]{(t \neq \mathtt{n})\sim \mathtt{true}}
-    \end{prooftree}
-    \end{gather*}
+	\begin{center}
+	\begin{mathpar}\mprset{sep=1em}
+		\inferrule*[right=REF]{\\}{u \sim u}
+		\and 
+		\inferrule*[right=REW]{(u = v)\sim \mathtt{true} \quad C[v]\sim w}{C[u] \sim w}
+		\and
+        \inferrule*[right=FRESH]{\\}{(t \neq \mathtt{n})\sim \mathtt{true}}
+	\end{mathpar}
+    \end{center}
     \caption{Inference rules over $\sim$ in Squirrel.}
     \label{fig:inference-rules-over-sim-squirrel}
 \end{figure}
 
-Given the inference rules over $\sim$ in Squirrel represented in Figure \ref{fig:inference-rules-over-sim-squirrel} one can derive the result as follows
+Given the inference rules over $\sim$ in Squirrel represented in Figure \ref{fig:inference-rules-over-sim-squirrel} one can verify that it is true that $(\mathtt{if}\,\,(\mathtt{att_0}(\cdot) = k) \,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1$ as follows
 
 \begin{gather*}
     \begin{prooftree}
     \hypo{}
-    \infer1[Fresh]{(\mathtt{att}_0(\cdot) \neq k)\sim \mathtt{true}}
+    \infer1[FRESH]{(\mathtt{att}_0(\cdot) \neq k)\sim \mathtt{true}}
     \infer1{((\mathtt{att_0}(\cdot) = k) = \mathtt{false}) \sim \mathtt{true}}
     \hypo{}
-    \infer1[Ref]{1\sim1}
+    \infer1[REF]{1\sim1}
     \infer1{(\mathtt{if}\,\,\mathtt{false}\,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1}
-    \infer2[Rew]{(\mathtt{if}\,\,(\mathtt{att_0}(\cdot) = k) \,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1}
+    \infer2[REW]{(\mathtt{if}\,\,(\mathtt{att_0}(\cdot) = k) \,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1}
     \end{prooftree}
 \end{gather*}
 

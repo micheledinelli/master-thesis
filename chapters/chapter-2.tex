@@ -342,7 +342,7 @@ A well-known result in cryptography states that pseudorandom functions can be us
 \begin{theorem}[Security of $\mathrm{MAC}^F$]\label{theorem:mac-security}
 If $F$ is a pseudorandom function, then the MAC scheme $\Pi^F$ is a secure fixed-length message authentication code for messages of length $n$.
 \end{theorem}
-\begin{proof}
+\begin{proof}\label{proof:handwavy}
 Let $A$ be a PPT adversary. Consider the message authentication code $\widetilde{\Pi}$, which is mostly identical to $\mathrm{MAC}^F$ except that it uses a truly random function $f$ instead of the pseudorandom function $F_k$. The algorithm $\widetilde{Gen}(1^n)$ samples uniformly a truly random function from the set of all functions $\{0,1\}^n \to \{0,1\}^n$, and the algorithm $\widetilde{Mac}(m)$ computes the tag $t = f(m)$.
 
 It is clear that
@@ -363,26 +363,25 @@ which proves the theorem because of the closure of negligible functions (see Lem
 
 To prove Equation~\ref{eq:pr-diff}, we construct from any adversary $A$ that succeeds in the $\mathtt{MacForge}$ experiment, a distinguisher $D_A$ for the pseudorandom function $F_k$. The distinguisher $D_A$ is given oracle access to a function $\mathcal{O}: \{0,1\}^n \to \{0,1\}^n$ and must determine whether $\mathcal{O}$ is a pseudorandom function of the form $F_k$ for a uniformly random key $k \in \{0,1\}^n$, or a truly random function $f$. The distinguisher $D_A^{\mathcal{O}}$ emulates the MAC-forgery experiment for $A$ in such a way that $D_A^{F_k(\cdot)}$ behaves exactly like $\mathtt{MacForge}_{A,\Pi^F}$, while $D_A^{f(\cdot)}$ behaves like $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, where $\widetilde{\Pi}$ is the MAC scheme based on a truly random function. The distinguisher is defined as follows:
 
-\begin{align*}
-&D_A^{\mathcal{O}}: \\
-& &D_A^{\mathcal{O}}: \\
-& & &D_A^{\mathcal{O}}: \\
-\end{align*}
-
-\begin{flushleft}
-$D_A^{\mathcal{O}}$:
-\end{flushleft}
-\begin{enumerate}
+\begin{center}
+\vspace*{1em}
+\begin{minipage}{0.7\textwidth}
+$D_A^{\mathcal{O}}:$
+\begin{enumerate}[leftmargin=3em]
 \item Run $A(1^n)$. Whenever $A$ queries its MAC oracle on a message $m \in \{0,1\}^n$, answer the query by returning $t \gets \mathcal{O}(m)$. Record the queried message $m$ in the set $\mathcal{Q}$.
 \item Eventually, $A$ outputs a pair $(m^*, t^*)$.
 \item If $m^* \notin \mathcal{Q}$ and $t^* = \mathcal{O}(m^*)$, then output $1$ and $0$ otherwise.
 \end{enumerate}
-$D_A^{\mathcal{O}}$ runs in probabilistic polynomial time, since it only runs $A$ and makes a polynomial number of oracle queries. There are two cases:
+\end{minipage}
+\end{center}
+
+The distinguisher $D_A^{\mathcal{O}}$ runs in probabilistic polynomial time, since it only runs $A$ and makes a polynomial number of oracle queries. There are two cases:
 \begin{itemize}
     \item If $\mathcal{O} = F_k$, then the simulation provided by $D_A$ is distributed identically to the view of $A$ in the experiment $\mathtt{MacForge}_{A,\Pi^F}$, and therefore $D$ outputs 1 exactly when $\mathtt{MacForge}_{A,\Pi}(n) = 1$ \[ \mathrm{Pr}[D_A^{F_k(\cdot)}(1^n) = 1] = \mathrm{Pr}[\mathtt{MacForge}_{A,\Pi^F}(n) = 1] \]
     \item If instead $\mathcal{O} = f$, where $f$ is a truly random function, then the simulation is distributed identically to the view of $A$ in the experiment $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, and hence $D$ outputs 1 exactly when $\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1$ \[ \mathrm{Pr}[D_A^{f(\cdot)}(1^n) = 1] = \mathrm{Pr}[\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1] \]
     where $f \in \mathsf{Func}_n$ is chosen uniformly.
 \end{itemize}
+
 
 Since $F$ is a pseudorandom function, by definition the advantage of any PPT distinguisher against $F$ is negligible (and $D$ runs in polynomial time), there exists a negligible function $\epsilon$ such that
 \begin{align}

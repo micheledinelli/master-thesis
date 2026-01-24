@@ -36,11 +36,7 @@ namely pairs formed with the tensor products $P \otimes P$, and the graded comon
   \label{fig:types}
 \end{figure}
 
-$\lamBLL$ extends the pure lambda-calculus with features necessary for modelling cryptographic computation. The language define a collection of function symbols $\mathcal{F}$. Each function symbol $f \in \mathcal{F}$ has a type denoted by $\mathtt{typeof}$ of the form
-\begin{align*}
-\mathtt{typeof}(f): G_1 \times \dots \times G_m \to G
-\end{align*}
-where $G_1, \dots, G_m$ and $G$ are ground types. For each polynomial $p$, a corresponding constructor $f_p$ represents a resource-bounded invocation of $f$, with the grade $p$ accounting for its computational cost within the type system.
+$\lamBLL$ extends the pure lambda-calculus with other features, necessary for modelling cryptographic computation, for example it defines a collection of function symbols $\mathcal{F}$. Each function symbol $f \in \mathcal{F}$ has a type denoted by $\mathsf{typeof}(f)$ of the form $G_1 \times \dots \times G_m \to G$ where $G_1, \dots, G_m$ and $G$ are ground types. Then, for each polynomial $p$, in $\lamBLL$ there is a corresponding constructor $f_p$ representing a resource-bounded invocation of $f$, with the grade $p$ accounting for its computational cost within the type system.
 
 Values represent data that can be passed, stored or paired but not directly executed, while computations represent effectful execution. Ground values include $\star$, booleans, and bitstrings. Positive values include variables, pairs, and suspended computations of the form $!M$. Computations follow the CBPV structure so values are injected using $\return$, suspended computations are forced using $\der$, and applications is defined only on positive arguments.
 
@@ -69,12 +65,162 @@ $\lamBLL$ considers two different typing contexts
 \Gamma &::= \emptyset \mid \Gamma, x: P \tag{Variable context} \\
 \Theta &::= \emptyset \mid \Theta, r: P \tag{Reference context}
 \end{align*}
-The context $\Gamma$ contains term variables with positive types only, which are not computations, while the reference context $\Theta$ contains references which are can only be ground types. Fixed a reference context $\Theta$ then there are two typing judgments with respect to $\Theta$
+The context $\Gamma$ contains term variables with positive types only, which are not computations, while the reference context $\Theta$ contains references which are can only be ground types. Fixed a reference context $\Theta$ then there are two typing judgments with respect to $\Theta$.
 \begin{align*}
 \Gamma &\vdash_v^\Theta V: A \tag{Value typing} \\
 \Gamma &\vdash_c^\Theta M: A \tag{Computation typing}
 \end{align*}
 Computations may access references, but references never contain computations.
+
+The polynomial addition induces a binary partial operation $\boxplus$ on positive types defined by induction
+\begin{align*}
+	G \boxplus G &:= G\\
+	(P \otimes Q) \boxplus(R \otimes S) &:= (P \boxplus R) \otimes (Q \boxplus S) \\
+	(\bang_p^{\Theta} A) \boxplus (\bang_q^{\Theta}  A) &:= \bang_{p+q}^{\Theta}  A
+\end{align*}
+The partial operation $\boxplus$ can be extended as a total operation on contexts
+\begin{align*}
+	\emptyset \boxplus \emptyset&:= \emptyset \\
+	(\Gamma, x:P) \boxplus \Delta & := \begin{cases}
+		\Gamma, x: P \boxplus \Delta & \text{ if } x \text{ does not occur in } \Delta \\
+		x : P \boxplus Q, \Gamma \boxplus \Sigma & \text{ if } \Delta = \Sigma, x: Q
+	\end{cases}
+\end{align*}
+
+And to account for polynomial multiplication, for every polynomial $p \in \mathbb{N}_{\geq 1}[i]$ there is a total unary operation on positive types by induction:
+\begin{align*}
+	p * G &:= G\\
+	p * (P \otimes Q)  &:= (p * P) \otimes (p * Q) \\
+	p * (\bang_q^{\Theta}  A) &:= \bang_{p\times q}^{ \Theta}  A
+\end{align*}
+
+The operation $(p\,*)$ on positive types can also be extended to a total operation on term variables contexts:
+\[\begin{aligned}
+	p \ast \varnothing &:= \varnothing\\
+	p \ast  (x : P,\Gamma )&:= (x : p \ast P),  p\ast \Gamma 
+\end{aligned}\]
+
+The notion of substitution in $\lamBLL$ is defined with respect to the distinguished security parameter $i$. Given a polynomial $p \in \mathbb{N}_{\geq 1}[i]$ and a type $A$, the type $Ap$ is the type obtained by substituting every occurrence of the parameter $i$ in $A$ with the polynomial $p$, that is, $A[i:=p]$. Similarly, for a term $M$, the type $Mp$ to denote the term obtained by substituting $p$ for $i$ in all polynomial annotations occurring in $M$, namely $M[i:=p]$. The substitution acts only on polynomial indices appearing in types and terms, and does not affect term variables or computational structure.
+
+\newcommand{\subst}[1]{#1}
+\begin{figure}[ht]
+    \vspace*{-6mm}
+	\begin{center} \scriptsize
+	\begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
+		\inferrule* [right=var]{\\}{ \Gamma, x : P \vdash x: P}
+		\and 
+		\inferrule* [right=true]{\\}{\Gamma \vdash \true : \BB}	
+		\and
+		\inferrule* [right=false]{\\}{\Gamma \vdash \false : \BB}	
+		\and
+		\inferrule* [right=fun]{ \mathsf{typeof}(f) = G_1 \times \dots \times G_m \to G \\ (\Gamma_k\subst{p} \vdash Z_k : G_k\subst{p})_{1\leq k \leq m} \\ p \in \N_{\geq 1}[i]}{ \boxplus_k \Gamma_k\subst{p} ; \Theta \vdash f_p(Z_1, \dots, Z_m):G\subst{p}}
+		\and
+		\inferrule* [right=string]{s\in \{0,1\}^{c} \\ p : i \mapsto c\text{ is a constant polynomial}}{\Gamma \vdash s : \SS[p]}	
+		\and
+		\inferrule* [right=tensor]{\Gamma \vdash Z_1 : P \\ \Delta \vdash Z_2: Q}{\Gamma \boxplus \Delta \vdash \lis{Z_1, Z_2} : P\otimes Q}	
+		\and
+		\inferrule* [right=let]{\Gamma \vdash Z :  P \otimes Q\\x : P, y : Q, \Delta ; \Theta \vdash  M : A}{\Gamma \boxplus \Delta; \Theta \vdash  \letin{ \lis{x,y} = Z}{M} : A }
+		\and
+		\inferrule* [right=unit]{\\}{\Gamma \vdash \star : \UU}	
+		\and
+		\inferrule* [right=bang]{\Gamma ; \Theta \vdash M : A}{p \ast \Gamma \vdash \bang M : \bang_p^{\Theta} A}	
+		\and
+		\inferrule* [right=der]{\Gamma \vdash Z : \bang_1^{\Theta} A }{\Gamma;   \Theta \vdash \der (Z):A } 	
+		\and
+		\inferrule* [right=app]{\Gamma ; \Theta \vdash M : P\arrowRef{\Theta} A
+		\\ \Delta \vdash Z : P}{\Gamma\boxplus \Delta ; \Theta \vdash MZ : A}	
+		\and	\inferrule* [right=lam]{\Gamma, x: P ; \Theta \vdash M : A }{\Gamma \vdash \lambda x . M : P\arrowRef{\Theta} A}
+		\and
+		\inferrule* [right=eta]{\Gamma  \vdash V: A}{\Gamma ; \Theta \vdash \return V: A}	
+		\and
+		\inferrule* [right=let]{\Gamma ; \Theta \vdash N: P \\ x : P, \Delta ; \Theta \vdash M : A }{ \Gamma\boxplus \Delta ; \Theta \vdash \letin{ x = N}{M} : A}	
+		\and
+		\inferrule* [right=loop]{\Gamma \vdash V: P\arrowRef{\Theta} P \\ \Delta ; \Theta \vdash  M : P }{(p \ast \Gamma)\boxplus \Delta ; \Theta \vdash  \loopp{V}{p}{M} : P }	
+		\and
+		\inferrule* [right=set]{  \Gamma \vdash Z: G }{ \Gamma;  \Theta, r: G  \vdash \setr{r}{Z} : \UU }	
+		\and 
+		\inferrule* [right=get]{\\}{ \Gamma ; \Theta, r: G \vdash \get r : G}
+		\and 
+			\inferrule* [right=case]{\Gamma ; \Theta \vdash Z: \BB \\ \Delta ; \Theta \vdash  M : A \\ \Delta ; \Theta \vdash  N : A}{\Gamma \boxplus \Delta ; \Theta \vdash  \ifthen{Z}{M}{N} : A}	
+	\end{mathpar}
+\end{center}
+\vspace*{-6mm}
+\caption{Typing rules of $\lamBLL$}
+\label{fig:typingRules}
+\end{figure}
+
+A computation in $\lamBLL$ can be probabilistic and can read or modify the global reference context. In order to model probabilistic effects together with mutable references, $\lamBLL$ combines the distribution monad with the state monad. The key idea is that the result of a computation is not just a value: it depends on the initial store, it produces a distribution of possible outcomes, and each outcome is paired with an updated store. Accordingly, computations are interpreted as functions that take an initial store and return a probability distribution over pairs consisting of a value and a store.
+
+To account for probabilistic effects, $\lamBLL$ models probabilistic computation using finite probability distributions. Given a set $X$, a probability distribution over $X$ is a function $\mu : X \to [0,1]$ with finite support and total mass equal to $1$. Any such distribution can be written as a finite weighted sum of Dirac distributions $\delta_x$, which represent deterministic outcomes. This construction induces a monad $(\D, \eta_{\D}, \bind_{\D})$ on the category $\mathbf{Set}$ of sets and functions. The unit maps a value $x$ to the Dirac distribution $\delta_x$, embedding pure values into probabilistic computations having components $\eta_X : x \mapsto \delta_x$, while the bind operation models sequential probabilistic computation by combining distributions:
+\[
+\bind : \D(X) \times \mathbf{Set}(X,\D(Y)) \to \D(Y).
+\]
+Here, $\D(X)$ denotes the set of all probability distributions over $X$.
+
+As a simple example, consider a fair coin flip. Let $X = \{\mathsf{H}, \mathsf{T}\}$ and define the distribution $\mu = \tfrac{1}{2}\,\delta_{\mathsf{H}} + \tfrac{1}{2}\,\delta_{\mathsf{T}} \in \D(X)$
+Supposing that each outcome determines a further probabilistic computation over a set $Y$, given by a function $f : X \to \D(Y)$ such that
+\[
+f(\mathsf{H}) = \delta_{0}
+\qquad\text{and}\qquad
+f(\mathsf{T}) = \tfrac{1}{2}\,\delta_{0} + \tfrac{1}{2}\,\delta_{1}.
+\]
+The bind operation combines these into a single distribution over $Y$:
+\[
+\mu \bind f
+= \tfrac{1}{2}\,\delta_{0}
++ \tfrac{1}{2}\bigl(\tfrac{1}{2}\,\delta_{0} + \tfrac{1}{2}\,\delta_{1}\bigr)
+= \tfrac{3}{4}\,\delta_{0} + \tfrac{1}{4}\,\delta_{1}.
+\]
+
+To model mutable references, $\lamBLL$ uses a state monad whose state space is given by the set
+of stores associated with a fixed reference context $\Theta$. A store assigns to each reference
+a ground value of the appropriate type, thereby ensuring that memory remains well-typed
+throughout execution. Reading a reference retrieves its current value from the store, while
+writing to a reference produces a new store in which the corresponding location is updated.
+
+The full semantics of computations in $\lamBLL$ is obtained by combining probabilistic choice with state. For a fixed reference context $\Theta$, computations returning values in a set $X$ are interpreted as functions from stores to probability distributions over pairs of values and stores. For every closed reference context $\Theta$, there is a corresponding monad $(\T_\Theta, \eta_\Theta, \bind_\Theta)$ on $\Set$, defined as the tensor product of the distribution monad with the state monad, namely
+\[
+\T_{\Theta} := \bigl(\D(X \times \Store_{\Theta})\bigr)^{\Store_{\Theta}}
+\]
+The unit of $\T_\Theta$ has components $\eta_\Theta : X \to \D(X \times \Store_\Theta)^{\Store_\Theta}$, mapping a value $x \in X$ and a store $e \in \Store_\Theta$ to the Dirac distribution
+$\delta_{(x,e)}$, corresponding to a deterministic computation that returns $x$ without
+modifying the store. The bind operator
+\[
+\bind_\Theta : \T_\Theta X \times \mathbf{Set}(X, \T_\Theta Y) \to \T_\Theta Y
+\]
+maps $\varphi \in \T_\Theta X$ and $f : X \to \T_\Theta Y$ to the function
+$\dlambda e.\, \bigl(\varphi(e) \bind_\D \eval \circ (f \times \id_{\Store_\Theta})\bigr)$,
+where $\dlambda$ denotes currying and $\eval$ is the evaluation map induced by the Cartesian closed structure of $\Set$.
+
+
+% A computation in $\lamBLL$ can be probabilistic, and read or modify the global reference context. In order to model probabilistic effects with references $\lamBLL$ uses the distribution monad and the state monad. The idea is that the result of a computation is not just a value, it depends on the initial store, it produces a distribution of outcomes, and each outcome comes with an updated store. Computations are interpreted as functions that accepts the initial store and produce outcoomes as probability distribution over (value, store) pairs.
+
+% To add the effect of probabilistic compuations $\lamBLL$ models probabilistic computation using finite probability distributions. Given a set $X$, a probability distribution over $X$ is a function $\mu : X \to [0,1]$ with finite support and total mass equal to $1$. Any such distribution can be written as a finite weighted sum of Dirac distributions $\delta_x$, which represent deterministic outcomes. This construction induces a monad $(\D, \eta_{\D}, \bind_{\D})$ on the category $\mathbf{Set}$ of sets and functions. The unit maps a value $x$ to the Dirac distribution $\delta_x$, namely $\eta_X : x \mapsto \delta_x$ hence embedding pure values into probabilistic computations, while the bind operation models sequential probabilistic computation by combining distributions according to their weights:
+% \[
+% \bind : \D(X) \times \mathbf{Set}(X,\D(Y)) \to \D(Y).
+% \]
+% Here, $\D(X)$ denotes the set of all probability distributions over $X$. As a simple example let's consider a fair coin flip. 
+% Let $X = \{\mathsf{H}, \mathsf{T}\}$ and define the distribution
+% \[
+% \mu = \tfrac{1}{2}\,\delta_{\mathsf{H}} + \tfrac{1}{2}\,\delta_{\mathsf{T}} \in \D(X)
+% \]
+% Now suppose that each outcome determines a probabilistic computation over a set $Y$, for instance there is a function $f: X \to \D(Y)$ such that
+% \[
+% f(\mathsf{H}) = \delta_{0}
+% \qquad\text{and}\qquad
+% f(\mathsf{T}) = \tfrac{1}{2}\,\delta_{0} + \tfrac{1}{2}\,\delta_{1}
+% \]
+% The bind operation combines these into a single distribution over $Y$:
+% \[
+% \mu \bind f
+% = \tfrac{1}{2}\,\delta_{0}
+% + \tfrac{1}{2}\bigl(\tfrac{1}{2}\,\delta_{0} + \tfrac{1}{2}\,\delta_{1}\bigr)
+% = \tfrac{3}{4}\,\delta_{0} + \tfrac{1}{4}\,\delta_{1}.
+% \]
+% Sequential probabilistic choices are composed by propagating and weighting probabilities. The probabilities from the first distribution are pushed forward through the second.
+
+% Similarly to add effect of modifying the references $\lamBLL$
+
 % % \begin{figure}[h]
 % % 	\centering
 % % 	\begin{tikzpicture}[]

@@ -66,27 +66,17 @@ The last case could be extended to prevent variable capture: the bound variable 
 
 In the lambda calculus, each step of a computation consists of rewriting an application whose left-hand side is an abstraction, by substituting the free occurrences of the bound variable with the argument. For example the expression $(\lambda x.\lambda y.x\,y)(\lambda z.z)(\lambda z.z)$ evaluates to $(\lambda z.z)$. However, there are multiple ways to reduce the original term, depending on which reducible expression is chosen at each step. A term of the form $(\lambda x.M)$ beta-reduces to a term $u$, written by $(\lambda x.M) \to_\beta u$ if $u$ is the result of substituting $N$ for the free occurrences of $x$ in $M$, that is $u=M[x:=N]$. For example $(\lambda y.x\,y)x \to_\beta \lambda x.x\,x$. An expression of the form $(\lambda x.M)N$ is called a redex (short for reducible-expression) \cite{the-calculi-of-lambda-conversion}. The binary relation $\to_\beta$ is defined using the following inference rules 
 \begin{figure}[htpb]
-    \begin{gather*}
-    \begin{prooftree}
-        \hypo{}
-        \infer1[]{ (\lambda x.M)N \to_\beta M[x:=N] }
-    \end{prooftree}
-    \quad \quad \quad
-    \begin{prooftree}
-        \hypo{M \to_\beta M'}
-        \infer1[]{ MN \to_\beta M'N }
-    \end{prooftree}
-    \\[2ex]
-    \begin{prooftree}
-        \hypo{M \to_\beta M'}
-        \infer1[]{ NM \to_\beta NM' }
-    \end{prooftree}
-    \quad \quad \quad
-    \begin{prooftree}
-        \hypo{M \to_\beta M'}
-        \infer1[]{ \lambda x.M \to_\beta \lambda x.M' }
-    \end{prooftree}
-    \end{gather*}
+	\begin{center}
+	\begin{mathpar}\mprset{sep=1em}
+		\inferrule*[]{\\}{(\lambda x.M)N \to_\beta M[x:=N] }
+		\and 
+		\inferrule*[]{M \to_\beta M'}{MN \to_\beta M'N }
+		\\ 
+		\inferrule*[]{M \to_\beta M'}{ NM \to_\beta NM' }
+		\and
+        \inferrule*[]{M \to_\beta M'}{\lambda x.M \to_\beta \lambda x.M'}
+	\end{mathpar}
+    \end{center}
     \caption{Inference rules for the binary relation $\to_\beta$ untyped lambda-calculus.}
     \label{fig:untyped-lambda-calculus-beta-reduction}
 \end{figure}
@@ -169,25 +159,19 @@ The possible forms of the contexts $\Gamma, \Delta, \dots$ are given by
 \Gamma ::= \emptyset \mid \Gamma, x: \tau
 \]
 where $\emptyset$ denotes an empty context and $\Gamma, x: \tau$ represents the extension of the context $\Gamma$ with a new variable $x$ of type $\tau$. The typability relation on $C \times \Lambda \times T$ is defined by the inference rules shown in Figure \ref{fig:simply-typed-lc-typability-relations}.
+
 \begin{figure}[htpb]
-    \centering
-    \begin{gather*}
-    \begin{prooftree}
-    \hypo{}
-    \infer1[]{\Gamma, x:\tau \vdash x: \tau}
-    \end{prooftree}
-    \quad\quad
-    \begin{prooftree}
-    \hypo{\Gamma, x: \sigma \vdash M: \tau}
-    \infer1[]{\Gamma \vdash \lambda x.M: \sigma \to \tau}
-    \end{prooftree}
-    \quad\quad
-    \begin{prooftree}
-    \hypo{\Gamma \vdash M: \sigma \to \tau \quad \Gamma \vdash N: \sigma}
-    \infer1[]{\Gamma \vdash MN: \tau}
-    \end{prooftree}
-    \end{gather*}
-    \caption{Typability relation on $C \times \Lambda \times T$ in the simply typed lambda-calculus.}
+	\begin{center}
+	\begin{mathpar}\mprset{sep=1em}
+		\inferrule*[]{\\}{\Gamma, x:\tau \vdash x: \tau}
+		\and 
+		\inferrule*[]{\Gamma, x: \sigma \vdash M: \tau}{\Gamma \vdash \lambda x.M: \sigma \to \tau}
+		\and 
+		\inferrule*[]{\Gamma \vdash M: \sigma \to \tau \quad \Gamma \vdash N: \sigma}{\Gamma \vdash MN: \tau}
+		\and 
+	\end{mathpar}
+    \end{center}
+	\caption{Typability relation on $C \times \Lambda \times T$ in the simply typed lambda-calculus.}
     \label{fig:simply-typed-lc-typability-relations}
 \end{figure}
 
