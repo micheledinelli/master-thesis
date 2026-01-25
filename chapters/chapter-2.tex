@@ -332,6 +332,7 @@ A MAC $\Pi$ is secure if and only if for every PPT adversary $A$ there exists a 
 \end{definition}
 This definition of MAC security is simultaneously strong and weak. On the one hand, it is strong because it considers the scheme broken even if the adversary forges a valid tag for a message that is meaningless. Any successful forgery, regardless of the message content, translates to a violation of security. On the other hand, the definition is weak in that it does not protect against replay attacks. An adversary who records a previously transmitted and authenticated pair $(m,t)$ can resend the same pair at a later time, and it will still be accepted as valid by the receiver. Since replayed messages are not considered new forgeries under the standard definition, preventing such attacks requires additional mechanisms, such as nonces, timestamps, or sequence numbers, which go beyond basic MAC security.
 
+\subsection{MAC Security From Pseudorandom Function}\label{subsec:mac-security}
 A well-known result in cryptography states that pseudorandom functions can be used to construct secure message authentication codes. Given a pseudorandom function $F$, the construction $\mathrm{MAC}^F$ yields a secure MAC. Formally, let $\Pi^F = (Gen, Mac, Vrfy)$ be the triple of algorithms defined as follows:
 \begin{itemize}
 \item The key-generation algorithm $Gen$ takes as input the security parameter $1^n$ and outputs a uniformly random bitstring $k \in {0,1}^n$, each with probability $1/2^n$;
@@ -355,7 +356,7 @@ The goal of the proof is to show that
 \begin{align}\label{eq:pr-diff}
 \left| \mathrm{Pr}[\mathtt{MacForge}_{A,\Pi^F}(n) = 1] - \mathrm{Pr}[\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1] \right| \leq \epsilon(n)
 \end{align}
-for some negligible function $\epsilon$. That is, the probability that any PPT adversary succeeds in forging a valid MAC under $\mathrm{MAC}^F$ differs only negligibly from the probability that the same adversary succeeds when the MAC is computed using a truly random function. Combining Equation~\ref{eq:pr-diff} with Equation~\ref{eq:security-tildepi}, we obtain
+for some negligible function $\epsilon$ and where $\Pi^F$ is MAC$^F$ construction. That is, the probability that any PPT adversary succeeds in forging a valid MAC under $\mathrm{MAC}^F$ differs only negligibly from the probability that the same adversary succeeds when the MAC is computed using a truly random function. Combining Equation~\ref{eq:pr-diff} with Equation~\ref{eq:security-tildepi}, we obtain
 \begin{align}\label{eq:security-macf}
 \mathrm{Pr}[\mathtt{MacForge}_{A,\Pi^F}(n) = 1] \leq \frac{1}{2^n} + \epsilon(n)
 \end{align}
@@ -381,7 +382,6 @@ The distinguisher $D_A^{\mathcal{O}}$ runs in probabilistic polynomial time, sin
     \item If instead $\mathcal{O} = f$, where $f$ is a truly random function, then the simulation is distributed identically to the view of $A$ in the experiment $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, and hence $D$ outputs 1 exactly when $\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1$ \[ \mathrm{Pr}[D_A^{f(\cdot)}(1^n) = 1] = \mathrm{Pr}[\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1] \]
     where $f \in \mathsf{Func}_n$ is chosen uniformly.
 \end{itemize}
-
 
 Since $F$ is a pseudorandom function, by definition the advantage of any PPT distinguisher against $F$ is negligible (and $D$ runs in polynomial time), there exists a negligible function $\epsilon$ such that
 \begin{align}

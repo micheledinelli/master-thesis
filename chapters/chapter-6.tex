@@ -1,15 +1,24 @@
 \chapter{Proving PRF-Induced MAC Security Equationally}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
+This chapter establishes that existential unforgeability under chosen-message
+attacks for pseudorandom-function–based message authentication codes can be
+soundly expressed and proved within the $\lamBLL$ framework. In particular, we
+formalize the standard reduction from MAC forgery to pseudorandom function
+indistinguishability by encoding the $\macexp$ experiment, the adversary, and the
+MAC oracle as $\lamBLL$ terms, and by reconstructing the reduction outlined in
+Section~\ref{subsec:mac-security} using the equational reasoning principles of the
+calculus. This formalization demonstrates that $\lamBLL$ is sufficiently expressive
+to internalize classical cryptographic security reductions while enforcing polynomial-time constraints through its graded type system.
 
-This chapter formalizes the security definition of pseudorandom-function–based message
-authentication codes (PRF-induced MACs) introduced in Section~\ref{sec:computational-cryptography}. We consider the standard proof by reduction establishing the security of the MAC scheme $\mathrm{MAC}^F$, constructed from a pseudorandom function $F$, as outlined in that section.
+We begin by recalling the MAC-forgery experiment $\macexp$ and its pseudocode,
+reported in Figure~\ref{fig:macforge-recall}, and by specifying the types of the
+components of the experiment as they appear as subterms in the $\lamBLL$
+formalization. The concrete implementation of the terms modeling the key-generation
+algorithm $Gen$ and the MAC oracle $Mac_k(\cdot)$ depends on the specific MAC
+scheme under consideration. For this reason, these terms are left abstract and will be instantiated only after fixing a scheme $\Pi$. In the following
+paragraphs, we make this instantiation explicit for the schemes $\Pi^F$ and
+$\widetilde{\Pi}$ that are used in the proof of Theorem~\ref{theorem:mac-security}.
 
-The goal is to express this security definition and its proof within the $\lamBLL$
-framework. To this end, we encode the components of the MAC-forgery experiment as
-$\lamBLL$ terms and reconstruct the reduction argument using the equational reasoning
-principles. In particular, we formalize the adversary, the MAC oracle, and the forgery experiment, and we prove the security of $\mathrm{MAC}^F$ by showing that any successful forgery induces a distinguisher for the underlying pseudorandom function.
-
-First of all let's begin by recalling the MAC-forgery experiment $\macexp$ and its pseudocode, shown in Figure~\ref{fig:macforge-recall}.
 \begin{figure}[htpb]
     \centering
     \begin{align*}
@@ -23,28 +32,49 @@ First of all let's begin by recalling the MAC-forgery experiment $\macexp$ and i
     \label{fig:macforge-recall}
 \end{figure}
 
-We now describe how the components of this experiment are typed in $\lamBLL$. The key-generation algorithm $Gen$ is a probabilistic computation that, given the
-security parameter, produces a secret key of length polynomial in $i$. The adversary is modeled as a higher-order term that receives oracle access to the MAC
-function and outputs a candidate forgery. Since the adversary may query the MAC oracle
-a polynomial number $q(i)$ of times, the oracle is provided under a graded modality.
+We now describe how the components of this experiment are typed in $\lamBLL$.
+The key-generation algorithm $Gen$ is modeled as a probabilistic computation that,
+given the security parameter, produces a secret key whose length is polynomial in
+$i$, where $i$ denotes the security parameter. The adversary is modeled as a
+higher-order computation that receives oracle access to the MAC function and outputs
+a candidate forgery together with its internal state, which records the oracle
+queries performed. The MAC oracle itself is represented as a term whose use is
+controlled by a graded modality, enforcing a polynomial bound on the number of
+queries.
 
 \begin{align*}
 \vdash_v^\Theta &: \UU \multimap \SS[i] && \tag{Type for $Gen$} \\
-\vdash_v^\Theta &: \vrfy : (\SS[i] \otimes \SS[i]) \multimap \BB && \tag{Type for $\vrfy$} \\
-\vdash_v^\Theta &: Oracle : \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) && \tag{Type for $Oracle$} \\
+\vdash_v^\Theta &: (\SS[i] \otimes \SS[i]) \multimap \BB && \tag{Type for $\vrfy$} \\
+\vdash_c^\Theta &: \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) && \tag{Type for $Oracle$} \\
 \vdash_c^\Theta &: 
-Adv : Oracle \multimap \bigl((\SS[i] \otimes \SS[i]) \otimes \SS[r]\bigr) && \tag{Type for $Adv$}
+Oracle \multimap \bigl((\SS[i] \otimes \SS[i]) \otimes \SS[r]\bigr) && \tag{Type for $Adv$}
+% \vdash_c^\Theta &: 
+% \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap \bigl((\SS[i] \otimes \SS[i]) \otimes \SS[r]\bigr) && \tag{Type for $Adv$}
 \end{align*}
 
-Here, $i$, $r$, and $q$ are polynomials. The oracle type $(\SS[i] \multimap \SS[i])$ represents the MAC function mapping messages of length $i$ to tags of length $i$, wrapped in a graded modality to enforce a polynomial bound on queries. The adversary's output $(\SS[i] \otimes \SS[i]) \otimes \SS[r]$ contains a candidate message/tag pair and the ledger of all queries performed. The function $\vrfy$ checks tag validity, and $\mathtt{contains}$ ensures the adversary does not output a previously queried message. The type of the function $\mathtt{contains}$ is \[ \vdash_v^\Theta: \mathtt{contains} : \SS[r] \otimes \SS[i] \multimap \BB \]
+Here, $i$, $r$, and $q$ denote polynomials in the security parameter. The oracle type $\bang_{q}(\SS[i] \multimap \SS[i])$ models a MAC oracle mapping messages of length $i$ to tags of the same length, where the graded modality $\bang_{q}$ enforces a polynomial bound on the number of oracle queries available to the adversary. The adversary’s output type $(\SS[i] \otimes \SS[i]) \otimes \SS[r]$ consists of a candidate message-tag pair together with a string encoding the adversary’s internal state. This state representation includes the information accumulated during oracle interactions, such as the history of queried messages. The verification function $\vrfy$ checks the validity of the proposed tag by recomputing the MAC on the message component of type $\SS[i]$ and comparing the result with the supplied tag. The adversary, represented by the term $Adv$, is given access to a MAC oracle of type $\bang_{q}(\SS[i] \multimap \SS[i])$. Based on its interaction with the oracle, it produces a candidate forgery $(m,t)$ together with its internal state.
+The length of this state is bounded by the polynomial $r$, a fact ensured by the typing of $\lambda$BLL reflecting that the adversary operates within probabilistic polynomial time.
 
-The $\lamBLL$ term for the experiment is represented in Figure~\ref{fig:macforge-term}
+To construct the set
+\[
+\mathbb{Q} \gets \{\, m \mid A \text{ queries } Mac_k(m) \,\}
+\]
+we introduce an auxiliary function that allows inspection of the adversary’s query history. This is captured by the predicate $\mathtt{contains}$, whose purpose is to determine whether a given message occurs in the adversary’s internal representation of queried messages. More generally, $\mathtt{contains}$ checks whether a bitstring $\SS[i]$ appears as a substring of a longer bitstring $\SS[r]$. In the security experiment, these strings are instantiated respectively by the message $m$ of an attempted forgery $(m,t)$ and by the adversary’s internal state returned by the term $Adv$, which encodes the sequence of previous oracle queries. The type of the predicate is given by
+\begin{align*}
+\vdash^\Theta_v\ \mathtt{contains} : (\SS[r] \otimes \SS[i]) \multimap \BB
+\end{align*}
+indicating that it takes the adversary state and a candidate message as input and returns a boolean value.
+
+It is worth noting that the type derivations of the terms introduced so far are parameterized by a reference context $\Theta$, which varies depending on the cryptographic experiment under consideration. The reference context will differ between the model for the encryption scheme $\Pi^F$ and that for $\widetilde{\Pi}$.
+In the former case, the context $\Theta$ is empty, whereas in the latter it contains a reference used to model the random function $f$.
+
+We define the $\lamBLL$ term corresponding to the forgery experiment, shown in Figure~\ref{fig:macforge-term}. The experiment begins by generating a fresh key $k$ and constructing the corresponding oracle $o$. The adversary $Adv$ is then given access to $o$ and returns both an attempted forgery $(m,t)$ and its internal state $s$, which encodes the history of oracle queries. The pair $(m,t)$ is destructured to handle the message and the tag separately, while the adversary state is bound to the variable $Q$. The experiment first checks whether the verification procedure $\vrfy$ accepts the pair $(m,t)$. If verification succeeds, it remains to test whether the message $m$ appears in the adversary's query history $Q$ using the predicate $\mathtt{contains}$. The experiment returns $\true$ if $m$ was not previously queried, and $\false$ otherwise. If verification fails, the experiment immediately returns $\false$.
 
 \begin{figure}[ht]
     \centering
     \begin{align*}
     &MacForge \triangleq \\
-    &\quad \letin{k = Gen *}{} \\
+    &\quad \letin{k = Gen \star}{} \\
     &\quad \letin{o = Oracle\, k}{} \\
     &\quad \letin{\langle mt, s \rangle = Adv\, o}{} \\
     &\quad \letin{\langle m, t \rangle = mt}{} \\
@@ -53,8 +83,6 @@ The $\lamBLL$ term for the experiment is represented in Figure~\ref{fig:macforge
     &\quad \mathtt{if}\, b\, \mathtt{then}\, \mathtt{not}(\mathtt{contains}(Q, m)) \\
     &\quad \mathtt{else}\, \false
     \end{align*}
-    \caption{$\lamBLL$ term for the $\mathtt{MacForge}$ experiment. The experiment returns $\true$ if the adversary outputs a fresh valid message/tag pair and $\false$ otherwise.}
+    \caption{$\lamBLL$ term for the $\mathtt{MacForge}$ experiment.}
     \label{fig:macforge-term}
 \end{figure}
-
-In this formulation the algorithm $Gen$ produces a random key of length $i$. The $Oracle\, k$ is the MAC function under the key $k$, duplicated according to the polynomial $q(i)$. $Adv$ is a computation interacting with the oracle, producing a candidate message/tag pair and the query ledger $Q$. The algorithm $\vrfy$ checks the correctness of the MAC tag for the candidate message. $\mathtt{contains}$ checks whether the candidate message is already present in the ledger. The experiment returns $\true$ if and only if the tag is valid and the message was not queried previously, otherwise it returns $\false$.
