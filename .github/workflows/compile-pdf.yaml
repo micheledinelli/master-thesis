@@ -30,12 +30,12 @@ jobs:
           root_file: main.tex
           working_directory: .
 
-      - name: Install pdfunite
-        run: sudo apt-get install -y poppler-utils
+      - name: Install pdftk
+        run: sudo apt-get update && sudo apt-get install -y pdftk-java
 
       - name: Concatenate title page and main document
         run: |
-          pdfunite titlepage/front.pdf main.pdf thesis.pdf
+          pdftk titlepage/front.pdf main.pdf cat output thesis.pdf
 
       - name: Prepare artifact directory
         run: |
@@ -43,7 +43,6 @@ jobs:
           mv thesis.pdf artfact-out/
 
       - name: Upload as artifact
-        id: deployment
         uses: actions/upload-pages-artifact@v3
         with:
           path: artfact-out
