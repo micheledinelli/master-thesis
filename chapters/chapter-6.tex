@@ -1,9 +1,6 @@
 \chapter{Proving PRF-Induced MAC Security Equationally}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
-This chapter establishes that existential unforgeability under chosen-message
-attacks for pseudorandom-function–based message authentication codes can be
-soundly expressed and proved within the $\lamBLL$ framework. In particular, we
-formalize the standard reduction from MAC forgery to pseudorandom function
+This chapter demonstrates that existential unforgeability under chosen-message attacks for pseudorandom-function-based message authentication codes may be rigorously articulated and validated inside the $\lamBLL$ framework. In particular, we formalize the standard reduction from MAC forgery to pseudorandom function
 indistinguishability by encoding the $\macexp$ experiment, the adversary, and the
 MAC oracle as $\lamBLL$ terms, and by reconstructing the reduction outlined in
 Section~\ref{subsec:mac-security} using the equational reasoning principles of the
@@ -45,15 +42,15 @@ queries.
 \begin{align*}
 \vdash_v^\Theta &: \UU \multimap \SS[i] && \tag{Type for $Gen$} \\
 \vdash_v^\Theta &: (\SS[i] \otimes \SS[i]) \multimap \BB && \tag{Type for $\vrfy$} \\
-\vdash_c^\Theta &: \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) && \tag{Type for $Oracle$} \\
+\vdash_c^\Theta &: \SS[i] \multimap \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) && \tag{Type for $Oracle$} \\
 \vdash_c^\Theta &: 
-Oracle \multimap \bigl((\SS[i] \otimes \SS[i]) \otimes \SS[r]\bigr) && \tag{Type for $Adv$}
+ \multimap \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap \bigl((\SS[i] \otimes \SS[i]) \otimes \SS[r]\bigr) && \tag{Type for $Adv$}
 % \vdash_c^\Theta &: 
 % \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap \bigl((\SS[i] \otimes \SS[i]) \otimes \SS[r]\bigr) && \tag{Type for $Adv$}
 \end{align*}
 
-Here, $i$, $r$, and $q$ denote polynomials in the security parameter. The oracle type $\bang_{q}(\SS[i] \multimap \SS[i])$ models a MAC oracle mapping messages of length $i$ to tags of the same length, where the graded modality $\bang_{q}$ enforces a polynomial bound on the number of oracle queries available to the adversary. The adversary’s output type $(\SS[i] \otimes \SS[i]) \otimes \SS[r]$ consists of a candidate message-tag pair together with a string encoding the adversary’s internal state. This state representation includes the information accumulated during oracle interactions, such as the history of queried messages. The verification function $\vrfy$ checks the validity of the proposed tag by recomputing the MAC on the message component of type $\SS[i]$ and comparing the result with the supplied tag. The adversary, represented by the term $Adv$, is given access to a MAC oracle of type $\bang_{q}(\SS[i] \multimap \SS[i])$. Based on its interaction with the oracle, it produces a candidate forgery $(m,t)$ together with its internal state.
-The length of this state is bounded by the polynomial $r$, a fact ensured by the typing of $\lambda$BLL reflecting that the adversary operates within probabilistic polynomial time.
+Here, $i$, $r$, and $q$ denote polynomials in the security parameter. The oracle type $\SS[i] \multimap \bang_{q}(\SS[i] \multimap \SS[i])$ models a MAC oracle which, once instantiated with a secret key, maps messages of length $i$ to tags of the same length. The graded modality $\bang_{q}$ enforces a polynomial bound on the number of oracle queries that the adversary may perform. 
+The adversary $Adv$ takes as input the closure obtained by currying and encapsulating the key within the $Oracle$ term. Its output type $(\SS[i] \otimes \SS[i]) \otimes \SS[r]$ consists of a candidate message-tag pair together with a string encoding the adversary's internal state. This state captures the information accumulated during oracle interactions, such as the history of queried messages. The verification function $\vrfy$ checks the validity of a proposed tag by recomputing the MAC on the message component of type $\SS[i]$ and comparing it with the supplied tag. Overall, the typing of $Adv$ ensures that both the number of oracle queries and the size of the internal state are polynomially bounded by $q$ and $r$, respectively. This reflects the fact that the adversary operates within probabilistic polynomial time, as enforced by the typing discipline of $\lamBLL$. The verification function $\vrfy$ checks the validity of the proposed tag by recomputing the MAC on the message component of type $\SS[i]$ and comparing the result with the supplied tag. The adversary, represented by the term $Adv$, is given access to a MAC oracle of type $\bang_{q}(\SS[i] \multimap \SS[i])$. Based on its interaction with the oracle, it produces a candidate forgery $(m,t)$ together with its internal state. The length of this state is bounded by the polynomial $r$, a fact ensured by the typing of $\lamBLL$ reflecting that the adversary operates within probabilistic polynomial time.
 
 To construct the set
 \[
