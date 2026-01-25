@@ -172,14 +172,14 @@ Here, the first probability is taken over the uniform choice of $s \in \{0,1\}^n
 
 As stated above, a pseudorandom generator is not random in a strict information-theoretic sense. If the expansion factor $\ell$ is fixed, for example $\ell(n) = 2n$, then the set of all possible bitstrings of length $2n$ has size $2^{2n}$, the generator $G$, being deterministic, can produce at most $2^n$ distinct outputs one for each possible seed. Thus, the distribution induced by $G(s)$ has support of size at most $2^n$, which is clearly smaller than the full space $2^{2n}$. Consequently, there always exists a distinguisher $D$ that can separate the output of $G$ from the uniform distribution with high probability. However, such a distinguisher necessarily has exponential complexity. Since the definition of pseudorandomness only considers efficient (polynomial-time) distinguishers, this does not contradict Equation~\ref{eq:prng} and for all PPT distinguishers, the distinguishing advantage remains negligible.
 
-Given the notion of a pseudorandom generator, one can construct a PRG-induced encryption scheme that is secure against passive (eavesdropping) attacks. Formally, this scheme is a triple of algorithms $\Pi^G = (Gen, Enc, Dec)$ defined as follows:
+Given the notion of a pseudorandom generator, one can construct a PRG-induced encryption scheme that is secure against passive (eavesdropping) attacks. Formally, this scheme is a triple of algorithms $\Pi_G = (Gen, Enc, Dec)$ defined as follows:
 \begin{itemize}
     \item The algorithm $Gen$ on input $1^n$ outputs each string of length $n$ with same probability $1/2^n$.
     \item The algorithm $Enc$ is defined as $Enc_k(m) = m \oplus G_k$.
     \item The algorithm $Dec$ is defined as $Dec_k(c) = c \oplus G_k$.
 \end{itemize}
 
-The scheme $\Pi^G$ is correct because $G$ is deterministic. Indeed, for every key $k$ and message $m$ it is true that $Dec_k(Enc_k(m)) = Dec_k(m \oplus G_k) = ((G_k \oplus m) \oplus G_k)  = m$. The scheme $\Pi^G$ is defined for messages of fixed length $\ell(n)$, where $\ell$ is the expansion factor of the pseudorandom generator $G$.
+The scheme $\Pi_G$ is correct because $G$ is deterministic. Indeed, for every key $k$ and message $m$ it is true that $Dec_k(Enc_k(m)) = Dec_k(m \oplus G_k) = ((G_k \oplus m) \oplus G_k)  = m$. The scheme $\Pi_G$ is defined for messages of fixed length $\ell(n)$, where $\ell$ is the expansion factor of the pseudorandom generator $G$.
 
 In the context of the experiment $\privkeav$, the considered attacks are \emph{passive}. This means that the adversary cannot actively interfere with the execution of the protocol, but can only observe its surroundings. In particular, the communicating parties transmit a single ciphertext, which may be observed by an eavesdropper. It would be desirable, however, for the communicating parties to be able to exchange multiple ciphertexts generated using the same secret key even in the presence of an eavesdropper who can observe all of them. To model such scenarios an encryption scheme is required to remains secure under the encryption of multiple messages, and has to behave accordingly with respect of a new security experiment, shown in Figure~\ref{fig:privk-mult}.
 
@@ -210,7 +210,7 @@ A scheme $\Pi$ is said to be secure against multiple encryptions if for every PP
 It immediately follows that:
 
 \begin{lemma}
-The scheme $\Pi^G$ is not secure with respect to $\privkmult$, even if $G$ is a pseudorandom generator.
+The scheme $\Pi_G$ is not secure with respect to $\privkmult$, even if $G$ is a pseudorandom generator.
 \end{lemma}
 
 What at first appears to be a strong limitation is in fact fundamental.
@@ -271,10 +271,10 @@ Let $F: \{0, 1\}^* \times \{0, 1\}^* \to \{0, 1\}^*$ be an efficient, length-pre
 \begin{align}
 \left| \mathrm{Pr}[D^{F_k(\cdot)}(1^n) = 1] - \mathrm{Pr}[D^{f(\cdot)}(1^n) = 1] \right| \leq \epsilon(n)
 \end{align}
-where $k$ is  uniformly chosen among all strings of length $n$ and $f(\cdot)$ is uniformly chosen among all functions from $\{0,1\}^n$ to $\{0,1\}^n$.
+where $k$ is  uniformly chosen among all strings of length $n$ and $f$ is uniformly chosen among all functions from $\{0,1\}^n$ to $\{0,1\}^n$.
 \end{definition}
 
-Given a pseudorandom function, one can construct a private-key encryption scheme that is secure with respect to the experiment $\mathtt{PrivK}^{cpa}$. The resulting scheme, denoted by ($\Pi^F = (Gen, Enc, Dec)$), is defined as follows.
+Given a pseudorandom function, one can construct a private-key encryption scheme that is secure with respect to the experiment $\mathtt{PrivK}^{cpa}$. The resulting scheme, denoted by ($\Pi_F = (Gen, Enc, Dec)$), is defined as follows.
 \begin{itemize}
     \item The algorithm $Gen$ on input $1^n$ outputs each string of length $n$ with same probability $1/2^n$.
     \item Given a pseudorandom function $F$, the algorithm $Enc_k(m)$ is defined as the (binary encoding of the) pair $\langle r, F_k(r) \oplus m\rangle$, where $r$ is a random string $|k|$ bits long.
@@ -282,13 +282,13 @@ Given a pseudorandom function, one can construct a private-key encryption scheme
 \end{itemize}
 
 \begin{theorem}
-If $F$ is a PRF, then $\Pi^F$ is secure against CPA attacks.
+If $F$ is a PRF, then $\Pi_F$ is secure against CPA attacks.
 \end{theorem}
 
 \section{Message Authentication Codes}
 Message Authentication Codes (MACs) address the problem of message authentication over insecure channels. In this setting, messages are not required to be secret, but it must be possible to authenticate them, namely, each party should be able to verify that a message it receives was indeed sent by the party claiming to be the sender. In other words, MACs provide integrity and authenticity rather than confidentiality. 
 
-Schemes based solely on pseudorandom generators are insufficient to solve this problem. For instance, consider an encryption scheme $\Pi^G$ based on a pseudorandom generator $G$, where encryption is defined as $Enc_k(m) = G_k \oplus m$ and decryption as $Dec_k(m) = G_k \oplus c$. An adversary who observes a ciphertext can easily construct a valid ciphertext for a related message, hence impersonating the legitimate sender. Even more directly, flipping any bit in the ciphertext $c = G_k \oplus m$ results in the same bit being flipped in the plaintext after decryption. Thus, given a ciphertext $c$ that encrypts a message $m$, it is possible to generate a modified ciphertext $c'$ such that $m' = Dec_k(c')$ is equal to $m$ except for one or more flipped bits. This illustrates that pseudorandomness alone does not guarantee message integrity. Authentication requires dedicated mechanisms beyond encryption.
+Schemes based solely on pseudorandom generators are insufficient to solve this problem. For instance, consider an encryption scheme $\Pi_G$ based on a pseudorandom generator $G$, where encryption is defined as $Enc_k(m) = G_k \oplus m$ and decryption as $Dec_k(m) = G_k \oplus c$. An adversary who observes a ciphertext can easily construct a valid ciphertext for a related message, hence impersonating the legitimate sender. Even more directly, flipping any bit in the ciphertext $c = G_k \oplus m$ results in the same bit being flipped in the plaintext after decryption. Thus, given a ciphertext $c$ that encrypts a message $m$, it is possible to generate a modified ciphertext $c'$ such that $m' = Dec_k(c')$ is equal to $m$ except for one or more flipped bits. This illustrates that pseudorandomness alone does not guarantee message integrity. Authentication requires dedicated mechanisms beyond encryption.
 
 Two users who wish to communicate in an authenticated manner begin by generating and securely sharing a secret key $k$ prior to communication. When one party wants to send a message $m$ to the other, she computes a MAC tag (or simply a tag) $t$ based on the message and the shared key, and sends the pair $(m, t)$ to the receiver. The tag is computed using a tag-generation algorithm, denoted by $Mac$. That is, the sender computes the tag $t$ as $Mac_k(m)$ and transmits $(m, t)$. Upon receiving $(m, t)$, the receiver checks whether $t$ is a valid tag for the message $m$ with respect to the key $k$. Verification is performed by a deterministic algorithm$\vrfy$, which takes as input the key, the message, and the tag, and outputs a bit indicating acceptance or rejection of the tag on the message.
 
@@ -333,7 +333,7 @@ A MAC $\Pi$ is secure if and only if for every PPT adversary $A$ there exists a 
 This definition of MAC security is simultaneously strong and weak. On the one hand, it is strong because it considers the scheme broken even if the adversary forges a valid tag for a message that is meaningless. Any successful forgery, regardless of the message content, translates to a violation of security. On the other hand, the definition is weak in that it does not protect against replay attacks. An adversary who records a previously transmitted and authenticated pair $(m,t)$ can resend the same pair at a later time, and it will still be accepted as valid by the receiver. Since replayed messages are not considered new forgeries under the standard definition, preventing such attacks requires additional mechanisms, such as nonces, timestamps, or sequence numbers, which go beyond basic MAC security.
 
 \subsection{MAC Security From Pseudorandom Function}\label{subsec:mac-security}
-A well-known result in cryptography states that pseudorandom functions can be used to construct secure message authentication codes. Given a pseudorandom function $F$, the construction $\mathrm{MAC}^F$ yields a secure MAC. Formally, let $\Pi^F = (Gen, Mac, Vrfy)$ be the triple of algorithms defined as follows:
+A well-known result in cryptography states that pseudorandom functions can be used to construct secure message authentication codes. Given a pseudorandom function $F$, the construction $\mathrm{MAC}^F$ yields a secure MAC. Formally, let $\Pi_F = (Gen, Mac, Vrfy)$ be the triple of algorithms defined as follows:
 \begin{itemize}
 \item The key-generation algorithm $Gen$ takes as input the security parameter $1^n$ and outputs a uniformly random bitstring $k \in {0,1}^n$, each with probability $1/2^n$;
 \item The tag generation algorithm is defined as $Mac_k(m) = F_k(m)$;
@@ -341,7 +341,7 @@ A well-known result in cryptography states that pseudorandom functions can be us
 \end{itemize}
 
 \begin{theorem}[Security of $\mathrm{MAC}^F$]\label{theorem:mac-security}
-If $F$ is a pseudorandom function, then the MAC scheme $\Pi^F$ is a secure fixed-length message authentication code for messages of length $n$.
+If $F$ is a pseudorandom function, then the MAC scheme $\Pi_F$ is a secure fixed-length message authentication code for messages of length $n$.
 \end{theorem}
 \begin{proof}\label{proof:handwavy}
 Let $A$ be a PPT adversary. Consider the message authentication code $\widetilde{\Pi}$, which is mostly identical to $\mathrm{MAC}^F$ except that it uses a truly random function $f$ instead of the pseudorandom function $F_k$. The algorithm $\widetilde{Gen}(1^n)$ samples uniformly a truly random function from the set of all functions $\{0,1\}^n \to \{0,1\}^n$, and the algorithm $\widetilde{Mac}(m)$ computes the tag $t = f(m)$.
@@ -354,15 +354,15 @@ since for any message $m \notin \mathcal{Q}$, the value $t = f(m)$ is uniformly 
 
 The goal of the proof is to show that
 \begin{align}\label{eq:pr-diff}
-\left| \mathrm{Pr}[\mathtt{MacForge}_{A,\Pi^F}(n) = 1] - \mathrm{Pr}[\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1] \right| \leq \epsilon(n)
+\left| \mathrm{Pr}[\mathtt{MacForge}_{A,\Pi_F}(n) = 1] - \mathrm{Pr}[\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1] \right| \leq \epsilon(n)
 \end{align}
-for some negligible function $\epsilon$ and where $\Pi^F$ is MAC$^F$ construction. That is, the probability that any PPT adversary succeeds in forging a valid MAC under $\mathrm{MAC}^F$ differs only negligibly from the probability that the same adversary succeeds when the MAC is computed using a truly random function. Combining Equation~\ref{eq:pr-diff} with Equation~\ref{eq:security-tildepi}, we obtain
+for some negligible function $\epsilon$ and where $\Pi_F$ is MAC$^F$ construction. That is, the probability that any PPT adversary succeeds in forging a valid MAC under $\mathrm{MAC}^F$ differs only negligibly from the probability that the same adversary succeeds when the MAC is computed using a truly random function. Combining Equation~\ref{eq:pr-diff} with Equation~\ref{eq:security-tildepi}, we obtain
 \begin{align}\label{eq:security-macf}
-\mathrm{Pr}[\mathtt{MacForge}_{A,\Pi^F}(n) = 1] \leq \frac{1}{2^n} + \epsilon(n)
+\mathrm{Pr}[\mathtt{MacForge}_{A,\Pi_F}(n) = 1] \leq \frac{1}{2^n} + \epsilon(n)
 \end{align}
 which proves the theorem because of the closure of negligible functions (see Lemma~\ref{lemma:closure-ngl}).
 
-To prove Equation~\ref{eq:pr-diff}, we construct from any adversary $A$ that succeeds in the $\mathtt{MacForge}$ experiment, a distinguisher $D_A$ for the pseudorandom function $F_k$. The distinguisher $D_A$ is given oracle access to a function $\mathcal{O}: \{0,1\}^n \to \{0,1\}^n$ and must determine whether $\mathcal{O}$ is a pseudorandom function of the form $F_k$ for a uniformly random key $k \in \{0,1\}^n$, or a truly random function $f$. The distinguisher $D_A^{\mathcal{O}}$ emulates the MAC-forgery experiment for $A$ in such a way that $D_A^{F_k(\cdot)}$ behaves exactly like $\mathtt{MacForge}_{A,\Pi^F}$, while $D_A^{f(\cdot)}$ behaves like $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, where $\widetilde{\Pi}$ is the MAC scheme based on a truly random function. The distinguisher is defined as follows:
+To prove Equation~\ref{eq:pr-diff}, we construct from any adversary $A$ that succeeds in the $\mathtt{MacForge}$ experiment, a distinguisher $D_A$ for the pseudorandom function $F_k$. The distinguisher $D_A$ is given oracle access to a function $\mathcal{O}: \{0,1\}^n \to \{0,1\}^n$ and must determine whether $\mathcal{O}$ is a pseudorandom function of the form $F_k$ for a uniformly random key $k \in \{0,1\}^n$, or a truly random function $f$. The distinguisher $D_A^{\mathcal{O}}$ emulates the MAC-forgery experiment for $A$ in such a way that $D_A^{F_k(\cdot)}$ behaves exactly like $\mathtt{MacForge}_{A,\Pi_F}$, while $D_A^{f(\cdot)}$ behaves like $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, where $\widetilde{\Pi}$ is the MAC scheme based on a truly random function. The distinguisher is defined as follows:
 
 \begin{center}
 \vspace*{1em}
@@ -378,7 +378,7 @@ $D_A^{\mathcal{O}}:$
 
 The distinguisher $D_A^{\mathcal{O}}$ runs in probabilistic polynomial time, since it only runs $A$ and makes a polynomial number of oracle queries. There are two cases:
 \begin{itemize}
-    \item If $\mathcal{O} = F_k$, then the simulation provided by $D_A$ is distributed identically to the view of $A$ in the experiment $\mathtt{MacForge}_{A,\Pi^F}$, and therefore $D$ outputs 1 exactly when $\mathtt{MacForge}_{A,\Pi}(n) = 1$ \[ \mathrm{Pr}[D_A^{F_k(\cdot)}(1^n) = 1] = \mathrm{Pr}[\mathtt{MacForge}_{A,\Pi^F}(n) = 1] \]
+    \item If $\mathcal{O} = F_k$, then the simulation provided by $D_A$ is distributed identically to the view of $A$ in the experiment $\mathtt{MacForge}_{A,\Pi_F}$, and therefore $D$ outputs 1 exactly when $\mathtt{MacForge}_{A,\Pi}(n) = 1$ \[ \mathrm{Pr}[D_A^{F_k(\cdot)}(1^n) = 1] = \mathrm{Pr}[\mathtt{MacForge}_{A,\Pi_F}(n) = 1] \]
     \item If instead $\mathcal{O} = f$, where $f$ is a truly random function, then the simulation is distributed identically to the view of $A$ in the experiment $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, and hence $D$ outputs 1 exactly when $\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1$ \[ \mathrm{Pr}[D_A^{f(\cdot)}(1^n) = 1] = \mathrm{Pr}[\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1] \]
     where $f \in \mathsf{Func}_n$ is chosen uniformly.
 \end{itemize}
