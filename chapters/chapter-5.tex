@@ -192,6 +192,26 @@ maps $\varphi \in \T_\Theta X$ and $f : X \to \T_\Theta Y$ to the function
 $\dlambda e.\, \bigl(\varphi(e) \bind_\D \eval \circ (f \times \id_{\Store_\Theta})\bigr)$,
 where $\dlambda$ denotes currying and $\eval$ is the evaluation map induced by the Cartesian closed structure of $\Set$.
 
+\section{Useful Functional Symbols and Equations}\label{sec:useful-functional-symbols-and-equations}
+\begin{table}[htpb]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{0.95}
+\begin{tabularx}{\textwidth}{|@{\hskip 1pt}c|l|X@{\hskip 2pt}|}
+\hline
+\textbf{Function Symbol} & \multicolumn{1}{c|}{\textbf{Type}} & \multicolumn{1}{c|}{\textbf{Interpretation}} \\ \hline
+\multicolumn{3}{|c|}{\textbf{Function Symbols for Ledger Manipulation}} \\ \hline
+$\mathtt{isdefinedQ_p}$ & $\SS[q\times(i+ 1)]\times\SS[i]\to\BB$ & Function that takes as input a query ledger and a string of length $i$, and returns true if the row, whose first i bits match the input string, is
+active and false otherwise. \\ \hline
+$\mathtt{initQ}_p$ & $\SS[(q\times(i+1))]$ & Function that initializes a  queryledger by generating a string of length $q\times(i+1)$ filled entirely with zeros. \\ \hline
+$\mathtt{modifyQ}_p$ & $\SS[(q\times(i+1))]$ & Function that, given a query ledger and two input strings of length $i$, identifies the first inactive row in the ledger, inserts into that row the concatenation of the two strings followed by a bit set to 1 (indicating activation), and returns the resulting updated ledger. \\ \hline
+$\mathtt{contains}_p$ & $\SS[(q \times (i+1)] \times \SS[i] \to \BB$ & Function that, given a query ledger and an input string of length $i$, searches for a row in the ledger whose first $i$ bits are equal to the input string and whose final bit is set to 1 and returns a boolean indicating whether the substring was found or not. \\ \hline
+\end{tabularx}
+\caption{Table of function symbols and their interpretations. We consider ledgers modelled by strings of length $(q\times(i+1))$ and $(p\times(2i+1))$, where $p$ is a polynomial in $\mathbb{N}_{\geq1}[i]$. This
+string represents a table with $q$ rows, where each row consists of two strings of length $i$ followed by a single bit, which is set to 1 if the corresponding row is active, and 0 otherwise.}
+\label{table:new-function-symbols}
+\end{table}
 
 % A computation in $\lamBLL$ can be probabilistic, and read or modify the global reference context. In order to model probabilistic effects with references $\lamBLL$ uses the distribution monad and the state monad. The idea is that the result of a computation is not just a value, it depends on the initial store, it produces a distribution of outcomes, and each outcome comes with an updated store. Computations are interpreted as functions that accepts the initial store and produce outcoomes as probability distribution over (value, store) pairs.
 
