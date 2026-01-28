@@ -380,8 +380,14 @@ $D_A^{\mathcal{O}}:$
 
 The distinguisher $D_A^{\mathcal{O}}$ runs in probabilistic polynomial time, since it only runs $A$ and makes a polynomial number of oracle queries. There are two cases:
 \begin{itemize}
-    \item If $\mathcal{O} = F_k$, then the simulation provided by $D_A$ is distributed identically to the view of $A$ in the experiment $\mathtt{MacForge}_{A,\Pi_F}$, and therefore $D$ outputs 1 exactly when $\mathtt{MacForge}_{A,\Pi}(n) = 1$ \[ \mathrm{Pr}[D_A^{F_k(\cdot)}(1^n) = 1] = \mathrm{Pr}[\mathtt{MacForge}_{A,\Pi_F}(n) = 1] \]
-    \item If instead $\mathcal{O} = f$, where $f$ is a truly random function, then the simulation is distributed identically to the view of $A$ in the experiment $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, and hence $D$ outputs 1 exactly when $\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1$ \[ \mathrm{Pr}[D_A^{f(\cdot)}(1^n) = 1] = \mathrm{Pr}[\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1] \]
+    \item If $\mathcal{O} = F_k$, then the simulation provided by $D_A$ is distributed identically to the view of $A$ in the experiment $\mathtt{MacForge}_{A,\Pi_F}$, and therefore $D$ outputs 1 exactly when $\mathtt{MacForge}_{A,\Pi}(n) = 1$ 
+    \begin{align}\label{eq:macforgeF-to-DF}
+        \mathrm{Pr}[D_A^{F_k(\cdot)}(1^n) = 1] = \mathrm{Pr}[\mathtt{MacForge}_{A,\Pi_F}(n) = 1]         
+    \end{align}
+    \item If instead $\mathcal{O} = f$, where $f$ is a truly random function, then the simulation is distributed identically to the view of $A$ in the experiment $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, and hence $D$ outputs 1 exactly when $\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1$ 
+    \begin{align}\label{eq:macforgef-to-Df}
+       \mathrm{Pr}[D_A^{f(\cdot)}(1^n) = 1] = \mathrm{Pr}[\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1]  
+    \end{align}
     where $f \in \mathsf{Func}_n$ is chosen uniformly.
 \end{itemize}
 
