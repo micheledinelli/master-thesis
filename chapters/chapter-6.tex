@@ -946,6 +946,81 @@ Now, the goal is to show that the term $\letin{o=M^F\,k}{MacOracle\,o}$ is $\The
 D^F \simcontext \mathit{MacForge}^F
 \]
 \end{theorem}
+\begin{proof}
+    \begin{align*}
+        D^F \triangleq \letin{k=Gen^F \star} \letin{o=M^F k} \letin{e=\mathit{MacOracle}\,o}{D\,e}
+    \end{align*}
+    \begin{align*}
+        \quad
+        \overset{\text{~\ref{letAss}}}{\simcontext}
+        \quad
+        \letin{k=Gen^F \star}{\letin{e=(\letin{o=M^F\,k}{MacOracle\,o)}}{D\,e}}
+    \end{align*}
+    \begin{align*}
+        \quad
+        \overset{\text{Lemma ~\ref{lemma:encoracle-to-oracleF}}}{\simcontext}
+        \quad
+        \begin{aligned}
+            &\letin{k=Gen^F \star}{} \\
+            &\letin{e=Oracle^F\,k}{} \\
+            &{D\,e}
+        \end{aligned}
+        \quad
+        =_\alpha
+        \quad
+        \begin{aligned}
+            &\letin{k=Gen^F \star}{} \\
+            &\letin{o=Oracle^F\,k}{} \\
+            &{D\,o}
+        \end{aligned}
+    \end{align*}
+
+    \begin{align*}
+        \quad
+        \triangleq
+        \quad
+        \begin{aligned}
+        &\letin{k=Gen^F \star}{} \\
+        &\letin{o=Oracle^F\,k}{} \\
+        &\left(
+            \begin{aligned}
+            &\return(\lambda o. \\
+            &\quad \letin{\lis{m,t} = Adv\, o}{} \\
+            &\quad \letin{queries = \get Q}{} \\
+            &\quad \letin{b = \vrfy\, \langle m, t \rangle}{} \\
+            &\quad \mathtt{if}\, b\, \mathtt{then}\, \mathtt{not}(\mathtt{contains}(queries, m)) \\
+            &\quad \mathtt{else}\, \false)
+            \end{aligned}
+        \right) o
+        \end{aligned}
+    \end{align*}
+
+    \begin{align*}
+        \quad
+        \overset{\text{~\ref{reduc2}}}{\simcontext}
+        \quad
+        \begin{aligned}
+            &\letin{k=Gen^F \star}{} \\
+            &\letin{o=Oracle^F\,k}{} \\
+            &\letin{\lis{m,t} = Adv\, o}{} \\
+            &\letin{queries = \get Q}{} \\
+            &\letin{b = \vrfy\, \langle m, t \rangle}{} \\
+            &\mathtt{if}\, b\, \mathtt{then}\, \mathtt{not}(\mathtt{contains}(queries, m)) \\
+            &\mathtt{else}\, \false
+        \end{aligned}
+        \quad
+        =
+        \quad
+        \mathit{MacForge^F}
+    \end{align*}
+\end{proof}
+
+In order to complete the proof it remains to demonstrate that the experiment $\widetilde{\mathit{MacForge}}$ returns true with negligible probability, hence is contextually indistinguishable from false namely $\widetilde{\mathit{MacForge}}\simcontext \mathtt{false}$. The idea to prove this is that a verified tag implies prior query to the random function namely in the execution of $\widetilde{MacForge}$ whenever $\vrfy(m,t)$ evaluates to true, it must hold that $m \in \mathbb{Q}$. In $\widetilde{Oracle}$ every call on input $m$ records $m$ in $\mathbb{Q}$. The only way the adversary can obtain a tag $t$ such that $f(m) = t$ must be by querying the oracle with $m$, hence causing $m$ to be in $\mathbb{Q}$.
+
+returns a fresh random value (or a consistent one via rand)
+We start by giving the lemma \ref{lemma:oracle-random}.
+\begin{lemma}\label{lemma:oracle-random}
+\end{lemma}
 
 % &\quad \return\bigl(\lambda k.\return(\bang(\return(\lambda r. \\
 % &\quad \letin{queries=\get Q}{} \\
