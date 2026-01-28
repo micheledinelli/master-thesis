@@ -3,11 +3,11 @@
 \appendix
 \chapter{Useful Function Symbols and Equations in lambda-BLL}\label{app:1}
 
-Table~\ref{table:function-symbols} introduces a collection of function symbols operating over boolean values and bitstrings, specifically tailored to facilitate random generation, basic data manipulation, and operations on a specialized ledger structure. While individually simple, these symbols collectively provide a robust framework for modeling both pure computation and stateful interaction within $\lambda_{BLL}$. The symbols in Table~\ref{table:function-symbols} are divided in three groups based on their functional roles. It's important to note that $\lambda_{BLL}$, each function symbol in $\mathcal{F}$ denotes a mapping into a probability distribution over values of its respective output type, as established in Section 1 of \cite{lago2024computationalindistinguishabilitylogicalrelations}. Consequently, when a function symbol is interpreted as returning a specific value $v$, it corresponds to the Dirac distribution centered at $v$ (denoted $\delta_v$), which assigns probability $1$ to $v$ and $0$ to all other outcomes.
+Table~\ref{table:function-symbols} introduces a collection of function symbols operating over boolean values and bitstrings, specifically tailored to facilitate random generation, basic data manipulation, and operations on a specialized ledger structure. While individually simple, these symbols collectively provide a robust framework for modeling both pure computation and stateful interaction within $\lamBLL$. The symbols in Table~\ref{table:function-symbols} are divided in three groups based on their functional roles. It's important to note that $\lamBLL$, each function symbol in $\mathcal{F}$ denotes a mapping into a probability distribution over values of its respective output type, as established in Section 1 of \cite{lago2024computationalindistinguishabilitylogicalrelations}. Consequently, when a function symbol is interpreted as returning a specific value $v$, it corresponds to the Dirac distribution centered at $v$ (denoted $\delta_v$), which assigns probability $1$ to $v$ and $0$ to all other outcomes.
 
 \setlength{\tabcolsep}{3pt}
 \renewcommand{\arraystretch}{1.0}
-\footnotesize
+\begin{footnotesize}
 \begin{xltabular}{\textwidth}{|@{\hskip 1.5pt}c|l|@{\hskip 1.5pt}X@{\hskip 1.5pt}|}
     \hline
     \textbf{Function Symbol} & \multicolumn{1}{c|}{\textbf{Type}} & \multicolumn{1}{c|}{\textbf{Interpretation}} \\ \hline
@@ -39,8 +39,9 @@ Table~\ref{table:function-symbols} introduces a collection of function symbols o
     \caption{Table of function symbols and their interpretations as presented in \cite{lago2024computationalindistinguishabilitylogicalrelations}.}
     \label{table:function-symbols}
 \end{xltabular}
+\end{footnotesize}
 
-The equations presented in Figure~\ref{fig:equations} establish a set of equivalences between $\lambda_{BLL}$ terms, which are sound with respect to the notion of $\Theta$-contextual indistinguishability introduced in \cite{lago2024computationalindistinguishabilitylogicalrelations} and denoted here by $\sim_{\Theta\subseteq\Xi}$. These equations characterize behavioral equivalence for terms that remain indistinguishable to any probabilistic polynomial-time context, restricted by a specific set of observable references.
+The equations presented in Figure~\ref{fig:equations} establish a set of equivalences between $\lamBLL$ terms, which are sound with respect to the notion of $\Theta$-contextual indistinguishability introduced in \cite{lago2024computationalindistinguishabilitylogicalrelations} and denoted here by $\sim_{\Theta\subseteq\Xi}$. These equations characterize behavioral equivalence for terms that remain indistinguishable to any probabilistic polynomial-time context, restricted by a specific set of observable references.
 
 \begin{figure}[htpb]
     \centering
