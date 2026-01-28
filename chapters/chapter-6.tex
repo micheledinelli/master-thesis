@@ -93,8 +93,7 @@ We have to define a $\lamBLL$ term for the experiment using the encryption schem
         &\mathit{Mac}^F \triangleq \\
         &\quad \lambda x. \\
         &\quad \letin{\lis{k,m}=x}{} \\
-        &\quad \letin{t=F\lis{k,m}}{} \\
-        &\quad \return t
+        &\quad \return F\lis{k,m}
         \end{align*}
     \end{minipage}
     \begin{align*}
@@ -231,7 +230,7 @@ where the subterms $M^F$ and $\widetilde{M}$ defined in Figure~\ref{fig:oracles}
         &\quad\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
         &\quad\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
         &\quad\quad \mathtt{else}\ \return \star}{} \\
-        &\quad\quad F\lis{k,m} \\
+        &\quad\quad \return F\lis{k,m} \\
         &\quad ))))
         \end{align*}
     \end{minipage}
@@ -336,7 +335,7 @@ this equivalence is established, the desired relation $\widetilde{D}\simcontext 
 \]
 \end{lemma}
 \begin{proof}
-\begin{footnotesize}
+\begin{small}
     \begin{align*}
         \begin{aligned}
             &\widetilde{Oracle}\,k \triangleq \\
@@ -346,7 +345,8 @@ this equivalence is established, the desired relation $\widetilde{D}\simcontext 
             &\quad\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
             &\quad\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
             &\quad\quad \mathtt{else}\ \return \star}{} \\
-            &\quad\quad \mathit{\widetilde{Mac}}\lis{k,m}))\,k
+            &\quad\quad \mathit{\widetilde{Mac}}\lis{k,m} \\
+            &))\,k
         \end{aligned}
         \overset{\text{~\ref{reduc2}}}{\simcontext}
         \begin{aligned}
@@ -425,11 +425,11 @@ this equivalence is established, the desired relation $\widetilde{D}\simcontext 
             &\quad\quad\quad \return x)
         \end{aligned}
     \end{align}
-\end{footnotesize}
+\end{small}
 
 Now, the goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracle\,o}$ is $\Theta$-contextual indistinguishable from the term above in Equation~\ref{eq:reduced-oracle}. 
 
-\begin{footnotesize}
+\begin{small}
     \begin{align*}
         \begin{aligned}
         \letin{o=\widetilde{M}\,k}{MacOracle\,o} 
@@ -480,8 +480,7 @@ Now, the goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracle\,o}
             &\quad \return x)))
             \end{aligned}
         \right) k\,\mathtt{in} \\
-        &\return(\bang(\return(\lambda m. \\ 
-        &\quad\return(\mathtt{der(o)}m))) \\
+        &\return(\bang(\return(\lambda m.\return(\mathtt{der(o)}m)))
         \end{aligned}
     \end{align*}
     
@@ -510,8 +509,7 @@ Now, the goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracle\,o}
             &\quad \return x)))
             \end{aligned}
         \right) \mathtt{in} \\
-        &\return(\bang(\return(\lambda m. \\ 
-        &\quad\return(\mathtt{der(o)}m))) \\
+        &\return(\bang(\return(\lambda m.\return(\mathtt{der(o)}m)))
         \end{aligned}
     \end{align*}
     
@@ -521,7 +519,7 @@ Now, the goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracle\,o}
     \quad
     \begin{aligned}
     &\return(\bang(\return(\lambda m. \\ 
-    &\quad\return \mathtt{der}\left(\bang\left(
+    &\quad\return\left(\mathtt{der}\left(\bang\left(
     \begin{aligned}
         &\return(\lambda m. \\
         &\letin{q=\get Q}{} \\
@@ -540,7 +538,7 @@ Now, the goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracle\,o}
         &\quad \letin{\_=\mathtt{set}\,rand\,newtab}{} \\
         &\quad \return x)
     \end{aligned}
-    \right)\,m\,\right) \\
+    \right)\right)\,m\,\right) \\
     &)))
     \end{aligned}
     \end{align*}
@@ -635,7 +633,7 @@ Now, the goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracle\,o}
         \quad
         {\text{Term in Equation~\ref{eq:reduced-oracle}}}
     \end{align*}
-\end{footnotesize}
+\end{small}
 \end{proof}
 
 \begin{theorem}\label{theorem:tildeD-sim-tildeMACForge}
@@ -643,13 +641,15 @@ Now, the goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracle\,o}
 \widetilde{D} \simcontext \widetilde{MacForge}
 \]
 \end{theorem}
+
 \begin{proof}
-\begin{footnotesize}
+\begin{small}
 \begin{align*}
     \begin{aligned}
         &\widetilde{D} &\triangleq \letin{k=\widetilde{Gen} \star} \letin{o=\widetilde{M} k} \letin{e=\mathit{MacOracle}\,o}{D\,e}      
     \end{aligned}
 \end{align*}
+
 \begin{align*}
     \quad
     \overset{\text{~\ref{letAss}}}{\simcontext}
@@ -658,6 +658,7 @@ Now, the goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracle\,o}
         \letin{k=\widetilde{Gen} \star}\letin{e=(\letin{o=\widetilde{M}\,k}{MacOracle}\,o)}{D\,e}
     \end{aligned}
 \end{align*}
+
 \begin{align*}
     \quad
     \overset{\text{Lemma ~\ref{lemma:encoracle-to-tilde-oracle}}}{\simcontext}
@@ -711,7 +712,7 @@ Now, the goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracle\,o}
     \quad
     \mathit{\widetilde{MacForge}}
 \end{align*}
-\end{footnotesize}
+\end{small}
 \end{proof}
 For the left side of the diagram, we first show that $M^F\simcontext Oracle^F$ in Lemma~\ref{lemma:encoracle-to-oracleF} and then we prove the desired relation in Theorem~\ref{theorem:DF-sim-MacForgeF}. The proofs of these statements follow the same approach already described for the right side of the diagram.
 \begin{lemma}\label{lemma:encoracle-to-oracleF}
@@ -721,7 +722,8 @@ For the left side of the diagram, we first show that $M^F\simcontext Oracle^F$ i
 \end{lemma}
 \begin{proof}
 The proof follows a similar approach to the the proof of Lemma~\ref{lemma:encoracle-to-tilde-oracle}.
-\begin{footnotesize}
+
+\begin{small}
     \begin{align*}
         \begin{aligned}
             Oracle^F\,k
@@ -766,10 +768,9 @@ The proof follows a similar approach to the the proof of Lemma~\ref{lemma:encora
             &\quad\quad\mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
             &\quad\mathtt{else}\ \return \star}{} \\
             &\quad\quad(\lambda x. \\
-            &\quad\quad\quad\letin{\lis{k,m}=x}{} \\
-            &\quad\quad\quad \letin{t=F\lis{k,m}}{} \\
-            &\quad\quad\quad \return t\\
-            &\quad\quad)\lis{k,m}\\
+            &\quad\quad\quad \letin{\lis{k,m}=x}{} \\
+            &\quad\quad\quad \return F\lis{k,m} \\
+            &\quad\quad)\lis{k,m} \\
             &)))
         \end{aligned}
     \end{align*}
@@ -786,8 +787,7 @@ The proof follows a similar approach to the the proof of Lemma~\ref{lemma:encora
             &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
             &\quad \mathtt{else}\ \return \star}{} \\
             &\quad \letin{\lis{k,m}=\lis{k,m}}{} \\
-            &\quad \letin{t=F\lis{k,m}}{} \\
-            &\quad\return t \\
+            &\quad \return F\lis{k,m} \\
             &)))
         \end{aligned}
         \quad
@@ -800,16 +800,15 @@ The proof follows a similar approach to the the proof of Lemma~\ref{lemma:encora
             &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
             &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
             &\quad \mathtt{else}\ \return \star}{} \\
-            &\quad \letin{t=F\lis{k,m}}{} \\
-            &\quad\return t \\
+            &\quad \return F\lis{k,m} \\
             &)))
         \end{aligned}
     \end{align}
-\end{footnotesize}
-\end{proof}
+\end{small}
+
 Now, the goal is to show that the term $\letin{o=M^F\,k}{MacOracle\,o}$ is $\Theta$-contextual indistinguishable from the term above in Equation~\ref{eq:oracleF-expansion}.
 
-\begin{footnotesize}
+\begin{small}
     \begin{align*}
         \begin{aligned}
         &\letin{o=M^F\,k}{MacOracle\,o}
@@ -847,7 +846,7 @@ Now, the goal is to show that the term $\letin{o=M^F\,k}{MacOracle\,o}$ is $\The
                 &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
                 &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
                 &\quad \mathtt{else}\ \return \star}{} \\
-                &\quad F\lis{k,m})))) 
+                &\quad \return F\lis{k,m}
             \end{aligned}
         \right)\,k\,\mathtt{in} \\
         &\quad \return(\bang(\return(\lambda m. \\ 
@@ -869,18 +868,83 @@ Now, the goal is to show that the term $\letin{o=M^F\,k}{MacOracle\,o}$ is $\The
                 &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
                 &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
                 &\quad \mathtt{else}\ \return \star}{} \\
-                &\quad F\lis{k,m})))) 
+                &\quad \return F\lis{k,m}
             \end{aligned}
-        \right) \\
+        \right) \mathtt{in} \\
         &\quad \return(\bang(\return(\lambda m. \\ 
         &\quad \return(\mathtt{der(o)}m) \\
         & )))
         \end{aligned}
     \end{align*}
-\end{footnotesize}
+
+    \begin{align*}
+        \quad
+        \overset{\text{~\ref{reduc4}}}{\simcontext}
+        \quad
+        \begin{aligned}
+        &\quad \return(\bang(\return(\lambda m. \\ 
+        &\quad \return\left(\mathtt{der}\left(\bang\left(
+            \begin{aligned}
+                &\return(\lambda m.\\
+                &\quad \letin{q=\get Q}{} \\
+                &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
+                &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
+                &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+                &\quad \mathtt{else}\ \return \star}{} \\
+                &\quad \return F\lis{k,m}
+            \end{aligned}
+        \right)\right)m\right) \\
+        & )))
+        \end{aligned}
+    \end{align*}
+
+    \begin{align*}
+        \quad
+        \overset{\text{~\ref{reduc3}}}{\simcontext}
+        \quad
+        \begin{aligned}
+        &\quad \return(\bang(\return(\lambda m. \\ 
+        &\quad \left(
+            \begin{aligned}
+                &\return(\lambda m.\\
+                &\quad \letin{q=\get Q}{} \\
+                &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
+                &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
+                &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+                &\quad \mathtt{else}\ \return \star}{} \\
+                &\quad \return F\lis{k,m}
+            \end{aligned}
+        \right)m \\
+        & )))
+        \end{aligned}
+    \end{align*}
+
+    \begin{align*}
+        \quad
+        \overset{\text{~\ref{reduc2}}}{\simcontext}
+        \quad
+        \begin{aligned}
+        &\return(\bang(\return(\lambda m. \\ 
+        &\quad\quad \letin{q=\get Q}{} \\
+        &\quad\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
+        &\quad\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
+        &\quad\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+        &\quad\quad \mathtt{else}\ \return \star}{} \\
+        &\quad\quad \return F\lis{k,m} \\
+        &)))
+        \end{aligned}
+        \quad
+        =
+        \quad
+        \text{Term in Equation~\ref{eq:oracleF-expansion}}
+    \end{align*}
+\end{small}
+\end{proof}
 
 \begin{theorem}\label{theorem:DF-sim-MacForgeF}
-    
+\[
+D^F \simcontext \mathit{MacForge}^F
+\]
 \end{theorem}
 
 % &\quad \return\bigl(\lambda k.\return(\bang(\return(\lambda r. \\
