@@ -44,9 +44,9 @@ The equations presented in Figure~\ref{fig:equations} establish a set of equival
 
 \begin{figure}[htpb]
     \centering
-    \small
+    \footnotesize
     \begin{align}
-    \letin{x=M_1}{\letin{y=M_2}{N}}{} &\sim_{\Theta\subseteq\Xi} \letin{y=\letin{x=M_1}{M_2}}{N} \label{letAss}\tag{$\mathtt{letAss}$} \\
+    \letin{x=M_1}{\letin{y=M_2}{N}}{} &\sim_{\Theta\subseteq\Xi} \letin{y=(\letin{x=M_1}{M_2)}}{N} \label{letAss}\tag{$\mathtt{letAss}$} \\
     (\return \lambda x.M)Z &\sim_{\Theta\subseteq\Xi}M[Z/x]\label{reduc2}\tag{$\mathtt{reduc2}$} \\
     \mathtt{der}(\bang M)&\sim_{\Theta\subseteq\Xi}M\label{reduc3}\tag{$\mathtt{reduc3}$} \\
     \letin{x=\return V}{M}&\sim_{\Theta\subseteq\Xi}M[V/x] \label{reduc4}\tag{$\mathtt{reduc4}$} \\
