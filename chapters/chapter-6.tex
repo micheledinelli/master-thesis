@@ -221,40 +221,52 @@ where the subterms $M^F$ and $\widetilde{M}$ defined in Figure~\ref{fig:oracles}
 
 \begin{figure}[htpb]
     \small
-    \begin{align*}
+    \centering
+    \begin{subfigure}[c]{0.45\textwidth}
+        \begin{align*}
         \begin{aligned}
             &M^F \triangleq \\
-            &\quad \return(\lambda k.\return(\bang(\return(\lambda m.\\
-            &\quad\quad \letin{q=\get Q}{} \\
-            &\quad\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-            &\quad\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
+            &\quad \text{return}(\lambda k.\text{return}(!(\text{return}(\lambda m.\\
+            &\quad\quad \text{let } q = \text{get } Q \text{ in} \\
+            &\quad\quad \text{let } t = \mathtt{isdefinedQ}(q,m) \text{ in} \\
+            &\quad\quad \text{let } \_ = \mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
             &\quad\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
-            &\quad\quad \mathtt{else}\ \return \star}{} \\
-            &\quad\quad \return F\lis{k,m} \\
+            &\quad\quad \mathtt{else}\ \text{return } \star \text{ in} \\
+            &\quad\quad \text{return } F[k,m] \\
             &\quad ))))
         \end{aligned}
-        \qquad\qquad
+        \end{align*}
+        \caption{subterm with pseudorandom function}
+        \label{subfig:oracle-pseudo-random}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[c]{0.53\textwidth}
+        \begin{align*}
         \begin{aligned}
             &\widetilde{M} \triangleq \\
-            &\quad \return(\lambda k.\return(\bang(\return(\lambda r. \\
-            &\quad\quad \letin{q=\get Q}{} \\
-            &\quad\quad \letin{t=\mathtt{isdefinedQ}(q, r)}{} \\
-            &\quad\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
+            &\quad \text{return}(\lambda k.\text{return}(!(\text{return}(\lambda r. \\
+            &\quad\quad \text{let } q = \text{get } Q \text{ in} \\
+            &\quad\quad \text{let } t = \mathtt{isdefinedQ}(q, r) \text{ in} \\
+            &\quad\quad \text{let } \_ = \mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
             &\quad\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q, r) \\
-            &\quad\quad \mathtt{else}\ \return \star}{} \\
-            &\quad\quad \letin{tab=\mathtt{get}\,rand}{} \\
-            &\quad\quad \letin{b=\mathtt{isdefined}(tab, r)}{} \\
+            &\quad\quad \mathtt{else}\ \text{return } \star \text{ in} \\
+            &\quad\quad \text{let } tab = \mathtt{get}\,rand \text{ in} \\
+            &\quad\quad \text{let } b = \mathtt{isdefined}(tab, r) \text{ in} \\
             &\quad\quad \mathtt{if}\,b\,\mathtt{then} \\
-            &\quad\quad\quad \letin{x=\mathtt{getValue}(tab, r)}{} \\
-            &\quad\quad\quad \return x \\
+            &\quad\quad\quad \text{let } x = \mathtt{getValue}(tab, r) \text{ in} \\
+            &\quad\quad\quad \text{return } x \\
             &\quad\quad \mathtt{else} \\
-            &\quad\quad\quad \letin{x=\mathtt{random}}{} \\
-            &\quad\quad\quad \letin{newtab=\mathtt{modify}(tab, r, x)}{} \\
-            &\quad\quad\quad \letin{\_=\mathtt{set}\,rand\,newtab}{} \\
-            &\quad\quad\quad \return x \\
+            &\quad\quad\quad \text{let } x = \mathtt{random} \text{ in} \\
+            &\quad\quad\quad \text{let } newtab = \mathtt{modify}(tab, r, x) \text{ in} \\
+            &\quad\quad\quad \text{let } \_ = \mathtt{set}\,rand\,newtab \text{ in} \\
+            &\quad\quad\quad \text{return } x \\
             &))))
         \end{aligned}
-    \end{align*}
+        \end{align*}
+        \caption{subterm with truly random function}
+        \label{subfig:oracle-truly-random}
+    \end{subfigure}
+
     \caption{Models for function oracles used by the distinguisher.}
     \label{fig:oracles}
 \end{figure}
@@ -323,10 +335,7 @@ Consider the diagram in Figure~\ref{fig:proofscheme}. The goal is to prove that,
 	\label{fig:proofscheme}
 \end{figure}
 
-We begin by focusing on the bottom-right side of the diagram. The first step is to establish the relation $\letin{o=\widetilde{M}\,k}{EncOracle\,o} \simcontext \widetilde{Oracle}\,k$, which is given as a lemma in Lemma~\ref{lemma:encoracle-to-tilde-oracle} and immediately proved. Once this equivalence is established, the desired relation $\widetilde{D}\simcontext \widetilde{MacForge}$ follows by unfolding the oracle $\widetilde{M}$ and straightforward applications of equation \ref{reduc2}, \ref{reduc4}, \ref{reduc3} and finally \ref{reduc2}.    
-
-% follows by successive application of Equation letAss and Lemma 6.1, concluding with a straightforward reduction via
-% Equation reduc2, as detailed in the proof of Theorem 6.2.
+We begin by focusing on the bottom-right side of the diagram. The first step is to establish the relation $\letin{o=\widetilde{M}\,k}{EncOracle\,o} \simcontext \widetilde{Oracle}\,k$, which is given as a lemma in Lemma~\ref{lemma:encoracle-to-tilde-oracle} and immediately proved. Once this equivalence is established, the relation $\widetilde{D}\simcontext \widetilde{MacForge}$ follows by...
 
 \begin{lemma}\label{lemma:encoracle-to-tilde-oracle}
 \[
@@ -334,6 +343,7 @@ We begin by focusing on the bottom-right side of the diagram. The first step is 
 \]
 \end{lemma}
 \begin{proof}
+We begin by unfolding the oracle $\widetilde{M}$ and applying the \ref{reduc2} equation. Then we unfold the definition of $\widetilde{Mac}$ and the proof is concluded after straightforward applications of equation \ref{reduc4}, \ref{reduc3} and finally \ref{reduc2}. Observe that equations used, which are reported in Figure~\ref{fig:equations} are parametrized on two contexts, $\Theta$ and $\Xi$. In these steps $\Theta=\Delta=\{Q: \mathbb{S}[q\times(i+1)]\}$ and $\Xi=\Upsilon=\{rand: \mathbb{S}[(q+1)\times(2i+1)], Q: \mathbb{S}[q\times(i+1)]\}$ since both $Q$ and $rand$ references are accessed.
 \begin{small}
     \begin{align*}
         \begin{aligned}
@@ -435,7 +445,11 @@ We begin by focusing on the bottom-right side of the diagram. The first step is 
     \end{align}
 \end{small}
 
-Now, the goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracle\,o}$ is $\Theta$-contextual indistinguishable from the term above in Equation~\ref{eq:reduced-oracle}. 
+Now, the goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracle\,o}$ is $\Theta$-contextual indistinguishable from the term above in Equation~\ref{eq:reduced-oracle}. We begin by unfolding the definition of $EncOracle$ as defined in Equation~\ref{eq:mac-oracle}, which is a curried function returning an encryption behavior when applied
+to an oracle $o$. We apply Equation~\ref{reduc2} to eliminate the lambda abstraction and simplify the application of $MacOracle$ to $o$. Next, we turn our attention to $\widetilde{M}$ unfolding its definition from Figure~\ref{subfig:oracle-truly-random}. Applying $\widetilde{M}$ to a key $k$ yields a function that, on input $r$, checks the ledger to determine whether a value has already been assigned to $r$. If so, it returns that value; otherwise, it samples a fresh randomness, updates the reference $tab$, and then returns the fresh sampled random value. 
+
+We again apply Equation~\ref{reduc2} to evaluate this application. At this point, we continue simplifying by using the rules \ref{reduc4}, \ref{reduc2} and finally \ref{reduc2}.
+
 
 \begin{small}
     \begin{align*}
