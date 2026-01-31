@@ -16,7 +16,7 @@ Table~\ref{table:function-symbols} introduces a collection of function symbols o
     \textbf{Function Symbol} & \multicolumn{1}{c|}{\textbf{Type}} & \multicolumn{1}{c|}{\textbf{Interpretation}} \\ \hline
     \endhead
     \multicolumn{3}{|c|}{\textbf{Function Symbols Generating Random Values}} \\ \hline
-    $\mathtt{random}$ & $\SS[i]$ & Function generating a random bitstring in $\{0,1\}^i$. \\ \hline
+    $\random$ & $\SS[i]$ & Function generating a random bitstring in $\{0,1\}^i$. \\ \hline
     
     \multicolumn{3}{|c|}{\textbf{Function Symbols for Manipulating Bitstrings and Boolean Values}} \\ \hline
     $\mathtt{not}$ & $\BB \to \BB$ & Function computing the negation of a boolean value. \\ \hline
@@ -47,11 +47,24 @@ The equations presented in Figure~\ref{fig:equations} establish a set of equival
     \centering
     \footnotesize
     \begin{align}
+    (\return \lambda x.M)Z &\sim_{\Theta\subseteq\Xi}M[Z/x]\label{reduc2}\tag{$\mathtt{reduc2}$} \\[2ex]
+    \mathtt{der}(\bang M)&\sim_{\Theta\subseteq\Xi}M\label{reduc3}\tag{$\mathtt{reduc3}$} \\[2ex]
+    \letin{x=\return V}{M}&\sim_{\Theta\subseteq\Xi}M[V/x] \label{reduc4}\tag{$\mathtt{reduc4}$} \\[2ex]
+    \letin{\lis{x,y}=\lis{Z,Z'}}{M}&\sim_{\Theta\subseteq\Xi}M[Z/x,Z'/y]\label{reduc5}\tag{$\mathtt{reduc5}$} \\[2ex]
+    \left(
+    \begin{aligned}
+        &\letin{r=\random}{} \\
+        &\letin{z=\mathtt{isdefined}(y,r)}{} \\
+        &\ifthen{z}{M}{N}
+    \end{aligned}\right) &\sim_{\Theta\subseteq\Xi} \letin{r=\random}{N}\label{randT}\tag{$\mathtt{randT}$}
+    \\[2ex]
     \letin{x=M_1}{\letin{y=M_2}{N}}{} &\sim_{\Theta\subseteq\Xi} \letin{y=(\letin{x=M_1}{M_2)}}{N} \label{letAss}\tag{$\mathtt{letAss}$} \\
-    (\return \lambda x.M)Z &\sim_{\Theta\subseteq\Xi}M[Z/x]\label{reduc2}\tag{$\mathtt{reduc2}$} \\
-    \mathtt{der}(\bang M)&\sim_{\Theta\subseteq\Xi}M\label{reduc3}\tag{$\mathtt{reduc3}$} \\
-    \letin{x=\return V}{M}&\sim_{\Theta\subseteq\Xi}M[V/x] \label{reduc4}\tag{$\mathtt{reduc4}$} \\
-    \letin{\lis{x,y}=\lis{Z,Z'}}{M}&\sim_{\Theta\subseteq\Xi}M[Z/x,Z'/y]\label{reduc5}\tag{$\mathtt{reduc5}$}
+    \text{if}\ x &\not\in FV(N) \nonumber
+    \\[2ex]
+    \letin{x_1=M_1}{\letin{x_2=M_2}{N}} &\sim_{\Theta\subseteq\Xi} \letin{x_2=M_2}{\letin{x_1=M_1}{N}}\tag{$\mathtt{letCom}$}\label{letCom}
+    \\[2ex]
+    \letin{x=M}{N}&\sim_{\Theta\subseteq\Xi}N \tag{$\mathtt{safeDisc1}$}\label{safeDisc1} \\
+    \text{if}\ x &\not\in FV(N) \ \text{and}\ \mathcal{R}(M) \cap \mathcal{R}(N) = \emptyset \nonumber 
     \end{align}
     \caption{Equations in $\lamBLL$ as presented in \cite{lago2024computationalindistinguishabilitylogicalrelations}. Let $\mathcal{R}(M)$ be the set of references accessed by the term $M$. The equations in this figure hold for all reference contexts $\Theta, \Xi$ such that $\Theta \subseteq \Xi$, except where stated otherwise.}
     \label{fig:equations}

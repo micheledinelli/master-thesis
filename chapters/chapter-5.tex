@@ -192,6 +192,12 @@ maps $\varphi \in \T_\Theta X$ and $f : X \to \T_\Theta Y$ to the function
 $\dlambda e.\, \bigl(\varphi(e) \bind_\D \eval \circ (f \times \id_{\Store_\Theta})\bigr)$,
 where $\dlambda$ denotes currying and $\eval$ is the evaluation map induced by the Cartesian closed structure of $\Set$.
 
+In this section we introduce the following syntactic sugar:
+\begin{align}
+    VZ \triangleq (\return V)\,Z\label{eq:sugar-return}
+\end{align}
+In $\lamBLL$, application is written as $MZ$, and the constructor $\return$ is used to lift values into computations. This notation allows us to simplify expressions by implicitly promoting values to computations, thereby reducing the need for nested $\return$ construct.
+
 \section{Useful Functional Symbols and Equations}\label{sec:useful-functional-symbols-and-equations}
 \begin{table}[htpb]
 \centering
