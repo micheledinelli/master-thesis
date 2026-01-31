@@ -47,6 +47,7 @@ The equations presented in Figure~\ref{fig:equations} establish a set of equival
     \centering
     \footnotesize
     \begin{align}
+    \letin{x=M}{\return x} &\sim_{\Theta\subseteq\Xi}\return M\label{reduc1}\tag{$\mathtt{reduc1}$} \\[2ex]
     (\return \lambda x.M)Z &\sim_{\Theta\subseteq\Xi}M[Z/x]\label{reduc2}\tag{$\mathtt{reduc2}$} \\[2ex]
     \mathtt{der}(\bang M)&\sim_{\Theta\subseteq\Xi}M\label{reduc3}\tag{$\mathtt{reduc3}$} \\[2ex]
     \letin{x=\return V}{M}&\sim_{\Theta\subseteq\Xi}M[V/x] \label{reduc4}\tag{$\mathtt{reduc4}$} \\[2ex]
@@ -64,7 +65,10 @@ The equations presented in Figure~\ref{fig:equations} establish a set of equival
     \letin{x_1=M_1}{\letin{x_2=M_2}{N}} &\sim_{\Theta\subseteq\Xi} \letin{x_2=M_2}{\letin{x_1=M_1}{N}}\tag{$\mathtt{letCom}$}\label{letCom}
     \\[2ex]
     \letin{x=M}{N}&\sim_{\Theta\subseteq\Xi}N \tag{$\mathtt{safeDisc1}$}\label{safeDisc1} \\
-    \text{if}\ x &\not\in FV(N) \ \text{and}\ \mathcal{R}(M) \cap \mathcal{R}(N) = \emptyset \nonumber 
+    \text{if}\ x \not\in FV(N) \ \text{and}\ \mathcal{R}(M) &\cap \mathcal{R}(N) = \emptyset \ \text{and}\ \nonumber \\ \mathcal{R}(M) \cap \Theta = \emptyset \ \text{and} &HOFV(M) = \emptyset \nonumber
+    \\[2ex]
+    \letin{\lis{x,y}=M}{N}&\sim_{\Theta\subseteq\Xi}N \tag{$\mathtt{safeDisc2}$}\label{safeDisc2} \\
+    \text{if}\ x,y \not\in FV(N) \ \text{and}\ \mathcal{R}(M) &\cap \mathcal{R}(N) = \emptyset \ \text{and}\ \nonumber \\ \mathcal{R}(M) \cap \Theta = \emptyset \ \text{and} &HOFV(M) = \emptyset \nonumber 
     \end{align}
     \caption{Equations in $\lamBLL$ as presented in \cite{lago2024computationalindistinguishabilitylogicalrelations}. Let $\mathcal{R}(M)$ be the set of references accessed by the term $M$. The equations in this figure hold for all reference contexts $\Theta, \Xi$ such that $\Theta \subseteq \Xi$, except where stated otherwise.}
     \label{fig:equations}

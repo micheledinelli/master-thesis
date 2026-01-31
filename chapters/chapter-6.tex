@@ -929,9 +929,10 @@ We start by giving the lemma \ref{lemma:mactilde-eq-random}.
 
 \begin{lemma}\label{lemma:mactilde-eq-random}
 \begin{align*}
-\widetilde{Mac} \simcontext \lambda k.\lambda m.\random
+\widetilde{Mac} \simcontext \lambda e.\random
 \end{align*}
 \end{lemma}
+
 \begin{proof}
 \small{
 \begin{align*}
@@ -993,25 +994,29 @@ We start by giving the lemma \ref{lemma:mactilde-eq-random}.
         &\quad\lambda e. \\
         &\quad\letin{\langle k,m\rangle = e}{} \\
         &\quad\letin{x = \random}{} \\
-        &\quad\mathtt{let}\,\_=\left(
-        \begin{aligned}
-            &\letin{tab = \mathtt{get}\,rand}{} \\
-            &\letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-            &\letin{\_ = \mathtt{set}\,rand\,newtab}{}
-        \end{aligned}
-        \right) \\
         &\quad\return x
+    \end{aligned}
+    \quad\overset{\text{~\ref{reduc1}}}{\simcontext}\quad
+    \begin{aligned}
+        &\lambda e. \\
+        &\letin{\langle k,m\rangle = e}{\random}
+    \end{aligned}
+    \\[2ex]
+    \quad\overset{\text{~\ref{safeDisc2}}}{\simcontext}\quad&
+    \begin{aligned}
+        &\lambda e. \\
+        &\letin{\langle k,m\rangle = e}{\random}
     \end{aligned}
 \end{align*}
 }
 \end{proof}
 
-\begin{lemma}
-In $\lamBLL$, if a computation $M$ outputs $y$, and $x$ is sampled subsequently, then:
-\begin{align*}\label{eq:ind-eq}
-\letin{y=M}{\letin{x=\random}{\return \mathtt{eq}(x,y)}} \sim \mathtt{false}
-\end{align*}
-\end{lemma}
+% \begin{lemma}
+% In $\lamBLL$, if a computation $M$ outputs $y$, and $x$ is sampled subsequently, then:
+% \begin{align*}\label{eq:ind-eq}
+% \letin{y=M}{\letin{x=\random}{\return \mathtt{eq}(x,y)}} \sim \mathtt{false}
+% \end{align*}
+% \end{lemma}
 
 % \begin{theorem}
 % \[
