@@ -7,9 +7,6 @@
   mathescape
 }
 
-\counterwithout{figure}{chapter}
-\counterwithout{equation}{chapter}
-
 \usepackage{tikz}
 \usepackage{subcaption}
 \usetikzlibrary{arrows,arrows.meta,positioning}
@@ -35,11 +32,12 @@
 \usepackage{proof}
 \usepackage{ebproof}
 
-\newtheorem{definition}{Definition}
-\newtheorem{lemma}{Lemma}
-\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{lemma}{Lemma}[chapter]
+\newtheorem{theorem}{Theorem}[chapter]
 
-\hyphenation{mate-mati-ca recu-perare}
+\counterwithout{figure}{chapter}
+\counterwithout{equation}{chapter}
 
 \usepackage{xcolor}
 \usepackage[]{hyperref}

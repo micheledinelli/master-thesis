@@ -201,7 +201,9 @@ In $\lamBLL$, application is written as $MZ$, and the constructor $\return$ is u
 \section{Useful Functional Symbols and Equations}\label{sec:useful-functional-symbols-and-equations}
 In $\lamBLL$, if a computation $M$ outputs $y$, and $x$ is sampled subsequently, then
 \begin{align}
-\letin{y=M}{\letin{x=\random}{\return \mathtt{eq}(x,y)}} \sim \mathtt{false} \tag{$\mathtt{randFalse}$}\label{randFalse}
+\letin{y=M}{\letin{x=\random}{\return \mathtt{eq}(x,y)}} &\sim_{\Theta\subseteq\Xi} \false \tag{$\mathtt{randFalse}$}\label{randFalse} \\[2ex]
+\letin{b=\false}{\ifthen{b}{M}{N}} &\sim_{\Theta\subseteq\Xi} N \tag{$\mathtt{ifFalse}$}\label{ifFalse} \\[2ex]
+\letin{\_ = \mathtt{set}\,Q\,v}{\get Q} \;\sim\; \return v \tag{$\mathtt{getset}$}\label{getset}
 \end{align}
 
 \begin{table}[htpb]

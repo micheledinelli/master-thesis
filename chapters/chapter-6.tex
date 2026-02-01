@@ -124,8 +124,8 @@ The model for $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, denoted by $\widetilde{\m
             &\quad \letin{\_ = \mathtt{set}\,Q\,q}{} \\
             &\quad \letin{tab=\mathtt{initTable}}{} \\
             &\quad \letin{\_ = \mathtt{set}\,rand\,tab}{} \\
-            &\quad \letin{k=\mathtt{zero}}{} \\
-            &\quad \return k
+            &\quad \letin{z=\mathtt{zero}}{} \\
+            &\quad \return z
         \end{aligned}
         \qquad\qquad\qquad
         \begin{aligned}
@@ -134,7 +134,7 @@ The model for $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, denoted by $\widetilde{\m
             &\quad\letin{\langle k,m\rangle = e}{} \\
             &\quad\letin{tab = \mathtt{get}\,rand}{} \\
             &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-            &\quad\mathtt{if}\; b\; \mathtt{then} \\
+            &\quad\mathtt{if}\, b\, \mathtt{then} \\
             &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
             &\quad\quad \return x \\
             &\quad\mathtt{else} \\
@@ -256,7 +256,7 @@ The terms $M^F$ and $\widetilde{M}$ are typed under the following type derivatio
 &\vdash_c^\Xi M^F: \SS[i] \multimap \bang_{q+1}(\SS[i] \multimap \SS[i]) \\
 &\vdash_c^\Upsilon \widetilde{M}: \SS[i] \multimap \bang_{q+1}(\SS[i] \multimap \SS[i])
 \end{align*}
-These judgments are parameterized by two distinct reference contexts, denoted by $\Xi$ and $\Upsilon$, which correspond to the two different oracles that may be provided to the distinguisher $D$. When the distinguisher is given access to the oracle $M^F$, modeling a pseudorandom function, the reference context $\Theta$ is instantiated as $\Xi = \{\, Q : \SS[q \times (i+1)] \,\}$ where the reference $Q$ is used to record the messages queried to the oracle. In contrast, when the distinguisher is given access to the term $\widetilde{M}$, modeling a truly random function $f$, the reference context $\Theta$ is instantiated as $\Upsilon = \{\, \mathit{rand} : \SS[(q+1) \times (2i+1)],\; Q : \SS[q \times (i+1)] \,\}$. In this case, the additional reference $\mathit{rand}$ is required to store previously generated random outputs which models the truly random function.
+These judgments are parameterized by two distinct reference contexts, denoted by $\Xi$ and $\Upsilon$, which correspond to the two different oracles that may be provided to the distinguisher $D$. When the distinguisher is given access to the oracle $M^F$, modeling a pseudorandom function, the reference context $\Theta$ is instantiated as $\Xi = \{\, Q : \SS[q \times (i+1)] \,\}$ where the reference $Q$ is used to record the messages queried to the oracle. In contrast, when the distinguisher is given access to the term $\widetilde{M}$, modeling a truly random function $f$, the reference context $\Theta$ is instantiated as $\Upsilon = \{\, \mathit{rand} : \SS[(q+1) \times (2i+1)],\, Q : \SS[q \times (i+1)] \,\}$. In this case, the additional reference $\mathit{rand}$ is required to store previously generated random outputs which models the truly random function.
 
 The oracle $\mathit{MacOracle}$, defined in Equation~\ref{eq:mac-oracle}, returns a function that is parameterized by an underlying function oracle $o$. In the present setting, $o$ abstracts either a pseudorandom function or a truly random function through terms in Figure~\ref{fig:oracles} and is used to model the MAC computation. Upon receiving a message $m$, the returned function simply invokes the oracle $o$ on $m$ and returns the resulting value, which is interpreted as the corresponding tag.  The term is well typed under the judgment $\vdash_c^\varnothing \mathit{MacOracle}: \bang_{q+1}(\SS[i] \multimap \SS[i]) \multimap \bang_{q+1}(\SS[i] \multimap \SS[i])$ where the graded modality accounts for the single use of the underlying oracle within the returned function.
 % TODO: is q+1 good here? or q+2?
@@ -359,7 +359,7 @@ We begin by unfolding the oracle $\widetilde{M}$ and applying Equation~\ref{redu
         &\quad\quad\letin{\langle k,m\rangle = e}{} \\
         &\quad\quad\letin{tab = \mathtt{get}\,rand}{} \\
         &\quad\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-        &\quad\quad\mathtt{if}\; b\; \mathtt{then} \\
+        &\quad\quad\mathtt{if}\, b\, \mathtt{then} \\
         &\quad\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
         &\quad\quad\quad \return x \\
         &\quad\quad\mathtt{else} \\
@@ -381,7 +381,7 @@ We begin by unfolding the oracle $\widetilde{M}$ and applying Equation~\ref{redu
         &\quad\letin{\langle k,m\rangle = \lis{k,m}}{} \\
         &\quad\letin{tab = \mathtt{get}\,rand}{} \\
         &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-        &\quad\mathtt{if}\; b\; \mathtt{then} \\
+        &\quad\mathtt{if}\, b\, \mathtt{then} \\
         &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
         &\quad\quad \return x \\
         &\quad\mathtt{else} \\
@@ -403,7 +403,7 @@ We begin by unfolding the oracle $\widetilde{M}$ and applying Equation~\ref{redu
         &\quad\quad\letin{\langle k,m\rangle = e}{} \\
         &\quad\quad\letin{tab = \mathtt{get}\,rand}{} \\
         &\quad\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-        &\quad\quad\mathtt{if}\; b\; \mathtt{then} \\
+        &\quad\quad\mathtt{if}\, b\, \mathtt{then} \\
         &\quad\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
         &\quad\quad\quad \return x \\
         &\quad\quad\mathtt{else} \\
@@ -425,7 +425,7 @@ We begin by unfolding the oracle $\widetilde{M}$ and applying Equation~\ref{redu
         &\quad\letin{\langle k,m\rangle = \lis{k,m}}{} \\
         &\quad\letin{tab = \mathtt{get}\,rand}{} \\
         &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-        &\quad\mathtt{if}\; b\; \mathtt{then} \\
+        &\quad\mathtt{if}\, b\, \mathtt{then} \\
         &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
         &\quad\quad \return x \\
         &\quad\mathtt{else} \\
@@ -445,7 +445,7 @@ We begin by unfolding the oracle $\widetilde{M}$ and applying Equation~\ref{redu
         &\quad \mathtt{else}\ \return \star}{} \\
         &\quad\letin{tab = \mathtt{get}\,rand}{} \\
         &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-        &\quad\mathtt{if}\; b\; \mathtt{then} \\
+        &\quad\mathtt{if}\, b\, \mathtt{then} \\
         &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
         &\quad\quad \return x \\
         &\quad\mathtt{else} \\
@@ -674,7 +674,7 @@ For the left side of the diagram, we first establish the relation $M^F \simconte
 \[ \letin{o=M^F}{MacOracle\,o}\simcontext Oracle^F\,k \]
 \end{lemma}
 \begin{proof}
-The proof follows a similar approach to the the proof of Lemma~\ref{lemma:MacOracle-to-tilde-oracle}.
+The proof follows a similar approach to the proof of Lemma~\ref{lemma:MacOracle-to-tilde-oracle}.
 
 \small{
 \begin{align}
@@ -911,9 +911,9 @@ D^F \simcontext \mathit{MacForge}^F
 }
 \end{proof}
 
-In order to complete the proof it remains to demonstrate that the experiment $\widetilde{\mathit{MacForge}}$ returns true with negligible probability, hence is contextually indistinguishable from false namely $\widetilde{\mathit{MacForge}}\simcontext \mathtt{false}$. By examining the term $\widetilde{MacForge}$ we notice that demonstrating that it is equal to $\mathtt{false}$ just rely on demonstrating the second branch of the $\mathtt{if}-\mathtt{then}-\mathtt{else}$ block since the first branch it is already $\mathtt{false}$. The idea to prove this is that a verified tag implies prior query to the random function namely in the execution of $\widetilde{MacForge}$ whenever the verification procedure evaluates to true, it must hold that $m \in \mathbb{Q}$. In $\widetilde{Oracle}$ every call on input $m$ records $m$ in $\mathbb{Q}$. The only way the adversary can obtain a tag must be by querying the oracle with $m$, hence causing $m$ to be in $\mathbb{Q}$. When we look at the second branch we notice that for sure $m$ is not in the query ledger because if it would be in it we would not be evaluating the $\mathtt{else}$ branch. If $m$ is not in the query ledger evaluating $\letin{x=\mathtt{der}(o)\;m}$ yields a random value by Lemma ~\ref{lemma:mactilde-eq-random} and Lemma~\ref{lemma:oracle-tilde-eq-suspended-random}. Equation~\ref{randFalse} concludes the proof.
+% In order to complete the proof it remains to demonstrate that the experiment $\widetilde{\mathit{MacForge}}$ returns true with negligible probability, hence is contextually indistinguishable from false namely $\widetilde{\mathit{MacForge}}\simcontext \mathtt{false}$. By examining the term $\widetilde{MacForge}$ we notice that demonstrating that it is equal to $\mathtt{false}$ just rely on demonstrating the second branch of the $\mathtt{if}-\mathtt{then}-\mathtt{else}$ block since the first branch it is already $\mathtt{false}$. The idea to prove this is that a verified tag implies prior query to the random function namely in the execution of $\widetilde{MacForge}$ whenever the verification procedure evaluates to true, it must hold that $m \in \mathbb{Q}$. In $\widetilde{Oracle}$ every call on input $m$ records $m$ in $\mathbb{Q}$. The only way the adversary can obtain a tag must be by querying the oracle with $m$, hence causing $m$ to be in $\mathbb{Q}$. When we look at the second branch we notice that for sure $m$ is not in the query ledger because if it would be in it we would not be evaluating the $\mathtt{else}$ branch. If $m$ is not in the query ledger evaluating $\letin{x=\mathtt{der}(o)\,m}$ yields a random value by Lemma ~\ref{lemma:mactilde-eq-random} and Lemma~\ref{lemma:oracle-tilde-eq-suspended-random}. Equation~\ref{randFalse} concludes the proof.
 
-We start by formalizing the following lemma.
+% We start by formalizing the following lemma.
 
 \begin{lemma}\label{lemma:mactilde-eq-random}
 \begin{align*}
@@ -930,7 +930,7 @@ We start by formalizing the following lemma.
         &\letin{\langle k,m\rangle = e}{} \\
         &\letin{tab = \mathtt{get}\,rand}{} \\
         &\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-        &\mathtt{if}\; b\; \mathtt{then} \\
+        &\mathtt{if}\, b\, \mathtt{then} \\
         &\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
         &\quad \return x \\
         &\mathtt{else} \\
@@ -1012,7 +1012,7 @@ We start by formalizing the following lemma.
         &\return(\lambda k.\return \bang(\return \lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\;\mathtt{then} \\
+        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
         &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
         &\quad \mathtt{else}\ \return \star}{} \\
         &\quad \mathit{\widetilde{Mac}}\lis{k,m} \\
@@ -1024,7 +1024,7 @@ We start by formalizing the following lemma.
         &\return(\lambda k.\return \bang(\return \lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\;\mathtt{then} \\
+        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
         &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
         &\quad \mathtt{else}\ \return \star}{} \\
         &\quad (\lambda e.\random)\lis{k,m} \\
@@ -1036,7 +1036,7 @@ We start by formalizing the following lemma.
         &\return(\lambda k.\return \bang(\return \lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\;\mathtt{then} \\
+        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
         &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
         &\quad \mathtt{else}\ \return \star}{} \\
         &\quad \random \\
@@ -1046,12 +1046,12 @@ We start by formalizing the following lemma.
     \quad\overset{\text{~\ref{letAss}}}{\simcontext}\quad&
     \begin{aligned}
         &\return(\lambda k.\return \bang(\return \lambda m. \\
-        &\quad\mathtt{let}\;\_=\left(
+        &\quad\mathtt{let}\,\_=\left(
         \begin{aligned}
             &\quad \letin{q=\get Q}{} \\
             &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-            &\quad \mathtt{if}\;\mathtt{not}(t)\;\mathtt{then} \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\;\return\star
+            &\quad \mathtt{if}\,\mathtt{not}(t)\,\mathtt{then}\,\mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\,\return\star
         \end{aligned}
         \right) \mathtt{in} \\
         &\quad \random \\
@@ -1071,7 +1071,11 @@ We start by formalizing the following lemma.
 \widetilde{MacForge}\simcontext \mathtt{false}
 \end{align*}
 \end{theorem}
+
 \begin{proof}
+We begin by unfolding $\widetilde{MacForge}$ and subsequently apply Lemma~\ref{lemma:oracle-tilde-eq-suspended-random}. This allows us to replace $\widetilde{Oracle}$ with a suspended computation that always yields random outputs independently of its input. Next, we proceed as follows: we first apply rule~\ref{reduc2} to reduce the oracle application to the unused key; we then apply rule~\ref{reduc4} to substitute the term $o$, which now denotes a dummy oracle that always returns random outputs, in the subsequent computations; finally, we apply rule~\ref{reduc3} to derelict the suspended oracle computation in the $\mathtt{else}$ branch and again use rule~\ref{reduc2} to reduce its argument. Next step is to unfold $\widetilde{Gen}$ and use \ref{reduc2} to reduce its abstraction.
+
+\small{
 \begin{align*}
     \widetilde{MacForge} \quad\triangleq\quad&
     \begin{aligned}
@@ -1087,7 +1091,7 @@ We start by formalizing the following lemma.
     \quad\overset{\text{Lemma ~\ref{lemma:oracle-tilde-eq-suspended-random}}}{\simcontext}\quad&
     \begin{aligned}
         &\letin{k = \widetilde{Gen} \star}{} \\
-        &\letin{o = \return(\lambda k.\return \bang(\return \lambda m.\random))\, k}{} \\
+        &\letin{o = \return(\lambda k.\return\bang(\return \lambda m.\random))\, k}{} \\
         &\letin{\langle m, t \rangle = Adv\, o}{} \\
         &\letin{queries = \get Q}{} \\
         &\letin{b=\mathtt{contains}(queries, m)}{} \\
@@ -1097,8 +1101,8 @@ We start by formalizing the following lemma.
     \\[2ex]
     \quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad&
     \begin{aligned}
-        &\letin{k =\widetilde{Gen} \star}{} \\
-        &\letin{o = \return \bang(\return \lambda m.\random))}{} \\
+        &\letin{k = \widetilde{Gen} \star}{} \\
+        &\letin{o = \bang(\return \lambda m.\random)}{} \\
         &\letin{\langle m, t \rangle = Adv\, o}{} \\
         &\letin{queries = \get Q}{} \\
         &\letin{b=\mathtt{contains}(queries, m)}{} \\
@@ -1108,18 +1112,18 @@ We start by formalizing the following lemma.
     \\[2ex]
     \quad\overset{\text{~\ref{reduc4}}}{\simcontext}\quad&
     \begin{aligned}
-        &\letin{k =\widetilde{Gen} \star}{} \\
-        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random))}{} \\
+        &\letin{k = \widetilde{Gen} \star}{} \\
+        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random)}{} \\
         &\letin{queries = \get Q}{} \\
         &\letin{b=\mathtt{contains}(queries, m)}{} \\
         &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
-        &\mathtt{else}\,\letin{x=(\mathtt{der}(\bang(\return \lambda m.\random)))\, m)}{\mathtt{eq}(x,t)}
+        &\mathtt{else}\,\letin{x=\mathtt{der}(\bang(\return \lambda m.\random))\, m}{\mathtt{eq}(x,t)}
     \end{aligned}
     \\[2ex]
     \quad\overset{\text{~\ref{reduc3}}}{\simcontext}\quad&
     \begin{aligned}
-        &\letin{k =\widetilde{Gen} \star}{} \\
-        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random))}{} \\
+        &\letin{k = \widetilde{Gen} \star}{} \\
+        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random)}{} \\
         &\letin{queries = \get Q}{} \\
         &\letin{b=\mathtt{contains}(queries, m)}{} \\
         &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
@@ -1128,8 +1132,8 @@ We start by formalizing the following lemma.
     \\[2ex]
     \quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad&
     \begin{aligned}
-        &\letin{k =\widetilde{Gen} \star}{} \\
-        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random))}{} \\
+        &\letin{k = \widetilde{Gen} \star}{} \\
+        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random)}{} \\
         &\letin{queries = \get Q}{} \\
         &\letin{b=\mathtt{contains}(queries, m)}{} \\
         &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
@@ -1138,41 +1142,248 @@ We start by formalizing the following lemma.
     \\[2ex]
     \quad\triangleq\quad&
     \begin{aligned}
-        &\letin{k =\widetilde{Gen} \star}{} \\
-        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random))}{} \\
-        &\letin{b=\mathtt{contains}(\mathtt{initQ}, m)}{} \\
+        &\mathtt{let}\,k= \\
+        &\left(
+        \begin{aligned}
+            &\lambda u. \\
+            &\letin{q=\mathtt{initQ}}{} \\
+            &\letin{\_ = \mathtt{set}\,Q\,q}{} \\
+            &\letin{tab=\mathtt{initTable}}{} \\
+            &\letin{\_ = \mathtt{set}\,rand\,tab}{} \\
+            &\letin{z=\mathtt{zero}}{} \\
+            &\return z
+        \end{aligned}
+        \right)\mathtt{in}\;\star \\
+        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random)}{} \\
+        &\letin{queries = \get Q}{} \\
+        &\letin{b=\mathtt{contains}(queries, m)}{} \\
         &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
         &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
     \end{aligned}
     \\[2ex]
-    \quad\overset{\text{~\ref{reduc4}}}{\simcontext}\quad&
+    \quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad&
     \begin{aligned}
-        &\letin{k =\widetilde{Gen} \star}{} \\
-        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random))}{} \\
-        &\mathtt{if}\, \false\, \mathtt{then}\, \return \false \\
+        &\mathtt{let}\,k= \\
+        &\left(
+        \begin{aligned}
+            &\letin{q=\mathtt{initQ}}{} \\
+            &\letin{\_ = \mathtt{set}\,Q\,q}{} \\
+            &\letin{tab=\mathtt{initTable}}{} \\
+            &\letin{\_ = \mathtt{set}\,rand\,tab}{} \\
+            &\letin{z=\mathtt{zero}}{} \\
+            &\return z
+        \end{aligned}
+        \right) \\
+        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random)}{} \\
+        &\letin{queries = \get Q}{} \\
+        &\letin{b=\mathtt{contains}(queries, m)}{} \\
+        &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
         &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
     \end{aligned}
-    \\[2ex]
-    \quad\triangleq\quad&
-    \begin{aligned}
-        &\letin{k =\widetilde{Gen} \star}{} \\
-        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random))}{} \\
-        &\letin{x=\random}{\mathtt{eq}(x,t)}
-    \end{aligned}
-    \\[2ex]
-    \quad\overset{\text{~\ref{safeDisc1}}}{\simcontext}\quad&
-    \begin{aligned}
-        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random))}{} \\
-        &\letin{x=\random}{\mathtt{eq}(x,t)}
-    \end{aligned}
-    \\[2ex]
-    \quad\overset{\text{~\ref{randFalse}}}{\simcontext}\quad&
-    \begin{aligned}
-        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random))}{} \\
-        &\letin{x=\random}{\mathtt{eq}(x,t)}
-    \end{aligned}
 \end{align*}
+}
 \end{proof}
+
+% \begin{align*}
+%     \widetilde{MacForge} \quad\triangleq\quad&
+%     \begin{aligned}
+%         &\letin{k = \widetilde{Gen} \star}{} \\
+%         &\letin{o = \widetilde{Oracle}\, k}{} \\
+%         &\letin{\langle m, t \rangle = Adv\, o}{} \\
+%         &\letin{queries = \get Q}{} \\
+%         &\letin{b=\mathtt{contains}(queries, m)}{} \\
+%         &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+%         &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)}
+%     \end{aligned}
+%     \\[2ex]
+%     \quad\overset{\text{Lemma ~\ref{lemma:oracle-tilde-eq-suspended-random}}}{\simcontext}\quad&
+%     \begin{aligned}
+%         &\letin{k = \widetilde{Gen} \star}{} \\
+%         &\letin{o = \return(\lambda k.\return \bang(\return \lambda m.\random))\, k}{} \\
+%         &\letin{\langle m, t \rangle = Adv\, o}{} \\
+%         &\letin{queries = \get Q}{} \\
+%         &\letin{b=\mathtt{contains}(queries, m)}{} \\
+%         &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+%         &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)}
+%     \end{aligned}
+%     \\[2ex]
+%     \quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad&
+%     \begin{aligned}
+%         &\letin{k =\widetilde{Gen} \star}{} \\
+%         &\letin{o = \return \bang(\return \lambda m.\random)}{} \\
+%         &\letin{\langle m, t \rangle = Adv\, o}{} \\
+%         &\letin{queries = \get Q}{} \\
+%         &\letin{b=\mathtt{contains}(queries, m)}{} \\
+%         &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+%         &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)}
+%     \end{aligned}
+%     \\[2ex]
+%     \quad\overset{\text{~\ref{reduc4}}}{\simcontext}\quad&
+%     \begin{aligned}
+%         &\letin{k =\widetilde{Gen} \star}{} \\
+%         &\letin{\langle m, t \rangle = Adv\,\bang(\return \lambda m.\random)}{} \\
+%         &\letin{queries = \get Q}{} \\
+%         &\letin{b=\mathtt{contains}(queries, m)}{} \\
+%         &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+%         &\mathtt{else}\,\letin{x=\mathtt{der}(\bang(\return \lambda m.\random))\, m}{\mathtt{eq}(x,t)}
+%     \end{aligned}
+%     \\[2ex]
+%     \quad\overset{\text{~\ref{reduc3}}}{\simcontext}\quad&
+%     \begin{aligned}
+%         &\letin{k =\widetilde{Gen} \star}{} \\
+%         &\letin{\langle m, t \rangle = Adv\,\bang(\return \lambda m.\random)}{} \\
+%         &\letin{queries = \get Q}{} \\
+%         &\letin{b=\mathtt{contains}(queries, m)}{} \\
+%         &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+%         &\mathtt{else}\,\letin{x=(\return \lambda m.\random)\, m}{\mathtt{eq}(x,t)}
+%     \end{aligned}
+%     \\[2ex]
+%     \quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad&
+%     \begin{aligned}
+%         &\letin{k =\widetilde{Gen} \star}{} \\
+%         &\letin{\langle m, t \rangle = Adv\,\bang(\return \lambda m.\random)}{} \\
+%         &\letin{queries = \get Q}{} \\
+%         &\letin{b=\mathtt{contains}(queries, m)}{} \\
+%         &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+%         &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
+%     \end{aligned}
+%     \\[2ex]
+%     \quad\triangleq\quad&
+%     \begin{aligned}
+%         &\mathtt{let}\,k=\left(
+%         \begin{aligned}
+%             &\lambda u. \\
+%             &\letin{q=\mathtt{initQ}}{} \\
+%             &\letin{\_ = \mathtt{set}\,Q\,q}{} \\
+%             &\letin{tab=\mathtt{initTable}}{} \\
+%             &\letin{\_ = \mathtt{set}\,rand\,tab}{} \\
+%             &\letin{z=\mathtt{zero}}{} \\
+%             &\return k
+%         \end{aligned}
+%         \right)\,\mathtt{in}\;\star \\
+%         &\letin{\langle m, t \rangle = Adv\,\bang(\return \lambda m.\random)}{} \\
+%         &\letin{queries = \get Q}{} \\
+%         &\letin{b=\mathtt{contains}(queries, m)}{} \\
+%         &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+%         &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
+%     \end{aligned}
+%     \\[2ex]
+%     \quad\overset{\text{~\ref{letAss}}}{\simcontext}\quad&
+%     \begin{aligned}
+%         &\mathtt{let}\,k=\left(
+%         \begin{aligned}
+%             &\lambda u. \\
+%             &\mathtt{let}\,\_ = \left(
+%             \begin{aligned}
+%                 &\letin{q=\mathtt{initQ}}{} \\
+%                 &\letin{\_ = \mathtt{set}\,Q\,q}{} \\
+%                 &\letin{tab=\mathtt{initTable}}{} \\
+%                 &\letin{\_ = \mathtt{set}\,rand\,tab}{} \\
+%             \end{aligned}
+%             \right)\,\mathtt{in} \\
+%             &\letin{z=\mathtt{zero}}{} \\
+%             &\return k
+%         \end{aligned}
+%         \right)\,\mathtt{in}\;\star \\
+%         &\letin{\langle m, t \rangle = Adv\,\bang(\return \lambda m.\random)}{} \\
+%         &\letin{queries = \get Q}{} \\
+%         &\letin{b=\mathtt{contains}(queries, m)}{} \\
+%         &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+%         &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
+%     \end{aligned}
+%     \\[2ex]
+%     \quad\overset{\text{~\ref{reduc4}}}{\simcontext}\quad&
+%     \begin{aligned}
+%         &\mathtt{let}\,k=\left(
+%         \begin{aligned}
+%             &\lambda u. \\
+%             &\mathtt{let}\,\_ = \left(
+%             \begin{aligned}
+%                 &\letin{\_ = \mathtt{set}\,Q\,\mathtt{initQ}}{} \\
+%                 &\letin{\_ = \mathtt{set}\,rand\,\mathtt{initTable}}{} \\
+%             \end{aligned}
+%             \right)\,\mathtt{in} \\
+%             &\letin{z=\mathtt{zero}}{} \\
+%             &\return k
+%         \end{aligned}
+%         \right)\,\mathtt{in}\;\star \\
+%         &\letin{\langle m, t \rangle = Adv\,\bang(\return \lambda m.\random)}{} \\
+%         &\letin{queries = \get Q}{} \\
+%         &\letin{b=\mathtt{contains}(queries, m)}{} \\
+%         &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+%         &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
+%     \end{aligned}
+%     % \\[2ex]
+%     % \quad\overset{\text{~\ref{safeDisc1}}}{\simcontext}\quad&
+%     % \begin{aligned}
+%     %     &\mathtt{let}\,k=\left(
+%     %     \begin{aligned}
+%     %         &\lambda u. \\
+%     %         &\letin{z=\mathtt{zero}}{} \\
+%     %         &\return k
+%     %     \end{aligned}
+%     %     \right)\,\mathtt{in}\;\star \\
+%     %     &\letin{\langle m, t \rangle = Adv\,\bang(\return \lambda m.\random)}{} \\
+%     %     &\letin{queries = \get Q}{} \\
+%     %     &\letin{b=\mathtt{contains}(queries, m)}{} \\
+%     %     &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+%     %     &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
+%     % \end{aligned}
+%     % \\[2ex]
+%     % \quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad&
+%     % \begin{aligned}
+%     %     &\letin{z=\mathtt{zero}}{} \\
+%     %     &\letin{\langle m, t \rangle = Adv\,\bang(\return \lambda m.\random)}{} \\
+%     %     &\letin{queries = \get Q}{} \\
+%     %     &\letin{b=\mathtt{contains}(queries, m)}{} \\
+%     %     &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+%     %     &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
+%     % \end{aligned}
+%     % \\[2ex]
+%     % \quad\overset{\text{~\ref{safeDisc1}}}{\simcontext}\quad&
+%     % \begin{aligned}
+%     %     &\letin{\langle m, t \rangle = Adv\,\bang(\return \lambda m.\random)}{} \\
+%     %     &\letin{queries = \get Q}{} \\
+%     %     &\letin{b=\mathtt{contains}(queries, m)}{} \\
+%     %     &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+%     %     &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
+%     % \end{aligned}
+% \end{align*}
+% At this point we notice that the third line corresponds to retrieving an empty query ledger since $Q$ was initialized in $\widetilde{Gen}$ but since there are not $\mathtt{set}$ operations on it we discarded it with respect of contextual indistinguishability. Given this observation we notice that $\mathtt{contains}(queries, m)$ corresponds to $\mathtt{contains}(\mathtt{initQ}, m)$ which reduces to $\false$ by definition.
+
+% \begin{align*}
+%     \quad\overset{\text{\ref{letCom}}}{\simcontext}\quad&
+%     \begin{aligned}
+%         &\letin{\langle m, t \rangle = Adv\,\bang(\return \lambda m.\random)}{} \\
+%         &\letin{queries = \get Q}{} \\
+%         &\letin{b=\mathtt{contains}(queries, m)}{} \\
+%         &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+%         &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
+%     \end{aligned}
+%     \\[2ex]
+%     \quad\simcontext\quad&
+%     \begin{aligned}
+%         &\letin{z=\mathtt{zero}}{} \\
+%         &\letin{\langle m, t \rangle = Adv\,\bang(\return \lambda m.\random)}{} \\
+%         &\letin{b=\false}{} \\
+%         &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+%         &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
+%     \end{aligned}
+%     \\[2ex]
+%     \quad\overset{\text{\ref{ifFalse}}}{\simcontext}\quad&
+%     \begin{aligned}
+%         &\letin{z=\mathtt{zero}}{} \\
+%         &\letin{\langle m, t \rangle = Adv\,\bang(\return \lambda m.\random)}{} \\
+%         &\letin{x=\random}{\mathtt{eq}(x,t)}
+%     \end{aligned}
+%     \\[2ex]
+%     \quad\overset{\text{\ref{safeDisc1}}}{\simcontext}\quad&
+%     \begin{aligned}
+%         &\letin{\langle m, t \rangle = Adv\,\bang(\return \lambda m.\random)}{} \\
+%         &\letin{x=\random}{\mathtt{eq}(x,t)}
+%     \end{aligned}
+% \end{align*}
+% \end{proof}
 
 % By the definition of the function symbol contains, an empty ledger (initQ) contains no messages. Thus, contains(initQ,m) is equivalent to \return\false.
 
@@ -1261,23 +1472,3 @@ We start by formalizing the following lemma.
 % Now let's observe that that the condition $\mathtt{not}(\mathtt{contains}(queries, m))$ can be hoisted since if $m\in queries$, the experiment returns $\false$ regardless of whether the tag is correct. If $fresh$ is $\mathtt{true}$, $m$ has never been queried. By the definition of $\widetilde{Mac}$, this means a fresh random value $x$ will be sampled using $\random$ and added to the random function ledger $rand$. Because $Adv$ finished its execution before this sampling, $t$ is independent of this specific $x$. Using Lemma~\ref{lemma:mactilde-eq-random} with $y=t$ and $x=\widetilde{Mac}\lis{k,m}$ we simplify to $\mathtt{false}$.
 
 % \end{proof}
-
-
-% &\quad \return\bigl(\lambda k.\return(\bang(\return(\lambda r. \\
-% &\quad \letin{queries=\get Q}{} \\
-% &\quad \letin{t=\mathtt{isdefinedQ}(queries, r)}{} \\
-% &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-% &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(queries, r) \\
-% &\quad \mathtt{else}\ \return \star}{} \\
-% &\quad \letin{tab=\mathtt{get}\,rand}{} \\
-% &\quad \letin{b=\mathtt{isdefined}(tab, r)}{} \\
-% &\quad \mathtt{if}\,b\,\mathtt{then} \\
-% &\quad\quad \letin{x=\mathtt{getValue}(tab, r)}{} \\
-% &\quad\quad \return x \\
-% &\quad \mathtt{else} \\
-% &\quad\quad \letin{x=\random}{} \\
-% &\quad\quad \letin{newtab=\mathtt{modify}(tab, r, x)}{} \\
-% &\quad\quad \letin{\_=\mathtt{set}\,rand\,newtab}{} \\
-% &\quad\quad \return x
-
-% % \overset{\ref{reduc2}}{\simcontext} 
