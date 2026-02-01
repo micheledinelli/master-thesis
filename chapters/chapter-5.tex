@@ -199,6 +199,11 @@ In this section we introduce the following syntactic sugar:
 In $\lamBLL$, application is written as $MZ$, and the constructor $\return$ is used to lift values into computations. This notation allows us to simplify expressions by implicitly promoting values to computations, thereby reducing the need for nested $\return$ construct.
 
 \section{Useful Functional Symbols and Equations}\label{sec:useful-functional-symbols-and-equations}
+In $\lamBLL$, if a computation $M$ outputs $y$, and $x$ is sampled subsequently, then
+\begin{align}
+\letin{y=M}{\letin{x=\random}{\return \mathtt{eq}(x,y)}} \sim \mathtt{false} \tag{$\mathtt{randFalse}$}\label{randFalse}
+\end{align}
+
 \begin{table}[htpb]
 \centering
 \footnotesize
@@ -207,6 +212,8 @@ In $\lamBLL$, application is written as $MZ$, and the constructor $\return$ is u
 \begin{tabularx}{\textwidth}{|@{\hskip 1pt}c|l|X@{\hskip 2pt}|}
 \hline
 \textbf{Function Symbol} & \multicolumn{1}{c|}{\textbf{Type}} & \multicolumn{1}{c|}{\textbf{Interpretation}} \\ \hline
+\multicolumn{3}{|c|}{\textbf{Function Symbols for Manipulating Bitstrings }} \\ \hline
+$\mathtt{eq}$ & $\SS[i)]\times\SS[i]\to\BB$ & Function that takes as input two strings of length $i$, and returns true if they are equals and false otherwise. \\ \hline
 \multicolumn{3}{|c|}{\textbf{Function Symbols for Ledger Manipulation}} \\ \hline
 $\mathtt{isdefinedQ_p}$ & $\SS[q\times(i+ 1)]\times\SS[i]\to\BB$ & Function that takes as input a query ledger and a string of length $i$, and returns true if the row, whose first i bits match the input string, is
 active and false otherwise. \\ \hline

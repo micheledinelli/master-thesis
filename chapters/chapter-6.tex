@@ -1,11 +1,11 @@
 \chapter{Proving PRF-Induced MAC Security Equationally}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
-This chapter demonstrates that existential unforgeability under chosen-message attacks for PRF-based MACs can be validated within the $\lamBLL$ framework. We formalize the standard reduction from MAC forgery to PRF indistinguishability by encoding the $\macexp$ experiment, the adversary, and the MAC oracle as $\lamBLL$ terms. By reconstructing the standard reduction presented in Section~\ref{subsec:mac-security} using the calculus's equational reasoning principles, we show that $\lamBLL$ is sufficiently expressive to internalize classical security proofs while enforcing strict polynomial-time constraints through its graded type system
+This chapter demonstrates that existential unforgeability under chosen message attacks for pseudorandom function based MACs can be validated within the $\lamBLL$ framework. We formalize the standard reduction from MAC forgery to pseudorandom function indistinguishability by encoding the $\macexp$ experiment, the adversary, and the MAC oracle as $\lamBLL$ terms. By reconstructing the proof described of Theorem~\ref{proof:handwavy} using the equational reasoning principles of the calculus, we show that $\lamBLL$ is sufficiently expressive to internalize classical security proofs while enforcing strict polynomial-time constraints through its graded type system.
 
-We begin by recalling the MAC-forgery experiment, $\macexp$, as defined in Figure~\ref{fig:macforge-recall}. To bridge the gap between pseudocode and formalization, we specify the types for each component as they appear in $\lamBLL$. The concrete implementation of the terms modeling the key generation
-algorithm $\mathit{Gen}$ and the MAC oracle $\mathit{Mac}_k(\cdot)$ depends on the specific MAC
-scheme under consideration. For this reason, these terms are left abstract
-and will be instantiated only after fixing a scheme $\Pi$. In the following paragraphs, we make this instantiation explicit for the schemes $\Pi^F$ and $\widetilde{\Pi}$ which are used in the proof of Theorem~\ref{theorem:mac-security}. In $\lamBLL$ typing discipline, the key generation algorithm $Gen$ is a probabilistic computation outputting a secret key of polynomial length. The adversary, $Adv$, is a higher-order computation receiving an oracle. The oracle itself is controlled by the graded modality $\bang_q$, which enforces a polynomial bound on the number of queries.
+We begin by recalling the MAC forgery experiment, $\macexp$, as defined in Figure~\ref{fig:macforge-recall}. To bridge the gap between pseudocode and formalization, we specify the types for each component as they appear in $\lamBLL$. The concrete implementation of the terms modeling the key generation
+algorithm $\mathit{Gen}$ and the MAC oracle $\mathit{Mac}_k(\cdot)$ depends on the specific MAC scheme under consideration. For this reason, these terms are left abstract and will be instantiated only after fixing a scheme $\Pi$. In the following paragraphs, we make this instantiation explicit for the schemes $\Pi^F$ and $\widetilde{\Pi}$ which are used in the proof of Theorem~\ref{theorem:mac-security}. 
+
+In $\lamBLL$ typing discipline, the key generation algorithm $Gen$ is a probabilistic computation that yields a secret key of polynomial length. The adversary, $Adv$, is a higher-order computation receiving an oracle. The oracle itself is controlled by the graded modality $\bang_q$, which enforces a polynomial bound on the number of queries.
 
 \begin{figure}[htpb]
     \centering
@@ -27,9 +27,9 @@ given the security parameter, produces a secret key whose length is polynomial i
 \begin{align*}
 &\vdash_v^\Theta Gen: \UU \multimap \SS[i] \\
 &\vdash_v^\Theta Mac: (\SS[i] \otimes \SS[i]) \multimap \SS[i] \\
-&\vdash_v^\Theta \vrfy: (\SS[i] \otimes \SS[i] \otimes \SS[i]) \multimap \BB \\
 &\vdash_c^\Theta Oracle: \SS[i] \multimap \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr)\\
-&\vdash_c^\Theta Adv: \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap (\SS[i] \otimes \SS[i])
+&\vdash_c^\varnothing Adv: \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap (\SS[i] \otimes \SS[i])
+% &\vdash_v^\Theta \vrfy: (\SS[i] \otimes \SS[i] \otimes \SS[i]) \multimap \BB \\
 % \vdash_c^\Theta &: 
 % \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap \bigl((\SS[i] \otimes \SS[i]) \otimes \SS[r]\bigr) && \tag{Type for $Adv$}
 \end{align*}
@@ -43,7 +43,7 @@ To model this behavior in $\lamBLL$, we rely on the notion of a \emph{ledger}, w
 
 The adversary $Adv$ takes as input the closure obtained by currying and encapsulating the key within the $Oracle$ term. Based on its interaction with the oracle, it produces a candidate forgery $(m,t)$ of type $(\SS[i] \otimes \SS[i])$. 
 
-The verification function $\vrfy$ checks the validity of a proposed tag by recomputing the MAC on the message component and comparing it with the supplied tag.
+The verification function $\vrfy$ is not introduced since the validity of a proposed tag can be checked just by recomputing the MAC on the message and comparing it with the supplied tag.
 
 It is worth noting that the type derivations of the terms introduced so far are parameterized by a reference context $\Theta$, which varies depending on the cryptographic experiment considered. In the model for the scheme $\Pi_F$, the context $\Theta$ contains the reference $Q$ used to record oracle queries so the types of the terms in Figure~\ref{fig:macforgeF-subterms} must be adapted by defining a reference context $\Xi=\{\,Q: \SS[(q\times(i+1)]\,\}$ and setting $\Theta$ accordingly. In contrast, in the model for the scheme $\widetilde{\Pi}$, the context $\Theta$ is instantiated with a reference context containing also the ledger used to model the random function $f$, namely $\Upsilon=\{\,rand : \SS[(q+1)\times(2i+1)], \dots\,\}$.
 
@@ -98,13 +98,6 @@ We have to define a $\lamBLL$ term for the experiment using the encryption schem
             &\quad\quad \mathtt{else}\ \return \star}{} \\
             &\quad\quad \mathit{Mac}^F\lis{k,m}))
         \end{aligned}
-        % \qquad\qquad\qquad
-        % \begin{aligned}
-        %     &\vrfy \triangleq \\
-        %     &\quad \lambda k.\lambda m.\lambda t. \\
-        %     &\quad Mac^F\lis{k,m} \\ 
-        %     &\quad \return \mathtt{eq}(Mac^F\lis{k,m}, t)
-        % \end{aligned}
     \end{align*}
     \caption{Models for subterms of $MacForge^F$.}
     \label{fig:macforgeF-subterms}
@@ -172,11 +165,13 @@ The term $\widetilde{\mathit{Mac}}$ models the MAC algorithm of $\widetilde{\Pi}
 using the predicate $\mathtt{isdefined}$. If $r$ is already present in the ledger, the corresponding output value $x$ is retrieved using $\mathtt{getValue}$, and the
 resulting tag is computed deterministically. Otherwise, if $r$ is a fresh input, the term samples a new uniformly random value $x$, records the association $(r,x)$ in the ledger using $\mathtt{modify}$, updates the reference $rand$, and then returns the corresponding tag. In this way, the ledger ensures that repeated evaluations of $f$ on the same input yield consistent outputs. 
 
-As in the case of the query ledger, the algorithms of the scheme $\widetilde{\Pi}$ operate directly on the ledger stored in the reference $rand$. Accordingly, the typing of the terms in Figure~\ref{fig:macforgef-subterms} is carried out in a reference context $\Upsilon = \{\, rand : \SS[(q+1)\times(2i+1)], Q: \SS[(q\times(i+1))] \,\}$ and the context $\Theta$ appearing in the corresponding typing judgments is instantiated with $\Upsilon$. It is worth observing that the underlying function $f$ can be queried at most $q+1$ times: up to $q$ times by the adversary through its oracle access, and once by the experiment itself during verification via $\vrfy$. The size of the ledger stored in $rand$ reflects this bound, as it contains exactly $q+1$ rows, corresponding to the maximum number of distinct messages on which $f$ may be evaluated throughout the execution of the experiment.
+As in the case of the query ledger, the algorithms of the scheme $\widetilde{\Pi}$ operate directly on the ledger stored in the reference $rand$. Accordingly, the typing of the terms in Figure~\ref{fig:macforgef-subterms} is carried out in a reference context $\Upsilon = \{\, rand : \SS[(q+1)\times(2i+1)], Q: \SS[(q\times(i+1))] \,\}$ and the context $\Theta$ appearing in the corresponding typing judgments is instantiated with $\Upsilon$. It is worth observing that the underlying function $f$ can be queried at most $q+1$ times: up to $q$ times by the adversary through its oracle access, and once by the experiment itself during verification via an oracle evaluation on the candidate message generated by the adversary. The size of the ledger stored in $rand$ reflects this bound, as it contains exactly $q+1$ rows, corresponding to the maximum number of distinct messages on which $f$ may be evaluated throughout the execution of the experiment.
 
 In the term $\widetilde{Oracle}$ in Figure~\ref{fig:macforgef-subterms} we use the syntactic sugar of Equation~\ref{eq:sugar-return} since $\widetilde{Mac}$ is a value.
 
-The distinguisher $D_A$ constructed from any adversary that succeeds in the $\macexp$ experiment, and used in the first step of the proof of Theorem~\ref{theorem:mac-security}, emulates the experiment $\macexp$. The model for the distinguisher is very similar to that of the experiment, however in this case the oracle $o$ is taken as an explicit input. This allows the same term to be used to model both $D_A^{F_k(\cdot)}$ and $D_A^{f(\cdot)}$, namely the distinguisher that receives oracle access to a pseudorandom function $F_k$ and the one that receives oracle access to a truly random function $f$.
+\section{Modeling The Distinguishers}
+
+The distinguisher $D_A$ constructed from any adversary that succeeds in the $\macexp$ experiment, and used in the first step of the proof of Theorem~\ref{theorem:mac-security}, emulates the experiment $\macexp$. The model for the distinguisher is very similar to that of the experiment, however in this case the oracle $o$ is taken as an explicit input. This allows the same term to be used to model both $D_A^{F_k(\cdot)}$ and $D_A^{f(\cdot)}$, namely the distinguisher that receives oracle access to a pseudorandom function $F_k$ and the one that receives oracle access to a truly random function $f$. The $\lamBLL$ term defining the distinguisher is shown in Figure~\ref{fig:d-term}.
 
 \begin{figure}[ht]
     \centering
@@ -193,17 +188,12 @@ The distinguisher $D_A$ constructed from any adversary that succeeds in the $\ma
     \label{fig:d-term}
 \end{figure}
 
-The $\lamBLL$ term defining the distinguisher is shown in
-Figure~\ref{fig:d-term}. The distinguisher invokes the adversary $Adv$ with oracle access to $o$, obtains a candidate forgery $(m,t)$, and checks its validity using the verification procedure $\vrfy$. If verification succeeds, the distinguisher tests whether the message $m$ appears in the query ledger by inspecting the reference $Q$ and applying the predicate $\mathtt{contains}$. As in the $\mathtt{MacForge}$ experiment, the reference $Q$ is shared between the oracle and the distinguisher and records all oracle queries performed by the adversary. The distinguisher returns $\true$ if $(m,t)$ is a valid fresh forgery, and
+The distinguisher invokes the adversary $Adv$ with oracle access to $o$, obtains a candidate forgery $(m,t)$, and checks its validity using a verification procedure identical to the one used in the $\macexp$ in Figure~\ref{fig:macforge-term}. As in the $\mathtt{MacForge}$ experiment, the reference $Q$ is shared between the oracle and the distinguisher and records all oracle queries performed by the adversary. The distinguisher returns $\true$ if $(m,t)$ is a valid fresh forgery, and
 $\false$ otherwise.
 
-We briefly justify that the distinguisher $D$ is well typed in $\lamBLL$. The term $D$ is a value returning a function that takes an oracle $o$ as input which has type $\bang_q(\SS[i] \multimap \SS[i])$, matching the oracle type expected by the adversary $Adv$. Since $Adv$ is typed as $\bang_q(\SS[i] \multimap \SS[i]) \multimap (\SS[i] \otimes \SS[i])$ the application $Adv\,o$ is well typed and yields a candidate forgery $(m,t)$.
+We briefly justify that the distinguisher $D$ is well typed in $\lamBLL$. The term $D$ is a value returning a function that takes an oracle $o$ as input which has type $\bang_{q+1}(\SS[i] \multimap \SS[i])$, matching the oracle type expected by the adversary $Adv$. Since $Adv$ is typed as $\bang_{q}(\SS[i] \multimap \SS[i]) \multimap (\SS[i] \otimes \SS[i])$ for a polynomial $q$ the application $Adv\,o$ is well typed and yields a candidate forgery $(m,t)$ with type $(\SS[i] \otimes \SS[i])$. The distinguisher then reads the reference $Q$ using $\get Q$. As in the $\mathtt{MacForge}$ experiment, the oracle $o$ and the distinguisher $D$ operate within the same reference context $\Theta$, which contains the reference $Q : \SS[(q \times (i+1))]$. This ensures that the query history recorded by the oracle during the execution of $Adv$ is available to the distinguisher when performing the check for the freshness of the message. It is important to note that modifying the reference state would not correspond to a meaningful strategy for distinguishing a pseudorandom function from a truly random one. The verification step is carried out by checking if the message generated by the adversary belongs to the set of registered queries, if it does not then $D$ evaluates the oracle on the message checking if the tag generated by the adversary and the tag generated by the oracle are equals. The type for the distinguisher follows the type derivation $\vdash_c^\Theta \bang_{q+1}(\SS[i] \multimap \SS[i]) \multimap \BB$
 
-The distinguisher then reads the reference $Q$ using $\get Q$. As in the $\mathtt{MacForge}$ experiment, the oracle $o$ and the distinguisher $D$ operate within the same reference context $\Theta$, which contains the reference $Q : \SS[(q \times (i+1))]$. This ensures that the query history recorded by the oracle during the execution of $Adv$ is available to the distinguisher when performing the check for the freshness of the message. It is important to note that the distinguisher is not intended to modify the reference state. Any interference with the reference $Q$ would result in an invalid execution of the experiment and would not correspond to a meaningful strategy for distinguishing a pseudorandom function from a truly random one.
-
-The verification step is carried out by checking if the message generated by the adversary belongs to the set of registered queries, if it does not then $D$ evaluates the oracle on the message checking if the tag generated by the adversary and the tag generated by the oracle are equals.
-
-We can now model the distinguishers $D_A^{F_k(\cdot)}$ and $D^{f(\cdot)}$ as follows:
+We can now model the distinguishers $D^{F_k(\cdot)}$ and $D^{f(\cdot)}$ as follows:
 \begin{align}
 D^F &\triangleq \letin{k=Gen^F \star} \letin{o=M^F k} \letin{e=\mathit{MacOracle}\,o}{D\,e} \\  
 \widetilde{D} &\triangleq \letin{k=\widetilde{Gen} \star} \letin{o=\widetilde{M} k} \letin{e=\mathit{MacOracle}\,o}{D\,e} \label{eq:d-tilde}
@@ -212,55 +202,53 @@ D^F &\triangleq \letin{k=Gen^F \star} \letin{o=M^F k} \letin{e=\mathit{MacOracle
 where the subterms $M^F$ and $\widetilde{M}$ defined in Figure~\ref{fig:oracles} model the pseudorandom function $F$ and the random function $f$.
 
 \begin{figure}[htpb]
-    \small
+\small{
     \centering
     \begin{subfigure}[c]{0.45\textwidth}
         \begin{align*}
         \begin{aligned}
-            &M^F \triangleq \\
-            &\quad \text{return}(\lambda k.\text{return}(!(\text{return}(\lambda m.\\
-            &\quad\quad \text{let } q = \text{get } Q \text{ in} \\
-            &\quad\quad \text{let } t = \mathtt{isdefinedQ}(q,m) \text{ in} \\
-            &\quad\quad \text{let } \_ = \mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-            &\quad\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
-            &\quad\quad \mathtt{else}\ \text{return } \star \text{ in} \\
-            &\quad\quad \text{return } F[k,m] \\
-            &\quad ))))
+            M^F &\triangleq \\
+            &\return(\lambda k.\return(\bang(\return(\lambda m.\\
+            &\quad \letin{q=\get Q}{} \\
+            &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
+            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
+            &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \return F\lis{k,m}
         \end{aligned}
         \end{align*}
         \caption{subterm with pseudorandom function}
         \label{subfig:oracle-pseudo-random}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[c]{0.53\textwidth}
+    \begin{subfigure}[c]{0.45\textwidth}
         \begin{align*}
         \begin{aligned}
-            &\widetilde{M} \triangleq \\
-            &\quad \text{return}(\lambda k.\text{return}(!(\text{return}(\lambda r. \\
-            &\quad\quad \text{let } q = \text{get } Q \text{ in} \\
-            &\quad\quad \text{let } t = \mathtt{isdefinedQ}(q, r) \text{ in} \\
-            &\quad\quad \text{let } \_ = \mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-            &\quad\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q, r) \\
-            &\quad\quad \mathtt{else}\ \text{return } \star \text{ in} \\
-            &\quad\quad \text{let } tab = \mathtt{get}\,rand \text{ in} \\
-            &\quad\quad \text{let } b = \mathtt{isdefined}(tab, r) \text{ in} \\
-            &\quad\quad \mathtt{if}\,b\,\mathtt{then} \\
-            &\quad\quad\quad \text{let } x = \mathtt{getValue}(tab, r) \text{ in} \\
-            &\quad\quad\quad \text{return } x \\
-            &\quad\quad \mathtt{else} \\
-            &\quad\quad\quad \text{let } x = \random \text{ in} \\
-            &\quad\quad\quad \text{let } newtab = \mathtt{modify}(tab, r, x) \text{ in} \\
-            &\quad\quad\quad \text{let } \_ = \mathtt{set}\,rand\,newtab \text{ in} \\
-            &\quad\quad\quad \text{return } x \\
-            &))))
+            \widetilde{M} &\triangleq \\
+            &\return(\lambda k.\return(\bang(\return(\lambda r. \\
+            &\quad \letin{q=\get Q}{} \\
+            &\quad \letin{t=\mathtt{isdefinedQ}(q, r)}{} \\
+            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
+            &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q, r) \\
+            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \letin{tab=\mathtt{get}\,rand}{} \\
+            &\quad \letin{b=\mathtt{isdefined}(tab, r)}{} \\
+            &\quad \mathtt{if}\,b\,\mathtt{then} \\
+            &\quad\quad \letin{x=\mathtt{getValue}(tab, r)}{} \\
+            &\quad\quad \return x \\
+            &\quad \mathtt{else} \\
+            &\quad\quad \letin{x=\random}{} \\
+            &\quad\quad \letin{newtab=\mathtt{modify}(tab, r, x)}{} \\
+            &\quad\quad \letin{\_=\mathtt{set}\,rand\,newtab}{} \\
+            &\quad\quad \return x))))
         \end{aligned}
         \end{align*}
         \caption{subterm with truly random function}
         \label{subfig:oracle-truly-random}
     \end{subfigure}
-
     \caption{Models for function oracles used by the distinguisher.}
     \label{fig:oracles}
+}
 \end{figure}
 
 The terms $M^F$ and $\widetilde{M}$ are typed under the following type derivations:
@@ -270,7 +258,7 @@ The terms $M^F$ and $\widetilde{M}$ are typed under the following type derivatio
 \end{align*}
 These judgments are parameterized by two distinct reference contexts, denoted by $\Xi$ and $\Upsilon$, which correspond to the two different oracles that may be provided to the distinguisher $D$. When the distinguisher is given access to the oracle $M^F$, modeling a pseudorandom function, the reference context $\Theta$ is instantiated as $\Xi = \{\, Q : \SS[q \times (i+1)] \,\}$ where the reference $Q$ is used to record the messages queried to the oracle. In contrast, when the distinguisher is given access to the term $\widetilde{M}$, modeling a truly random function $f$, the reference context $\Theta$ is instantiated as $\Upsilon = \{\, \mathit{rand} : \SS[(q+1) \times (2i+1)],\; Q : \SS[q \times (i+1)] \,\}$. In this case, the additional reference $\mathit{rand}$ is required to store previously generated random outputs which models the truly random function.
 
-The oracle $\mathit{MacOracle}$, defined in Equation~\ref{eq:mac-oracle}, returns a function that is parameterized by an underlying function oracle $o$. In the present setting, $o$ abstracts either a pseudorandom function or a truly random function through terms in Figure~\ref{fig:oracles} and is used to model the MAC computation. Upon receiving a message $m$, the returned function simply invokes the oracle $o$ on $m$ and returns the resulting value, which is interpreted as the corresponding tag.  The term is well typed under the judgment $\vdash_c^\emptyset \mathit{MacOracle}: \bang_{q+1}(\SS[i] \multimap \SS[i]) \multimap \bang_{q+1}(\SS[i] \multimap \SS[i])$ where the graded modality accounts for the single use of the underlying oracle within the returned function.
+The oracle $\mathit{MacOracle}$, defined in Equation~\ref{eq:mac-oracle}, returns a function that is parameterized by an underlying function oracle $o$. In the present setting, $o$ abstracts either a pseudorandom function or a truly random function through terms in Figure~\ref{fig:oracles} and is used to model the MAC computation. Upon receiving a message $m$, the returned function simply invokes the oracle $o$ on $m$ and returns the resulting value, which is interpreted as the corresponding tag.  The term is well typed under the judgment $\vdash_c^\varnothing \mathit{MacOracle}: \bang_{q+1}(\SS[i] \multimap \SS[i]) \multimap \bang_{q+1}(\SS[i] \multimap \SS[i])$ where the graded modality accounts for the single use of the underlying oracle within the returned function.
 % TODO: is q+1 good here? or q+2?
 
 \begin{equation}
@@ -923,9 +911,9 @@ D^F \simcontext \mathit{MacForge}^F
 }
 \end{proof}
 
-In order to complete the proof it remains to demonstrate that the experiment $\widetilde{\mathit{MacForge}}$ returns true with negligible probability, hence is contextually indistinguishable from false namely $\widetilde{\mathit{MacForge}}\simcontext \mathtt{false}$. The idea to prove this is that a verified tag implies prior query to the random function namely in the execution of $\widetilde{MacForge}$ whenever $\vrfy(m,t)$ evaluates to true, it must hold that $m \in \mathbb{Q}$. In $\widetilde{Oracle}$ every call on input $m$ records $m$ in $\mathbb{Q}$. The only way the adversary can obtain a tag $t$ such that $f(m) = t$ must be by querying the oracle with $m$, hence causing $m$ to be in $\mathbb{Q}$.
+In order to complete the proof it remains to demonstrate that the experiment $\widetilde{\mathit{MacForge}}$ returns true with negligible probability, hence is contextually indistinguishable from false namely $\widetilde{\mathit{MacForge}}\simcontext \mathtt{false}$. By examining the term $\widetilde{MacForge}$ we notice that demonstrating that it is equal to $\mathtt{false}$ just rely on demonstrating the second branch of the $\mathtt{if}-\mathtt{then}-\mathtt{else}$ block since the first branch it is already $\mathtt{false}$. The idea to prove this is that a verified tag implies prior query to the random function namely in the execution of $\widetilde{MacForge}$ whenever the verification procedure evaluates to true, it must hold that $m \in \mathbb{Q}$. In $\widetilde{Oracle}$ every call on input $m$ records $m$ in $\mathbb{Q}$. The only way the adversary can obtain a tag must be by querying the oracle with $m$, hence causing $m$ to be in $\mathbb{Q}$. When we look at the second branch we notice that for sure $m$ is not in the query ledger because if it would be in it we would not be evaluating the $\mathtt{else}$ branch. If $m$ is not in the query ledger evaluating $\letin{x=\mathtt{der}(o)\;m}$ yields a random value by Lemma ~\ref{lemma:mactilde-eq-random} and Lemma~\ref{lemma:oracle-tilde-eq-suspended-random}. Equation~\ref{randFalse} concludes the proof.
 
-We start by giving the lemma \ref{lemma:mactilde-eq-random}.
+We start by formalizing the following lemma.
 
 \begin{lemma}\label{lemma:mactilde-eq-random}
 \begin{align*}
@@ -938,63 +926,63 @@ We start by giving the lemma \ref{lemma:mactilde-eq-random}.
 \begin{align*}
     \widetilde{\mathit{Mac}} \quad\triangleq\quad&
     \begin{aligned}
-        &\quad\lambda e. \\
-        &\quad\letin{\langle k,m\rangle = e}{} \\
-        &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-        &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-        &\quad\mathtt{if}\; b\; \mathtt{then} \\
-        &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
-        &\quad\quad \return x \\
-        &\quad\mathtt{else} \\
-        &\quad\quad \letin{x = \random}{} \\
-        &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
-        &\quad\quad \return x
+        &\lambda e. \\
+        &\letin{\langle k,m\rangle = e}{} \\
+        &\letin{tab = \mathtt{get}\,rand}{} \\
+        &\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+        &\mathtt{if}\; b\; \mathtt{then} \\
+        &\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+        &\quad \return x \\
+        &\mathtt{else} \\
+        &\quad \letin{x = \random}{} \\
+        &\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+        &\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad \return x
     \end{aligned}
     \\[2ex]
     \quad\overset{\text{~\ref{randT}}}{\simcontext}\quad&
     \begin{aligned}
-        &\quad\lambda e. \\
-        &\quad\letin{\langle k,m\rangle = e}{} \\
-        &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-        &\quad\letin{x = \random}{} \\
-        &\quad\letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
-        &\quad\return x
+        &\lambda e. \\
+        &\letin{\langle k,m\rangle = e}{} \\
+        &\letin{tab = \mathtt{get}\,rand}{} \\
+        &\letin{x = \random}{} \\
+        &\letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+        &\letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\return x
     \end{aligned}
     \\[2ex]
     \quad\overset{\text{~\ref{letCom}}}{\simcontext}\quad&
     \begin{aligned}
-        &\quad\lambda e. \\
-        &\quad\letin{\langle k,m\rangle = e}{} \\
-        &\quad\letin{x = \random}{} \\
-        &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-        &\quad\letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
-        &\quad\return x
+        &\lambda e. \\
+        &\letin{\langle k,m\rangle = e}{} \\
+        &\letin{x = \random}{} \\
+        &\letin{tab = \mathtt{get}\,rand}{} \\
+        &\letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+        &\letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\return x
     \end{aligned}
     \\[2ex]
     \quad\overset{\text{~\ref{letAss}}}{\simcontext}\quad&
     \begin{aligned}
-        &\quad\lambda e. \\
-        &\quad\letin{\langle k,m\rangle = e}{} \\
-        &\quad\letin{x = \random}{} \\
-        &\quad\mathtt{let}\,\_=\left(
+        &\lambda e. \\
+        &\letin{\langle k,m\rangle = e}{} \\
+        &\letin{x = \random}{} \\
+        &\mathtt{let}\,\_=\left(
         \begin{aligned}
             &\letin{tab = \mathtt{get}\,rand}{} \\
             &\letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
             &\letin{\_ = \mathtt{set}\,rand\,newtab}{}
         \end{aligned}
         \right) \\
-        &\quad\return x
+        &\return x
     \end{aligned}
     \\[2ex]
     \quad\overset{\text{~\ref{safeDisc1}}}{\simcontext}\quad&
     \begin{aligned}
-        &\quad\lambda e. \\
-        &\quad\letin{\langle k,m\rangle = e}{} \\
-        &\quad\letin{x = \random}{} \\
-        &\quad\return x
+        &\lambda e. \\
+        &\letin{\langle k,m\rangle = e}{} \\
+        &\letin{x = \random}{} \\
+        &\return x
     \end{aligned}
     \quad\overset{\text{~\ref{reduc1}}}{\simcontext}\quad
     \begin{aligned}
@@ -1005,11 +993,188 @@ We start by giving the lemma \ref{lemma:mactilde-eq-random}.
     \quad\overset{\text{~\ref{safeDisc2}}}{\simcontext}\quad&
     \begin{aligned}
         &\lambda e. \\
-        &\letin{\langle k,m\rangle = e}{\random}
+        &\random
     \end{aligned}
 \end{align*}
 }
 \end{proof}
+
+\begin{lemma}\label{lemma:oracle-tilde-eq-suspended-random}
+\begin{align*}
+\widetilde{Oracle} \simcontext \return(\lambda k.\return\bang(\return \lambda m.\random))
+\end{align*}
+\end{lemma}
+\begin{proof}
+\small{
+\begin{align*}
+    \widetilde{Oracle} \quad\triangleq\quad&
+    \begin{aligned}
+        &\return(\lambda k.\return \bang(\return \lambda m. \\
+        &\quad \letin{q=\get Q}{} \\
+        &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
+        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\;\mathtt{then} \\
+        &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad \mathit{\widetilde{Mac}}\lis{k,m} \\
+        &))
+    \end{aligned}
+    \\[2ex]
+    \quad\overset{\text{Lemma ~\ref{lemma:mactilde-eq-random}}}{\simcontext}\quad&
+    \begin{aligned}
+        &\return(\lambda k.\return \bang(\return \lambda m. \\
+        &\quad \letin{q=\get Q}{} \\
+        &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
+        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\;\mathtt{then} \\
+        &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad (\lambda e.\random)\lis{k,m} \\
+        &))
+    \end{aligned}
+    \\[2ex]
+    \quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad&
+    \begin{aligned}
+        &\return(\lambda k.\return \bang(\return \lambda m. \\
+        &\quad \letin{q=\get Q}{} \\
+        &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
+        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\;\mathtt{then} \\
+        &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad \random \\
+        &))
+    \end{aligned}
+    \\[2ex]
+    \quad\overset{\text{~\ref{letAss}}}{\simcontext}\quad&
+    \begin{aligned}
+        &\return(\lambda k.\return \bang(\return \lambda m. \\
+        &\quad\mathtt{let}\;\_=\left(
+        \begin{aligned}
+            &\quad \letin{q=\get Q}{} \\
+            &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
+            &\quad \mathtt{if}\;\mathtt{not}(t)\;\mathtt{then} \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\;\return\star
+        \end{aligned}
+        \right) \mathtt{in} \\
+        &\quad \random \\
+        &))
+    \end{aligned}
+    \\[2ex]
+    \quad\overset{\text{~\ref{safeDisc1}}}{\simcontext}\quad&
+    \begin{aligned}
+        &\return(\lambda k.\return \bang(\return \lambda m.\random))
+    \end{aligned}
+\end{align*}
+}
+\end{proof}
+
+\begin{theorem}
+\begin{align*}
+\widetilde{MacForge}\simcontext \mathtt{false}
+\end{align*}
+\end{theorem}
+\begin{proof}
+\begin{align*}
+    \widetilde{MacForge} \quad\triangleq\quad&
+    \begin{aligned}
+        &\letin{k = \widetilde{Gen} \star}{} \\
+        &\letin{o = \widetilde{Oracle}\, k}{} \\
+        &\letin{\langle m, t \rangle = Adv\, o}{} \\
+        &\letin{queries = \get Q}{} \\
+        &\letin{b=\mathtt{contains}(queries, m)}{} \\
+        &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+        &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)}
+    \end{aligned}
+    \\[2ex]
+    \quad\overset{\text{Lemma ~\ref{lemma:oracle-tilde-eq-suspended-random}}}{\simcontext}\quad&
+    \begin{aligned}
+        &\letin{k = \widetilde{Gen} \star}{} \\
+        &\letin{o = \return(\lambda k.\return \bang(\return \lambda m.\random))\, k}{} \\
+        &\letin{\langle m, t \rangle = Adv\, o}{} \\
+        &\letin{queries = \get Q}{} \\
+        &\letin{b=\mathtt{contains}(queries, m)}{} \\
+        &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+        &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)}
+    \end{aligned}
+    \\[2ex]
+    \quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad&
+    \begin{aligned}
+        &\letin{k =\widetilde{Gen} \star}{} \\
+        &\letin{o = \return \bang(\return \lambda m.\random))}{} \\
+        &\letin{\langle m, t \rangle = Adv\, o}{} \\
+        &\letin{queries = \get Q}{} \\
+        &\letin{b=\mathtt{contains}(queries, m)}{} \\
+        &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+        &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)}
+    \end{aligned}
+    \\[2ex]
+    \quad\overset{\text{~\ref{reduc4}}}{\simcontext}\quad&
+    \begin{aligned}
+        &\letin{k =\widetilde{Gen} \star}{} \\
+        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random))}{} \\
+        &\letin{queries = \get Q}{} \\
+        &\letin{b=\mathtt{contains}(queries, m)}{} \\
+        &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+        &\mathtt{else}\,\letin{x=(\mathtt{der}(\bang(\return \lambda m.\random)))\, m)}{\mathtt{eq}(x,t)}
+    \end{aligned}
+    \\[2ex]
+    \quad\overset{\text{~\ref{reduc3}}}{\simcontext}\quad&
+    \begin{aligned}
+        &\letin{k =\widetilde{Gen} \star}{} \\
+        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random))}{} \\
+        &\letin{queries = \get Q}{} \\
+        &\letin{b=\mathtt{contains}(queries, m)}{} \\
+        &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+        &\mathtt{else}\,\letin{x=(\return \lambda m.\random)\, m}{\mathtt{eq}(x,t)}
+    \end{aligned}
+    \\[2ex]
+    \quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad&
+    \begin{aligned}
+        &\letin{k =\widetilde{Gen} \star}{} \\
+        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random))}{} \\
+        &\letin{queries = \get Q}{} \\
+        &\letin{b=\mathtt{contains}(queries, m)}{} \\
+        &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+        &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
+    \end{aligned}
+    \\[2ex]
+    \quad\triangleq\quad&
+    \begin{aligned}
+        &\letin{k =\widetilde{Gen} \star}{} \\
+        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random))}{} \\
+        &\letin{b=\mathtt{contains}(\mathtt{initQ}, m)}{} \\
+        &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+        &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
+    \end{aligned}
+    \\[2ex]
+    \quad\overset{\text{~\ref{reduc4}}}{\simcontext}\quad&
+    \begin{aligned}
+        &\letin{k =\widetilde{Gen} \star}{} \\
+        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random))}{} \\
+        &\mathtt{if}\, \false\, \mathtt{then}\, \return \false \\
+        &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
+    \end{aligned}
+    \\[2ex]
+    \quad\triangleq\quad&
+    \begin{aligned}
+        &\letin{k =\widetilde{Gen} \star}{} \\
+        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random))}{} \\
+        &\letin{x=\random}{\mathtt{eq}(x,t)}
+    \end{aligned}
+    \\[2ex]
+    \quad\overset{\text{~\ref{safeDisc1}}}{\simcontext}\quad&
+    \begin{aligned}
+        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random))}{} \\
+        &\letin{x=\random}{\mathtt{eq}(x,t)}
+    \end{aligned}
+    \\[2ex]
+    \quad\overset{\text{~\ref{randFalse}}}{\simcontext}\quad&
+    \begin{aligned}
+        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random))}{} \\
+        &\letin{x=\random}{\mathtt{eq}(x,t)}
+    \end{aligned}
+\end{align*}
+\end{proof}
+
+% By the definition of the function symbol contains, an empty ledger (initQ) contains no messages. Thus, contains(initQ,m) is equivalent to \return\false.
 
 % \begin{lemma}
 % In $\lamBLL$, if a computation $M$ outputs $y$, and $x$ is sampled subsequently, then:
