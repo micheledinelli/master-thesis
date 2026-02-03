@@ -268,7 +268,7 @@ To formally define pseudorandom function let's introduce also the following noti
     \item A binary partial function $F$ is length-preserving iif $F(k,x)$ is defined iif $|k|= |x|$ and in that case $|F(k,x)| = |x|$.
     \item A binary partial function efficient if there exists a PPT algorithm that computes it.
 \end{itemize}
-\begin{definition}
+\begin{definition}\label{def:prf}
 Let $F: \{0, 1\}^* \times \{0, 1\}^* \to \{0, 1\}^*$ be an efficient, length-preserving, keyed function. $F$ is a pseudorandom function if for all PPT distinguishers $D$, there is a negligible function $\epsilon$ such that:
 \begin{align}
 \left| \mathrm{Pr}[D^{F_k(\cdot)}(1^n) = 1] - \mathrm{Pr}[D^{f(\cdot)}(1^n) = 1] \right| \leq \epsilon(n)

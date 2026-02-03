@@ -192,18 +192,15 @@ maps $\varphi \in \T_\Theta X$ and $f : X \to \T_\Theta Y$ to the function
 $\dlambda e.\, \bigl(\varphi(e) \bind_\D \eval \circ (f \times \id_{\Store_\Theta})\bigr)$,
 where $\dlambda$ denotes currying and $\eval$ is the evaluation map induced by the Cartesian closed structure of $\Set$.
 
-In this section we introduce the following syntactic sugar:
+In $\lamBLL$, application is written as $MZ$, and the constructor $\return$ is used to lift values into computations. The syntactic sugar
 \begin{align}
-    VZ \triangleq (\return V)\,Z\label{eq:sugar-return}
+    VZ \triangleq (\return V)\,Z\label{eq:sugar-return},
 \end{align}
-In $\lamBLL$, application is written as $MZ$, and the constructor $\return$ is used to lift values into computations. This notation allows us to simplify expressions by implicitly promoting values to computations, thereby reducing the need for nested $\return$ construct.
+allows to simplify expressions by implicitly promoting values to computations, thereby reducing the need for nested $\return$ construct.
 
 \section{Useful Functional Symbols and Equations}\label{sec:useful-functional-symbols-and-equations}
-In $\lamBLL$, if a computation $M$ outputs $y$, and $x$ is sampled subsequently, then
 \begin{align}
-\letin{y=M}{\letin{x=\random}{\return \mathtt{eq}(x,y)}} &\sim_{\Theta\subseteq\Xi} \false \tag{$\mathtt{randFalse}$}\label{randFalse} \\[2ex]
-\letin{b=\false}{\ifthen{b}{M}{N}} &\sim_{\Theta\subseteq\Xi} N \tag{$\mathtt{ifFalse}$}\label{ifFalse} \\[2ex]
-\letin{\_ = \mathtt{set}\,Q\,v}{\get Q} \;\sim\; \return v \tag{$\mathtt{getset}$}\label{getset}
+\letin{x=\random}{\return \mathtt{eq}(x,t)}&\sim_{\Theta\subseteq\Xi} \return\false \tag{$\mathtt{randEq}$}\label{randEq}
 \end{align}
 
 \begin{table}[htpb]
@@ -215,7 +212,7 @@ In $\lamBLL$, if a computation $M$ outputs $y$, and $x$ is sampled subsequently,
 \hline
 \textbf{Function Symbol} & \multicolumn{1}{c|}{\textbf{Type}} & \multicolumn{1}{c|}{\textbf{Interpretation}} \\ \hline
 \multicolumn{3}{|c|}{\textbf{Function Symbols for Manipulating Bitstrings }} \\ \hline
-$\mathtt{eq}$ & $\SS[i)]\times\SS[i]\to\BB$ & Function that takes as input two strings of length $i$, and returns true if they are equals and false otherwise. \\ \hline
+$\mathtt{eq}$ & $\SS[i]\times\SS[i]\to\BB$ & Function that takes as input two strings of length $i$, and returns true if they are equals and false otherwise. \\ \hline
 \multicolumn{3}{|c|}{\textbf{Function Symbols for Ledger Manipulation}} \\ \hline
 $\mathtt{isdefinedQ_p}$ & $\SS[q\times(i+ 1)]\times\SS[i]\to\BB$ & Function that takes as input a query ledger and a string of length $i$, and returns true if the row, whose first i bits match the input string, is
 active and false otherwise. \\ \hline
