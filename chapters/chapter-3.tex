@@ -5,18 +5,17 @@ Automated proof systems are machine-checked frameworks that enable cryptographer
 performs Hoare-style proofs of programs, CryptoVerif relies on game transformations while Squirrel reasons over execution traces of protocols.
 
 \section{EasyCrypt}
-In EasyCrypt, security goals and hardness assumptions are modeled as probabilistic programs, called experiments (or games), which include unspecified adversarial code. EasyCrypt supports common reasoning patterns from the game-based approach, in which reductionist security proofs are decomposed into a sequence (or, more generally, a tree) of transformations called \textit{game hops}. Each hop introduces a local change to the experiment whose impact on the adversary’s distinguishing advantage can be formally bounded, making the overall proof easier to understand, structure, and check. Since each game hop relates two probabilistic programs, EasyCrypt relies on probabilistic relational Hoare logic (pRHL) to reason about pairs of programs. pRHL defines judgments of the form
+In EasyCrypt, security goals and hardness assumptions are modeled as probabilistic programs, called experiments (or games), which include unspecified adversarial code. EasyCrypt supports common reasoning patterns from the game-based approach, in which reductionist security proofs are decomposed into a sequence or, more generally, a tree of transformations called \textit{game hops} \cite{the-game-playing-technique, a-tool-for-taming-complexity-in-security-proofs}. Each hop introduces a small change to the initial game, whose impact on the adversary's distinguishing advantage can be formally bounded, making the overall proof easier to understand, structure, and check. Since each game hop relates two probabilistic programs, EasyCrypt relies on probabilistic relational Hoare logic (pRHL) to reason about pairs of programs. pRHL defines judgments of the form
 \[
-[c_1 \sim c_2 : \Phi \Longrightarrow \Psi]
+[c_1 \sim c_2 : \Phi \Longrightarrow \Psi],
 \]
-
 where $c_1$ and $c_2$ are probabilistic programs, and $\Phi$ and $\Psi$ are relational assertions on two memories. An example is $x\langle1\rangle = x\langle2\rangle$, which states that the value of $x$ coincides in both memories. pRHL judgments do not explicitly refer to probabilities but probabilistic statements can still be derived from valid judgments. The semantics of pRHL is based on a notion of \textit{lifting} which allows one to derive equalities and inequalities between probabilities of events in related programs. For instance, from pRHL judgment of the form
 \[
-[c_1 \sim c_2 : \Phi \Longrightarrow E\langle1\rangle \to F\langle2\rangle]
+[c_1 \sim c_2 : \Phi \Longrightarrow E\langle1\rangle \to F\langle2\rangle],
 \]
 one can derive that
 \[
-\mathrm{Pr}[c_1, m_1: E] \leq \mathrm{Pr} [c_2, m_2: F ]
+\mathrm{Pr}[c_1, m_1: E] \leq \mathrm{Pr} [c_2, m_2: F ],
 \]
 for all initial memories $m_1$ and $m_2$ that are related by $\Phi$, and for events $E$ and $F$.
 
@@ -47,50 +46,49 @@ A concrete example illustrating the use of pRHL involves reasoning about two pro
 \end{figure}
 In pRHL, this equivalence can be expressed by the judgment
 \[
-[\mathtt{OTP} \sim \mathtt{Uniform}: \Phi \Longrightarrow m\langle1\rangle = m\langle2\rangle \land c\langle1\rangle = c\langle2\rangle ]
+[\mathtt{OTP} \sim \mathtt{Uniform}: \Phi \Longrightarrow m\langle1\rangle = m\langle2\rangle \land c\langle1\rangle = c\langle2\rangle ],
 \]
-where the precondition 
-$\Phi$ relates the initial memories of the two games. In this case, since both programs start from empty memories and no inputs are assumed, 
+where the precondition $\Phi$ relates the initial memories of the two games. In this case, since both programs start from empty memories and no inputs are assumed, 
 can simply be taken as $(\Phi = \top)$. By the soundness of pRHL, a judgment of the form
-\[[\mathtt{OTP} \sim \mathtt{Uniform}: \Phi \Longrightarrow res\langle1\rangle = res\langle2\rangle] \Longrightarrow \mathtt{OTP} \equiv \mathtt{Uniform}
+\[[\mathtt{OTP} \sim \mathtt{Uniform}: \Phi \Longrightarrow res\langle1\rangle = res\langle2\rangle] \Longrightarrow \mathtt{OTP} \equiv \mathtt{Uniform},
 \]
 implies that the two programs are observationally equivalent. To establish the judgment, we proceed as follows. Both programs begin by sampling a message $m$ using the same distribution $\mathcal{M}$ which is assumed to be the set containing all the bit strings of length $n$. Therefore, we can couple the two samplings so that  $m\langle1\rangle=m\langle2\rangle$. Next the $\mathtt{OTP}$ game samples a key $k \gets \{0,1\}^n$ uniformly at random, while the $\mathtt{Uniform}$ game samples a ciphertext $c \gets \{0,1\}^n$ uniformly at random. We define a coupling between these samplings by setting
 \[
-c\langle2\rangle = m \oplus k
+c\langle2\rangle = m \oplus k,
 \]
 and this is valid because, for any fixed message $m$
 m, the distribution of  $m\oplus k$ is uniform whenever $k$ is uniformly distributed. Finally, the $\mathtt{OTP}$ game sets
 \[
-c\langle1\rangle = m \oplus k
+c\langle1\rangle = m \oplus k,
 \]
 which implies $c\langle1\rangle = c\langle2\rangle$. The postcondition 
 \[
-(m\langle1\rangle = m\langle2\rangle) \land (c\langle1\rangle = c\langle2\rangle)
+(m\langle1\rangle = m\langle2\rangle) \land (c\langle1\rangle = c\langle2\rangle),
 \]
 holds and we conclude that
 \[
-\mathtt{OTP} \equiv \mathtt{Uniform}
+\mathtt{OTP} \equiv \mathtt{Uniform}.
 \]
 This shows that pRHL can formally capture standard cryptographic arguments by reasoning about couplings between probabilistic programs rather than directly manipulating probability distributions.
 
 Additionally in pRHL, given a valid judgment of the form
 \[
-\left[ c_1 \sim c_2: \Phi \Longrightarrow \bigwedge\limits_{i=1}^n x_i\langle1\rangle = x_i\langle2\rangle \right]
+\left[ c_1 \sim c_2: \Phi \Longrightarrow \bigwedge\limits_{i=1}^n x_i\langle1\rangle = x_i\langle2\rangle \right],
 \]
 it holds that $\mathrm{Pr}[c_1, m_1: A] = \mathrm{Pr}[c2, m_2: A]$ for every initial memories $m_1$ and $m_2$ that are related by $\Phi$ and event $A$ that only depends on $\{x_1, \dots , x_n\}$. A further generalization of observational equivalence is observational equivalence up to a
 failure event $F$
 \[
-\left[ c_1 \sim c_2: \Phi \Longrightarrow \neg F\langle2\rangle \to \bigwedge\limits_{i=1}^n x_i\langle1\rangle = x_i\langle2\rangle \right] 
+\left[ c_1 \sim c_2: \Phi \Longrightarrow \neg F\langle2\rangle \to \bigwedge\limits_{i=1}^n x_i\langle1\rangle = x_i\langle2\rangle \right].
 \]
-And it follows that from the above judgment that for every initial memories $m_1$ and $m_2$ that are related by $\Phi$ and event $A$ that only depends on $\{x_1, \dots , x_n\}$ it holds
+It follows that from the above judgment, for every initial memories $m_1$ and $m_2$ that are related by $\Phi$ and event $A$ that only depends on $\{x_1, \dots , x_n\}$ it holds
 \[
-\mathrm{Pr}[c_1, m_1: A] \leq Pr [c_2, m_2 : A] + \mathrm{Pr}[c_2, m_2 : F] 
+\mathrm{Pr}[c_1, m_1: A] \leq Pr [c_2, m_2 : A] + \mathrm{Pr}[c_2, m_2 : F].
 \]
 This is useful to take into account upper bounds on the probability of some event (typically a failure).
 
 The second key component of EasyCrypt is a probabilistic Hoare Logic (pHL) that enables probabilistic reasonging about certain events in a game. Judgments in pHL have the form
 \[ 
-[c : \varsigma \Longrightarrow \varphi] \diamond p \]
+[c : \varsigma \Longrightarrow \varphi] \diamond p \],
 where $c$ is a probabilistic program, $\varsigma$ and $\varphi$ are (non-relational) assertions, $\diamond$ is a comparison operator and $p$ is a probability expression.
 
 In EasyCrypt, both pRHL and pHL are embedded into a higher-order logic, and reasoning within this logic is supported by a core proof engine inspired by SsReflect, an extension of Coq \cite{ssreflect-coq}. To support compositional reasoning, which is essential when analyzing cryptographic systems, as they are typically constructed by composing multiple cryptographic primitives, EasyCrypt provides a module system. It enables the development of modular proofs that reflect the compositional structure of cryptographic constructions. In addition, it make easier the reasoning, organization and management of large and complex proofs involving numerous game hops and reductions at different levels of abstraction.
@@ -98,7 +96,7 @@ In EasyCrypt, both pRHL and pHL are embedded into a higher-order logic, and reas
 \section{Squirrel}
 Squirrel is a proof assistant tool that enables automated verification techniques for the computational model. The system is based on the Computationally Complete Symbolic Attacker (CCSA) approach, which retains a symbolic reasoning framework while avoiding some of the limitations of traditional symbolic models. Rather than modeling an adversary's capabilities by explicitly specifying all actions the adversary can perform, the CCSA approach characterizes the adversary by specifying what it cannot do. Starting from the assumed security properties of cryptographic primitives, one derives inference rules that express which pairs of message sequences are computationally indistinguishable. Rules are proven sound with respect to an interpretation of terms as Probabilistic Polynomial-Time Turing Machines (PPTM). Any security proof carried out using the rules implies security in the computational model, given that the underlying cryptographic assumptions hold.
 
-The CCSA approach reasons about cryptographic protocols viewed as concurrent programs (or games) that rely on cryptographic primitives while executing in a malicious environment. A central concept in this setting is computational indistinguishability: two games are said to be indistinguishable if any probabilistic polynomial-time adversary has at most a negligible probability of distinguishing between them. The CCSA framework uses first-order logic to establish computational indistinguishability by first modeling the messages generated during a game’s execution as first-order terms, and then reasoning about indistinguishability within first-order logic using inference rules derived from the assumed security properties of the underlying cryptographic primitives. Describing cryptographic games as probabilistic imperative programs allows cryptographers to rely on an intuitive understanding of their semantics and avoids the introduction of overly complex execution models. Formally reasoning about such programs can be challenging, as it requires handling statefulness, loop invariants, and probabilistic dependencies. Moreover, while encoding complex protocols as imperative programs is possible, it is unnatural and can significantly complicate security proofs.
+The CCSA approach reasons about cryptographic protocols viewed as concurrent programs (or games) that rely on cryptographic primitives while executing in a malicious environment. A central concept in this setting is computational indistinguishability: two games are said to be indistinguishable if any probabilistic polynomial-time adversary has at most a negligible probability of distinguishing between them. The CCSA framework uses first-order logic to establish computational indistinguishability by first modeling the messages generated during a game's execution as first-order terms, and then reasoning about indistinguishability within first-order logic using inference rules derived from the assumed security properties of the underlying cryptographic primitives. Describing cryptographic games as probabilistic imperative programs allows cryptographers to rely on an intuitive understanding of their semantics and avoids the introduction of overly complex execution models. Formally reasoning about such programs can be challenging, as it requires handling statefulness, loop invariants, and probabilistic dependencies. Moreover, while encoding complex protocols as imperative programs is possible, it is unnatural and can significantly complicate security proofs.
 
 The CCSA approach represents only the messages computed during a game, modeling them as first-order terms. These terms are pure in the functional programming sense and are therefore easier to reason about than full game descriptions that maintain mutable state. To illustrate this idea, let us consider a simple game.
 \begin{figure}[htpb]
@@ -129,9 +127,9 @@ A term $\mathtt{t}$ is interpreted as a function that associates to each value o
 
 As one of the most commonly used notions to define cryptographic properties is computational indistinguishability, Squirrel's logic relies on the symbol $\sim$ to represent it. Formally, for two terms $\mathtt{u}$, $\mathtt{v}$, the predicate $\mathtt{u} \sim \mathtt{v}$ holds in a model $\mathbb{M}$ if $\mathtt{G}^\mathbb{M}_\mathtt{u} \approx \mathtt{G}^\mathbb{M}_\mathtt{v}$, and $\mathtt{G}^\mathbb{M}_\mathtt{t}$ is the game where the adversary is provided with $[\![t]\!]_\mathbb{M}^{\eta, \rho}$ and must produce a bit b, returned by the game. $\mathtt{u}$, $\mathtt{v}$ holds in $\mathbb{M}$ if exists a negligible function $\epsilon$ such that
 \begin{align*}
-\forall A \in \mathrm{PPTM}. \eta \mapsto \left|\mathrm{Pr}_\rho(A([\![u]\!]_\mathbb{M}^{\eta, \rho},\rho_a)=1) - \mathrm{Pr}_\rho(A([\![v]\!]_\mathbb{M}^{\eta, \rho},\rho_a)=1)\right| \leq \epsilon(\eta)
+\forall A \in \mathrm{PPTM}. \eta \mapsto \left|\mathrm{Pr}_\rho(A([\![u]\!]_\mathbb{M}^{\eta, \rho},\rho_a)=1) - \mathrm{Pr}_\rho(A([\![v]\!]_\mathbb{M}^{\eta, \rho},\rho_a)=1)\right| \leq \epsilon(\eta).
 \end{align*}
-Let's consider another game $\mathtt{G}_\mathtt{k}$ reported in Figure \ref{fig:squirrel-sample-proof-2}.
+
 \begin{figure}[htpb]
     \centering
     \begin{align*}
@@ -146,9 +144,9 @@ Let's consider another game $\mathtt{G}_\mathtt{k}$ reported in Figure \ref{fig:
     \caption{Example of a cryptographic game $\mathtt{G}_\mathtt{k}$ to discuss computational indistinguishability in Squirrel.}
     \label{fig:squirrel-sample-proof-2}
 \end{figure}
-The message returned at the end of the game can be represented by the term
+Let's consider another game $\mathtt{G}_\mathtt{k}$ reported in Figure \ref{fig:squirrel-sample-proof-2}. The message returned at the end of the game can be represented by the term
 \[
-\phi_k = \mathtt{if}\,\,(\mathtt{att_0} = sk) \,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1
+\phi_k = \mathtt{if}\,\,(\mathtt{att_0} = sk) \,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1,
 \]
 which outputs $0$ if the adversary correctly guesses the secret key $k$ and $1$ otherwise. Checking the indistinguishability judgment $(\phi_k \sim 1)$ amounts to verify that the corresponding game $\mathtt{G}_\mathtt{k}$ is computationally indistinguishable from the trivial game $(\mathtt{return}\,\,1)$ i.e., $G_k \approx (\mathtt{return}\,\,1)$.
 
@@ -166,23 +164,77 @@ which outputs $0$ if the adversary correctly guesses the secret key $k$ and $1$ 
     \label{fig:inference-rules-over-sim-squirrel}
 \end{figure}
 
-Given the inference rules over $\sim$ in Squirrel represented in Figure \ref{fig:inference-rules-over-sim-squirrel} one can verify that it is true that $(\mathtt{if}\,\,(\mathtt{att_0}(\cdot) = k) \,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1$ as follows
+The inference rules over $\sim$ in Squirrel represented in Figure \ref{fig:inference-rules-over-sim-squirrel}. The key rule is the second one that states that if given $u$ indistinguishable from $v$, then $u$ can be replaced with $v$ inside any context $C$ without changing the overall indistinguishability from $w$. 
+
+One can verify that it is true that $(\mathtt{if}\,\,(\mathtt{att_0}(\cdot) = k) \,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1$ as follows
 
 \begin{gather*}
     \begin{prooftree}
     \hypo{}
     \infer1[FRESH]{(\mathtt{att}_0(\cdot) \neq k)\sim \mathtt{true}}
-    \infer1{((\mathtt{att_0}(\cdot) = k) = \mathtt{false}) \sim \mathtt{true}}
+    \infer1[$\mathrm{SIMPL}_\equiv$]{((\mathtt{att_0}(\cdot) = k) = \mathtt{false}) \sim \mathtt{true}}
     \hypo{}
     \infer1[REF]{1\sim1}
-    \infer1{(\mathtt{if}\,\,\mathtt{false}\,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1}
+    \infer1[$\mathrm{SIMPL}_\equiv$]{(\mathtt{if}\,\,\mathtt{false}\,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1}
     \infer2[REW]{(\mathtt{if}\,\,(\mathtt{att_0}(\cdot) = k) \,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1}
     \end{prooftree}
 \end{gather*}
-
-% The key rules is the second one that states that if given $u$ indistinguishable from $v$, then  replace $u$ can be replaced with $v$ inside any context $C$ without changing the overall indistinguishability from $w$.
+Here it is assumed an additional proof rule $\mathrm{SIMPL}_\equiv$ that allows to replace a term with another one equal to it with probability one.
 
 \section{CryptoVerif}
+CryptoVerif is a mechanized proof assistant designed for the computational model of cryptography. It constructs security proofs as sequences of games, following the standard methodology of game-based reasoning in computational cryptography. The tool supports the formal verification of secrecy, authentication, and indistinguishability properties, and provides a generic framework for specifying and reasoning about the security of cryptographic primitives, including message authentication codes, symmetric and public-key encryption schemes, digital signatures, hash functions, and Diffie–Hellman key agreement protocols. For each proof, CryptoVerif derives an explicit bound on the probability of a successful attack.
+
+The central notion used to express security properties in CryptoVerif is observational equivalence. Proofs proceed by transforming an initial game, representing the real protocol, into a final game in which the desired security property is evident. Each transformation step corresponds either to a syntactic rewriting or to the application of a security assumption for a cryptographic primitive. The difference in the adversary's success probability between successive games must be negligible, ensuring that the overall transformation preserves security up to a negligible function.
+
+CryptoVerif uses a formal probabilistic process calculus for representing cryptographic experiments. In this calculus, messages are modeled as bitstrings, and cryptographic primitives are represented as functions over bitstrings. Games are expressed as probabilistic processes that execute in polynomial time, while the adversary is modeled as a probabilistic Turing machine, thus faithfully capturing the standard computational assumptions underlying cryptographic security definitions.
+
+In particular in the calculus of CryptoVerif terms represent computations on messages (bitstrings):
+\begin{align*}
+M ::= x \mid f(M_1, \dots, M_n).
+\end{align*}
+Function symbols $f$ correspond to functions computable by deterministic
+Turing machines that always terminate.
+
+In order to define oracles, CryptoVerif uses the following grammar:
+\begin{align*}
+&Q ::= \\
+&\qquad \mid 0 \\
+&\qquad \mid Q \mid Q' \\
+&\qquad \mid \mathtt{foreach}\,i \leq N\, \mathtt{do}\, Q \\
+&\qquad \mid O(x_1: T_1, \dots, x_m : T_m) := P,
+\end{align*}
+where the symbol 0 denotes termination, $Q \mid Q'$ denotes parallel computation, and the $\mathtt{foreach}$ construct denotes replication up to $N$ times. The construct $O(x_1: T_1, \dots, x_m : T_m) := P$ defines an oracle with parameters $x_1, \dots, x_m$ and body $P$. The oracle body can have the following forms:
+\begin{align*}
+&P ::= \\
+&\qquad \mid \mathtt{yield} \\
+&\qquad \mid \mathtt{return}(M_1, \dots, M_m); Q \\
+&\qquad \mid \mathtt{event}\, e(M_1, \dots, M_m); P \\
+&\qquad \mid x \xleftarrow{R} T; P \\
+&\qquad \mid x: T \leftarrow M; P \\
+&\qquad \mid \ifthen{M}{P}{P'} \\
+&\qquad \mid \mathtt{insert}\, L(M_1, \dots, M_m); P \\
+&\qquad \mid \mathtt{get}\, L(M_1, \dots, M_m)\,\mathtt{suchthat}\, M\, \mathtt{in}\, P\, \mathtt{else}\, P'. \\
+\end{align*}
+Here, $\mathtt{yield}$ denotes termination of the oracle execution, while the expression $\mathtt{return}(M_1, \dots, M_m); Q$ outputs a tuple of messages and continues with process  $Q$. The construct $\mathtt{event}\, e(M_1, \dots, M_m); P$ records an event $e$ and then proceeds with $P$. The command $x \xleftarrow{R} T; P$ denotes uniform random sampling of a value of type 
+$T$ binding the result to $x$, whereas $x: T \leftarrow M; P$ represents deterministic assignment. The conditional $\ifthen{M}{P}{P'}$ branches on the boolean value of $M$. Finally, $\mathtt{insert}\, L(M_1, \dots, M_m); P$ adds an entry to a list $L$, while $\mathtt{get}\, L(M_1, \dots, M_m)\,\mathtt{suchthat}\, M\, \mathtt{in}\, P\, \mathtt{else}\, P'$ performs a lookup in $L$ satisfying the condition $M$, proceeding with $P$ if successful and with $P'$ otherwise. 
+
+The processes in CryptoVerif are expressed using the syntax introduced above. These processes specify the oracles that an adversary may invoke, and their execution is bounded with respect to a security parameter, denoted by $\eta$. In particular, processes are bounded both in the number of oracle invocations (copies) and in the length of the messages provided as inputs to these oracles. Let $I_\eta(n)$ denote the interpretation of a bound $n$ for a given value of the security parameter $\eta$. Then $I_\eta(n)$ is required to be an efficiently computable function of $\eta$ that is bounded by a polynomial in $\eta$.
+
+At the type level, the CryptoVerif calculus is parameterized by the security parameter $\eta$. For each $\eta$, every type $T$ is interpreted as a subset $I_\eta(T)$ of $Bitstring \cup \{\bot\}$, where $Bitstring$ denotes the set of all finite bitstrings and $\bot$ is a special symbol. The set $I_\eta(T)$ must be recognizable in polynomial time: there exists an algorithm that, on input $x$, decides whether $x \in I_\eta(T)$ in time polynomial in the length of $x$ and in the value of $\eta$.
+
+A type is called \textit{fixed-length} if $T$ is such that $I_\eta(T)$ consists exactly of all bitstrings of a certain length $\ell(\eta)$, where $\ell$ is a polynomially bounded function of $\eta$ while a type is called \textit{large} if its cardinality is sufficiently high so that collisions between elements sampled uniformly at random from $I_\eta(T)$ occur only with negligible probability, while still allowing the tool to keep explicit track of the residual collision probability; formally, $\frac{1}{|I_\eta(T)|}$ is negligible as a function of $\eta$.
+
+The boolean type is predefined as $\mathit{bool} = \{\,\mathtt{true}, \mathtt{false}\,\}$, with the convention $\mathtt{true} = 1$ and $\mathtt{false} = 0$. Moreover, the predefined type $bitstring$ is interpreted as $I_\eta(bitstring) = Bitstring$, and the type $bitstring_\bot$ is interpreted as $I_\eta(bitstring_\bot) = Bitstring \cup \{\bot\}$.
+
+The calculus further assumes a finite set of function symbols $f$, each equipped with a type declaration of the form
+\[
+f : T_1 \times \dots \times T_m \to T.
+\]
+Each such symbol $f$ denotes a function, also written $f$, from $T_1 \times \dots \times T_m$ to $T$, such that $f(x_1, \dots, x_m)$ is computable within time $t_f$, where $t_f$ is bounded by a function of the lengths of the inputs $x_1, \dots, x_m$. Some function symbols are written in infix notation, for example:
+- $M = N$ denotes the equality test, which takes two values of the same type $T$ and returns a value of type $bool$;
+- $M \land N$ denotes the boolean conjunction, which takes and returns values of type $bool$.
+
+% : $Q$ is observationally equilalent to $Q'$ and is written $Q \approx Q'$, when the adversary has a negligible probability of distinguishing $Q$ from $Q'$. 
 
 % \begin{figure}
 %     \centering

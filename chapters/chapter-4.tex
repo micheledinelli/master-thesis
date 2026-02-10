@@ -118,19 +118,19 @@ This allows $Y$ to generate fixed points, where $Yf$ is equal to itself under th
 
 The lambda calculus can also encode primitive data types commonly found in most programming languages, such as booleans. These can be represented as follows:
 \begin{align*}
-\mathtt{true} &= \lambda x.\lambda y.x \\
-\mathtt{false} &= \lambda x.\lambda y.y
+\mathsf{true} &= \lambda x.\lambda y.x \\
+\mathsf{false} &= \lambda x.\lambda y.y
 \end{align*}
 Given a boolean value B, a conditional expression of the form
 \begin{verbatim}
 if B then M else N
 \end{verbatim}
-can be expressed by the lambda term $BMN$ since $(\mathtt{true}\,MN=M)$ and $(\mathtt{false}\,MN=N)$.
+can be expressed by the lambda term $BMN$ since $(\mathsf{true}\,MN=M)$ and $(\mathsf{false}\,MN=N)$.
 In a similar way one can construct ordered pairs using
 \begin{align*}
-    [M,N] = \lambda z.z MN
+    [M,N] = \lambda z.z MN,
 \end{align*}
-and retrieve the first or the second element using $([M,N]\,\mathtt{true}=M)$ and $([M,N]\,\mathtt{false}=N)$.
+and retrieve the first or the second element using $([M,N]\,\mathsf{true}=M)$ and $([M,N]\,\mathsf{false}=N)$.
 
 \section{Simply Typed Lambda-Calculus}\label{sec:typed-lambda-calculus}
 In mathematics, functions are usually defined on a fixed domain and range, there is no corresponding requirement in type-free lambda-calculus \cite{Srensen2007-SRELOT}. The lambda calculus can be extended with type annotations that specify the kinds of inputs a term accepts and the kinds of outputs it produces. There are two distinct approaches to introducing types into the lambda calculus: in Church-style typing \cite{Church_1940}, variables and abstractions are explicitly annotated with their types, and each well-typed term has a unique type. In contrast, Curry-style typing \cite{functionality_in_combinatory_logic} does not require type annotations on variables; instead, types are assigned to terms after they are constructed, and typable expressions admit a unique most general type. In Church’s approach, a term’s type is a built-in part of the term itself, the modern analogy would be a programmer explicitly writing the types for all variables used in the program as in, e.g., Pascal. In Curry’s approach, a term’s type is inferred after the term has been defined, the programmer writes functions, and it is then the job of the compiler to infer the types of variables, as e.g., in ML and Haskell \cite{Raamsdonk2009LambdaCalculusAC, Srensen2007-SRELOT}. The aim of this section is to introduce the simply typed lambda calculus following Curry's approach, hence first defining terms, how they behave and then defining a basic type system. 
