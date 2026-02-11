@@ -214,11 +214,11 @@ allows to simplify expressions by implicitly promoting values to computations, t
 \multicolumn{3}{|c|}{\textbf{Function Symbols for Manipulating Bitstrings }} \\ \hline
 $\mathtt{eq}$ & $\SS[i]\times\SS[i]\to\BB$ & Function that takes as input two strings of length $i$, and returns true if they are equals and false otherwise. \\ \hline
 \multicolumn{3}{|c|}{\textbf{Function Symbols for Ledger Manipulation}} \\ \hline
-$\mathtt{isdefinedQ_p}$ & $\SS[q\times(i+ 1)]\times\SS[i]\to\BB$ & Function that takes as input a query ledger and a string of length $i$, and returns true if the row, whose first i bits match the input string, is
+$\mathtt{isdefinedQ_p}$ & $\SS[q\times(i+1)]\times\SS[i]\to\BB$ & Function that takes as input a query ledger and a string of length $i$, and returns true if the row, whose first i bits match the input string, is
 active and false otherwise. \\ \hline
 $\mathtt{initQ}_p$ & $\SS[(q\times(i+1))]$ & Function that initializes a  queryledger by generating a string of length $q\times(i+1)$ filled entirely with zeros. \\ \hline
-$\mathtt{modifyQ}_p$ & $\SS[(q\times(i+1))]$ & Function that, given a query ledger and two input strings of length $i$, identifies the first inactive row in the ledger, inserts into that row the concatenation of the two strings followed by a bit set to 1 (indicating activation), and returns the resulting updated ledger. \\ \hline
-$\mathtt{contains}_p$ & $\SS[(q \times (i+1)] \times \SS[i] \to \BB$ & Function that, given a query ledger and an input string of length $i$, searches for a row in the ledger whose first $i$ bits are equal to the input string and whose final bit is set to 1 and returns a boolean indicating whether the substring was found or not. \\ \hline
+$\mathtt{modifyQ}_p$ & $\SS[q\times(i+1)]$ & Function that, given a query ledger and two input strings of length $i$, identifies the first inactive row in the ledger, inserts into that row the concatenation of the two strings followed by a bit set to 1 (indicating activation), and returns the resulting updated ledger. \\ \hline
+$\mathtt{contains}_p$ & $\SS[q \times (i+1)] \times \SS[i] \to \BB$ & Function that, given a query ledger and an input string of length $i$, searches for a row in the ledger whose first $i$ bits are equal to the input string and whose final bit is set to 1 and returns a boolean indicating whether the substring was found or not. \\ \hline
 \end{tabularx}
 \caption{Table of function symbols and their interpretations. We consider ledgers modelled by strings of length $(q\times(i+1))$ and $(p\times(2i+1))$, where $p$ is a polynomial in $\mathbb{N}_{\geq1}[i]$. This
 string represents a table with $q$ rows, where each row consists of two strings of length $i$ followed by a single bit, which is set to 1 if the corresponding row is active, and 0 otherwise.}
