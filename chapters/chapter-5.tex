@@ -203,27 +203,32 @@ allows to simplify expressions by implicitly promoting values to computations, t
 \letin{x=\random}{\mathtt{eq}(x,t)}&\sim_{\Theta\subseteq\Xi} \false \tag{$\mathtt{randEq}$}\label{randEq}
 \end{align}
 
-\begin{table}[htpb]
-\centering
-\footnotesize
 \setlength{\tabcolsep}{3pt}
-\renewcommand{\arraystretch}{0.95}
-\begin{tabularx}{\textwidth}{|@{\hskip 1pt}c|l|X@{\hskip 2pt}|}
-\hline
+\renewcommand{\arraystretch}{1.0}
+\begin{footnotesize}
+\begin{xltabular}{\textwidth}{|@{\hskip 1.5pt}c|l|@{\hskip 1.5pt}X@{\hskip 1.5pt}|}
+    \hline
 \textbf{Function Symbol} & \multicolumn{1}{c|}{\textbf{Type}} & \multicolumn{1}{c|}{\textbf{Interpretation}} \\ \hline
 \multicolumn{3}{|c|}{\textbf{Function Symbols for Manipulating Bitstrings }} \\ \hline
+
 $\mathtt{eq}$ & $\SS[i]\times\SS[i]\to\BB$ & Function that takes as input two strings of length $i$, and returns true if they are equals and false otherwise. \\ \hline
+
 \multicolumn{3}{|c|}{\textbf{Function Symbols for Ledger Manipulation}} \\ \hline
+
 $\mathtt{isdefinedQ_p}$ & $\SS[q\times(i+1)]\times\SS[i]\to\BB$ & Function that takes as input a query ledger and a string of length $i$, and returns true if the row, whose first i bits match the input string, is
 active and false otherwise. \\ \hline
+
 $\mathtt{initQ}_p$ & $\SS[(q\times(i+1))]$ & Function that initializes a  queryledger by generating a string of length $q\times(i+1)$ filled entirely with zeros. \\ \hline
 $\mathtt{modifyQ}_p$ & $\SS[q\times(i+1)]$ & Function that, given a query ledger and two input strings of length $i$, identifies the first inactive row in the ledger, inserts into that row the concatenation of the two strings followed by a bit set to 1 (indicating activation), and returns the resulting updated ledger. \\ \hline
+
 $\mathtt{contains}_p$ & $\SS[q \times (i+1)] \times \SS[i] \to \BB$ & Function that, given a query ledger and an input string of length $i$, searches for a row in the ledger whose first $i$ bits are equal to the input string and whose final bit is set to 1 and returns a boolean indicating whether the substring was found or not. \\ \hline
-\end{tabularx}
-\caption{Table of function symbols and their interpretations. We consider ledgers modelled by strings of length $(q\times(i+1))$ and $(p\times(2i+1))$, where $p$ is a polynomial in $\mathbb{N}_{\geq1}[i]$. This
-string represents a table with $q$ rows, where each row consists of two strings of length $i$ followed by a single bit, which is set to 1 if the corresponding row is active, and 0 otherwise.}
+
+$\mathtt{consistent}_p$ & $\SS[q \times (i+1)] \times \SS[p \times (2i + 1)] \to \BB$ & Function that, given a query ledger and a ledger representing a random function, returns a boolean indicating whether for every message $m$ in the query ledger there exists a corresponding entry in the random function ledger. \\ \hline  
+
+\caption{Table of function symbols and their interpretations. We consider ledgers modelled by strings of length $(q\times(i+1))$ and $(p\times(2i+1))$, where $p$ is a polynomial in $\mathbb{N}_{\geq1}[i]$. This string represents a table with $q$ (resp., $p$) rows, where each row consists of two strings of length $i$ (resp., $2i + 1$) followed by a single bit, which is set to 1 if the corresponding row is active, and 0 otherwise.}
 \label{table:new-function-symbols}
-\end{table}
+\end{xltabular}
+\end{footnotesize}
 
 % A computation in $\lamBLL$ can be probabilistic, and read or modify the global reference context. In order to model probabilistic effects with references $\lamBLL$ uses the distribution monad and the state monad. The idea is that the result of a computation is not just a value, it depends on the initial store, it produces a distribution of outcomes, and each outcome comes with an updated store. Computations are interpreted as functions that accepts the initial store and produce outcoomes as probability distribution over (value, store) pairs.
 
@@ -251,4 +256,37 @@ string represents a table with $q$ rows, where each row consists of two strings 
 % \]
 % Sequential probabilistic choices are composed by propagating and weighting probabilities. The probabilities from the first distribution are pushed forward through the second.
 
-% Similarly to add effect of modifying the references $\lamBLL$
+\section{A Lambda-BLL Extension for Proving MAC Security}
+We introduce a formal Hoare Logic \cite{axiomatic-basis-for-computer-programming} which will result needed for proving the existential unforgeability under chosen-message attacks (EUF-CMA) of Message Authentication Codes (MACs) within the $\lamBLL$ framework. Following Hoare's formalism, we characterize programmatic behavior using \textit{partial correctness specifications} expressed as the triple:
+\[
+\{P\} S \{Q\}.
+\]
+In this construction, $S$ denotes the program, while $P$ and $Q$ represent the precondition and postcondition predicates, respectively. The semantics of this triple imply that if execution of $S$ is initiated in a state satisfying $P$, any terminating execution necessarily results in a state satisfying $Q$. A \textit{state} is defined as an evaluation of all program variables, and predicates are expressed using standard mathematical notation and logical operators to characterize sets of such states.
+
+Hoare Logic is essentialy a deductive proof system for Hoare triple $\{P\} S \{Q\}$. Given the set of references appearing in predicate $\Phi$ as $\mathcal{R}(\Phi)$ we define the following rules to apply a simple Hoare Logic to $\lamBLL$.
+
+\begin{figure}[ht]
+    \vspace*{-6mm}
+	\begin{center} \footnotesize
+	\begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
+		\inferrule* [right=H-REFL]{\\}{\{\Phi\} M \sim M \{\Phi\}}
+		\and 
+		\inferrule* [right=H-CONS]{\Phi' \Rightarrow \Phi \quad \{\Phi\}M \sim N \{\Psi\} \quad \Psi \Rightarrow \Psi'}{\{\Phi'\}M \sim N \{\Psi'\}}
+		\and
+		\inferrule* [right=H-LET]{\{\Phi\} M \sim M' \{\Theta\} \quad \{\Theta\} N \sim N' \{\Psi\}}{\{\Phi\} \letin{x=M}{N} \sim \letin{x=M'}{N'}\{\Psi\}}
+		\and
+		\inferrule* [right=H-IF]{\{\Phi \land b\} M \sim M' \{\Psi\} \quad \{\Phi \land \neg b\} N \sim N' \{\Psi\}}{\{\Phi\} \ifthen{b}{M}{N} \sim \ifthen{b}{M'}{N'}\{\Psi\}}
+		\and
+		\inferrule* [right=H-THEN]{\\}{\{\Phi \land b=\true\} \ifthen{b}{M}{N} \sim M \{\Psi \land b=\true\}}
+		\and
+		\inferrule* [right=H-ELSE]{\\}{\{\Phi \land b=\false\} \ifthen{b}{M}{N} \sim N \{\Psi \land b=\false\}}
+        \and
+		\inferrule* [right=H-PRES]{\mathcal{R}(M) \cap \mathcal{R}(\Phi)=\emptyset}{\{\Phi\} M \{\Phi\}}
+        \and
+		\inferrule* [right=H-FRAME]{\{\Phi\}M\sim N\{\Psi\} \quad \mathcal{R}(M) \cap \mathcal{R}(\Theta)=\emptyset \quad \mathcal{R}(N) \cap \mathcal{R}(\Theta)=\emptyset}{\{\Phi \land \Theta\} M \sim N \{\Psi \land \Theta\}}
+	\end{mathpar}
+\end{center}
+\vspace*{-6mm}
+\caption{Hoare rules for $\lamBLL$}
+\label{fig:hoare-rules}
+\end{figure}

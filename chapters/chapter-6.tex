@@ -1144,69 +1144,101 @@ The final step consists of invoking Equation~\ref{randEq}, introduced in Section
         &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
         &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
     \end{aligned}
-    \\[2ex]
-    \quad\triangleq\quad&
-    \begin{aligned}
-        &\mathtt{let}\,k= \\
-        &\left(
-        \begin{aligned}
-            &\lambda u. \\
-            &\letin{q=\mathtt{initQ}}{} \\
-            &\letin{\_ = \mathtt{set}\,Q\,q}{} \\
-            &\letin{tab=\mathtt{initTable}}{} \\
-            &\letin{\_ = \mathtt{set}\,rand\,tab}{} \\
-            &\letin{z=\mathtt{zero}}{} \\
-            &\return z
-        \end{aligned}
-        \right)\mathtt{in}\;\star \\
-        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random)}{} \\
-        &\letin{queries = \get Q}{} \\
-        &\letin{b=\mathtt{contains}(queries, m)}{} \\
-        &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
-        &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
-    \end{aligned}
-    \\[2ex]
-    \quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad&
-    \begin{aligned}
-        &\mathtt{let}\,k= \\
-        &\left(
-        \begin{aligned}
-            &\letin{q=\mathtt{initQ}}{} \\
-            &\letin{\_ = \mathtt{set}\,Q\,q}{} \\
-            &\letin{tab=\mathtt{initTable}}{} \\
-            &\letin{\_ = \mathtt{set}\,rand\,tab}{} \\
-            &\letin{z=\mathtt{zero}}{} \\
-            &\return z
-        \end{aligned}
-        \right)\mathtt{in} \\
-        &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random)}{} \\
-        &\letin{queries = \get Q}{} \\
-        &\letin{b=\mathtt{contains}(queries, m)}{} \\
-        &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
-        &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
-    \end{aligned}
-    \\[2ex]
-    \quad\simcontext\quad&
-    \begin{aligned}
-    \left(\dots\right)
-    \end{aligned}
-    \\[2ex]
-    \quad\simcontext\quad&
-    \begin{aligned}
-        &\letin{\lis{m,t} = Adv\;\bang(\return \lambda m.\random)}{} \\
-        &\letin{x=\random}{\mathtt{eq}(x,t)}
-    \end{aligned}
-    \\[2ex]
-    \quad\overset{\text{\ref{randEq}}}{\simcontext}\quad&
-    \begin{aligned}
-        &\letin{\lis{m,t} = Adv\;\bang(\return \lambda m.\random)}{} \\
-        &\false
-    \end{aligned}
-    \\[2ex]
-    \quad\overset{\text{\ref{safeDisc2}}}{\simcontext}\quad&
-    \begin{aligned}
-        &\false
-    \end{aligned}
+    % \begin{aligned}
+    %     &\mathtt{let}\,k= \\
+    %     &\left(
+    %     \begin{aligned}
+    %         &\lambda u. \\
+    %         &\letin{q=\mathtt{initQ}}{} \\
+    %         &\letin{\_ = \mathtt{set}\,Q\,q}{} \\
+    %         &\letin{tab=\mathtt{initTable}}{} \\
+    %         &\letin{\_ = \mathtt{set}\,rand\,tab}{} \\
+    %         &\letin{z=\mathtt{zero}}{} \\
+    %         &\return z
+    %     \end{aligned}
+    %     \right)\mathtt{in}\;\star \\
+    %     &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random)}{} \\
+    %     &\letin{queries = \get Q}{} \\
+    %     &\letin{b=\mathtt{contains}(queries, m)}{} \\
+    %     &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+    %     &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
+    % \end{aligned}
+    % \\[2ex]
+    % \quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad&
+    % \begin{aligned}
+    %     &\mathtt{let}\,k= \\
+    %     &\left(
+    %     \begin{aligned}
+    %         &\letin{q=\mathtt{initQ}}{} \\
+    %         &\letin{\_ = \mathtt{set}\,Q\,q}{} \\
+    %         &\letin{tab=\mathtt{initTable}}{} \\
+    %         &\letin{\_ = \mathtt{set}\,rand\,tab}{} \\
+    %         &\letin{z=\mathtt{zero}}{} \\
+    %         &\return z
+    %     \end{aligned}
+    %     \right)\mathtt{in} \\
+    %     &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random)}{} \\
+    %     &\letin{queries = \get Q}{} \\
+    %     &\letin{b=\mathtt{contains}(queries, m)}{} \\
+    %     &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+    %     &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
+    % \end{aligned}
+    % \\[2ex]
+    % \quad\simcontext\quad&
+    % \begin{aligned}
+    % \left(\dots\right)
+    % \end{aligned}
+    % \\[2ex]
+    % \quad\simcontext\quad&
+    % \begin{aligned}
+    %     &\letin{\lis{m,t} = Adv\;\bang(\return \lambda m.\random)}{} \\
+    %     &\letin{x=\random}{\mathtt{eq}(x,t)}
+    % \end{aligned}
+    % \\[2ex]
+    % \quad\overset{\text{\ref{randEq}}}{\simcontext}\quad&
+    % \begin{aligned}
+    %     &\letin{\lis{m,t} = Adv\;\bang(\return \lambda m.\random)}{} \\
+    %     &\false
+    % \end{aligned}
+    % \\[2ex]
+    % \quad\overset{\text{\ref{safeDisc2}}}{\simcontext}\quad&
+    % \begin{aligned}
+    %     &\false
+    % \end{aligned}
 \end{align*}
 }
+At this point of the proof, we introduce an assertion-carrying relation in the style of Hoare logic. Observe that the term $\widetilde{MacForge}$ evaluates to $\false$ whenever the conditional returns $\false$ in the else branch, since the then branch already returns $\false$. Hence, it suffices to show that the else branch is contextually indistinguishable from $\false$. Inside the else branch we have $b = \mathtt{contains}(queries, m)$ and we are in the case where $\lnot b$ holds.  In order to conclude the proof, we would like to transform the term 
+$\letin{x=\random}{\mathtt{eq}(x,t)}$ into $\false$. This transformation relies on the following facts: $m \notin Q$, which holds in the else branch; the outputs of the oracle are exactly the entries stored in $Q$; the ledgers $Q$ and $rand$ are consistent, namely each oracle output corresponds to an entry in $rand$. This is achieved with a function $\mathtt{consistent_p}$ defined in Table~\ref{table:new-function-symbols}.
+To formalize this reasoning, we introduce a refined contextual indistinguishability relation $\sim_{\Xi \subseteq \Upsilon, \Phi}$, where $\Phi$ is a set of assertions describing invariants that are preserved throughout the execution.
+
+\[
+\Phi \vdash M \sim_{\Xi \subseteq \Upsilon} N
+\]
+
+\[
+\frac{
+\Phi \wedge b \vdash M \sim N
+\qquad
+\Phi \wedge \neg b \vdash M' \sim N'
+}{
+\Phi \vdash
+\ifthen{b}{M}{M'}
+\sim
+\ifthen{b}{N}{N'}
+}
+\]
+
+
+\[
+\frac{
+M \sim_{\Xi \subseteq \Upsilon , \Phi \wedge b} M'
+\qquad
+N \sim_{\Xi \subseteq \Upsilon , \Phi \wedge \neg b} N'
+}{
+\ifthen{b}{M}{N}
+\sim_{\Xi \subseteq \Upsilon , \Phi}
+\ifthen{b}{M'}{N'}
+}
+\]
+
 \end{proof}

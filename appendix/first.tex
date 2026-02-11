@@ -24,13 +24,13 @@ Table~\ref{table:function-symbols} introduces a collection of function symbols o
     $\mathtt{zero}$ & $\SS[i]$ & Function that returns a bitstring consisting solely of zeros. \\ \hline
     
     \multicolumn{3}{|c|}{\textbf{Function Symbols for Ledger Manipulation}} \\ \hline
-    $\mathtt{initTable}_p$ & $\SS[(p\times(2i+1))]$ & Function that initializes a ledger by generating a string of length $p\times(2i+1)$ filled entirely with zeros. \\ \hline
+    $\mathtt{initTable}_p$ & $\SS[p\times(2i+1)]$ & Function that initializes a ledger by generating a string of length $p\times(2i+1)$ filled entirely with zeros. \\ \hline
     
     $\mathtt{isdefined_p}$ & $\SS[p\times(2i+ 1)]\times\SS[i]\to\BB$ & Function that takes as input a ledger and a string of length $i$, and returns true if the row, whose first $i$ bits match the input string, is active and false otherwise. \\ \hline
     
     $\mathtt{getValue_p}$ & $\SS[p\times(2i+ 1)]\times\SS[i]\to\SS[i]$ & Function that, given a ledger and an input string of length $i$, searches for a row in the ledger whose first $i$ bits are equal to the input string and whose final bit is set to 1 (indicating that the row is active), and returns the substring spanning from position $i+1$ to position $2i$ within the selected row. If no matching active row is found, it returns a dummy value. \\ \hline
     
-    $\mathtt{modify}_p$ & $\SS[(p\times(2i+1))]$ & Function that, given a ledger and two input strings of length $i$, identifies the first inactive row in the ledger, inserts into that row the concatenation of the two strings followed by a bit set to 1 (indicating activation), and returns the resulting updated ledger. \\ \hline
+    $\mathtt{modify}_p$ & $\SS[p\times(2i+1)]$ & Function that, given a ledger and two input strings of length $i$, identifies the first inactive row in the ledger, inserts into that row the concatenation of the two strings followed by a bit set to 1 (indicating activation), and returns the resulting updated ledger. \\ \hline
     \noalign{\smallskip}
     \noalign{\smallskip}
     \noalign{\smallskip}
