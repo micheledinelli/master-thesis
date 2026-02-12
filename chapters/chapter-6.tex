@@ -1207,38 +1207,8 @@ The final step consists of invoking Equation~\ref{randEq}, introduced in Section
     % \end{aligned}
 \end{align*}
 }
-At this point of the proof, we introduce an assertion-carrying relation in the style of Hoare logic. Observe that the term $\widetilde{MacForge}$ evaluates to $\false$ whenever the conditional returns $\false$ in the else branch, since the then branch already returns $\false$. Hence, it suffices to show that the else branch is contextually indistinguishable from $\false$. Inside the else branch we have $b = \mathtt{contains}(queries, m)$ and we are in the case where $\lnot b$ holds.  In order to conclude the proof, we would like to transform the term 
-$\letin{x=\random}{\mathtt{eq}(x,t)}$ into $\false$. This transformation relies on the following facts: $m \notin Q$, which holds in the else branch; the outputs of the oracle are exactly the entries stored in $Q$; the ledgers $Q$ and $rand$ are consistent, namely each oracle output corresponds to an entry in $rand$. This is achieved with a function $\mathtt{consistent_p}$ defined in Table~\ref{table:new-function-symbols}.
-To formalize this reasoning, we introduce a refined contextual indistinguishability relation $\sim_{\Xi \subseteq \Upsilon, \Phi}$, where $\Phi$ is a set of assertions describing invariants that are preserved throughout the execution.
-
-\[
-\Phi \vdash M \sim_{\Xi \subseteq \Upsilon} N
-\]
-
-\[
-\frac{
-\Phi \wedge b \vdash M \sim N
-\qquad
-\Phi \wedge \neg b \vdash M' \sim N'
-}{
-\Phi \vdash
-\ifthen{b}{M}{M'}
-\sim
-\ifthen{b}{N}{N'}
-}
-\]
-
-
-\[
-\frac{
-M \sim_{\Xi \subseteq \Upsilon , \Phi \wedge b} M'
-\qquad
-N \sim_{\Xi \subseteq \Upsilon , \Phi \wedge \neg b} N'
-}{
-\ifthen{b}{M}{N}
-\sim_{\Xi \subseteq \Upsilon , \Phi}
-\ifthen{b}{M'}{N'}
-}
-\]
+At this point of the proof, we introduce an assertion-carrying relation in the style of Hoare logic as introduced in Section~\ref{sec:extensions-lambda-bll}. Observe that the term $\widetilde{MacForge}$ evaluates to $\false$ whenever the conditional returns $\false$ in the else branch, since the then branch already returns $\false$. Hence, it suffices to show that the else branch is contextually indistinguishable from $\false$. Inside the else branch we have $b = \mathtt{contains}(queries, m)$ and we are in the case where $\lnot b$ holds.  In order to conclude the proof, we would like to transform the term 
+$\letin{x=\random}{\mathtt{eq}(x,t)}$ into $\false$. This transformation relies on the following facts: $m \notin Q$, which holds in the else branch; the outputs of the oracle are exactly the entries stored in $Q$; the ledgers $Q$ and $rand$ are consistent, namely each oracle output corresponds to an entry in $rand$. This is achieved with the function $\mathtt{consistent_p}$ defined in Table~\ref{table:new-function-symbols}.
+To formalize this reasoning, we introduce a refined contextual indistinguishability relation $\sim_{\Xi \subseteq \Upsilon, \Phi, \Psi}$, where $\Phi$ and $\Psi$ are a set of assertions describing invariants that are preserved before and after the execution.
 
 \end{proof}
