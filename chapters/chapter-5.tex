@@ -157,20 +157,20 @@ To account for probabilistic effects, $\lamBLL$ models probabilistic computation
 \]
 Here, $\D(X)$ denotes the set of all probability distributions over $X$.
 
-As a simple example, consider a fair coin flip. Let $X = \{\mathsf{H}, \mathsf{T}\}$ and define the distribution $\mu = \tfrac{1}{2}\,\delta_{\mathsf{H}} + \tfrac{1}{2}\,\delta_{\mathsf{T}} \in \D(X)$
-Supposing that each outcome determines a further probabilistic computation over a set $Y$, given by a function $f : X \to \D(Y)$ such that
-\[
-f(\mathsf{H}) = \delta_{0}
-\qquad\text{and}\qquad
-f(\mathsf{T}) = \tfrac{1}{2}\,\delta_{0} + \tfrac{1}{2}\,\delta_{1}.
-\]
-The bind operation combines these into a single distribution over $Y$:
-\[
-\mu \bind f
-= \tfrac{1}{2}\,\delta_{0}
-+ \tfrac{1}{2}\bigl(\tfrac{1}{2}\,\delta_{0} + \tfrac{1}{2}\,\delta_{1}\bigr)
-= \tfrac{3}{4}\,\delta_{0} + \tfrac{1}{4}\,\delta_{1}.
-\]
+% As a simple example, consider a fair coin flip. Let $X = \{\mathsf{H}, \mathsf{T}\}$ and define the distribution $\mu = \tfrac{1}{2}\,\delta_{\mathsf{H}} + \tfrac{1}{2}\,\delta_{\mathsf{T}} \in \D(X)$
+% Supposing that each outcome determines a further probabilistic computation over a set $Y$, given by a function $f : X \to \D(Y)$ such that
+% \[
+% f(\mathsf{H}) = \delta_{0}
+% \qquad\text{and}\qquad
+% f(\mathsf{T}) = \tfrac{1}{2}\,\delta_{0} + \tfrac{1}{2}\,\delta_{1}.
+% \]
+% The bind operation combines these into a single distribution over $Y$:
+% \[
+% \mu \bind f
+% = \tfrac{1}{2}\,\delta_{0}
+% + \tfrac{1}{2}\bigl(\tfrac{1}{2}\,\delta_{0} + \tfrac{1}{2}\,\delta_{1}\bigr)
+% = \tfrac{3}{4}\,\delta_{0} + \tfrac{1}{4}\,\delta_{1}.
+% \]
 
 To model mutable references, $\lamBLL$ uses a state monad whose state space is given by the set
 of stores associated with a fixed reference context $\Theta$. A store assigns to each reference
@@ -256,14 +256,18 @@ $\mathtt{consistent}_p$ & $\SS[q \times (i+1)] \times \SS[p \times (2i + 1)] \to
 % \]
 % Sequential probabilistic choices are composed by propagating and weighting probabilities. The probabilities from the first distribution are pushed forward through the second.
 
-\section{A Lambda-BLL Extension for Proving MAC Security}
-We introduce a formal Hoare Logic \cite{axiomatic-basis-for-computer-programming} which will result needed for proving the existential unforgeability under chosen-message attacks (EUF-CMA) of Message Authentication Codes (MACs) within the $\lamBLL$ framework. Following Hoare's formalism, we characterize programmatic behavior using \textit{partial correctness specifications} expressed as the triple:
+\section{Lambda-BLL Extension for Proving MAC Security}
+We introduce a formal system of Hoare Logic \cite{axiomatic-basis-for-computer-programming}, which will be required to establish the existential unforgeability under chosen-message attacks (EUF-CMA) of PRF-induced MACs within the $\lamBLL$ framework. Following Hoare's original formalism, we describe program behavior by means of \emph{partial correctness specifications}, written as triples of the form
 \[
 \{P\} S \{Q\}.
 \]
-In this construction, $S$ denotes the program, while $P$ and $Q$ represent the precondition and postcondition predicates, respectively. The semantics of this triple imply that if execution of $S$ is initiated in a state satisfying $P$, any terminating execution necessarily results in a state satisfying $Q$. A \textit{state} is defined as an evaluation of all program variables, and predicates are expressed using standard mathematical notation and logical operators to characterize sets of such states.
+Here, $S$ denotes a program, and $P$ and $Q$ are predicates representing, respectively, the precondition and postcondition. The intended semantics of this triple are that, if the execution of $S$ is started in any state that satisfies $P$, then every terminating execution of $S$ will result in a state that satisfies $Q$.
 
-Hoare Logic is essentialy a deductive proof system for Hoare triple $\{P\} S \{Q\}$. Given the set of references appearing in predicate $\Phi$ as $\mathcal{R}(\Phi)$ we define the following rules to apply a simple Hoare Logic to $\lamBLL$.
+A \emph{state} is defined as an assignment of values to all program variables. Predicates over states are written using standard mathematical notation and logical connectives, thereby characterizing sets of such states. The specification is termed \emph{partial} because the validity of $\{P\} S \{Q\}$ does not require that the execution of $S$ actually terminates when initiated in a state satisfying $P$, it only constrains the states reached upon termination, should termination occur. 
+
+A stronger notion, referred to as \emph{total correctness specifications}, is written as $[P] S [Q]$. This triple asserts that whenever $S$ is executed from a state satisfying $P$, (i) the execution of $S$ terminates, and (ii) the resulting state satisfies $Q$. In the setting considered here, we assume that all programs $S$ terminate.
+
+Hoare Logic is essentially a deductive proof system for reasoning about Hoare triples $\{P\} S \{Q\}$. Let $\mathcal{R}(\Phi)$ denote the set of program variables (or references) that occur in a predicate $\Phi$. Using this notation, we formulate the following inference rules presented in Figure~\ref{fig:hoare-rules} that instantiate a simple Hoare Logic for the $\lamBLL$ calculus. In particular, several rules play a crucial role in formalizing the proof of Theorem~\ref{theorem:mac-security}. 
 
 \begin{figure}[ht]
     \vspace*{-6mm}
@@ -290,3 +294,5 @@ Hoare Logic is essentialy a deductive proof system for Hoare triple $\{P\} S \{Q
 \caption{Hoare rules for $\lamBLL$}
 \label{fig:hoare-rules}
 \end{figure}
+
+The \textit{reflexivity} rule (\textsc{H-REFL}) rule captures the reflexivity of the logic, stating that any expression $M$ preserves a predicate $\Phi$ when it is related to itself. The \textit{consequence rule} (\textsc{H-CONS}) enables the strengthening of preconditions and the weakening of postconditions. The \textit{let rule} (\textsc{H-LET}) rule formalizes sequential composition, chaining the transition from an initial precondition $\Phi$ to a final postcondition $\Psi$ via an intermediate predicate $\Theta$. The \textit{if rule} (\textsc{H-IF}) rule handles conditional branching: it requires that both branches of a conditional expression establish the postcondition $\Psi$ under their respective boolean constraints. The rules \textsc{H-THEN} and \textsc{H-ELSE} constitute the axiomatic basis for reasoning about conditionals when the guard $b$ is known to evaluate to true or false, respectively. The \textit{preservation rule} (\textsc{H-PRES}) states that a predicate $\Phi$ remains invariant provided that the set of resources $\mathcal{R}(M)$ modified by the expression $M$ does not intersect the set of resources $\mathcal{R}(\Phi)$ referenced by $\Phi$. Finally, the \textsc{H-Frame} rule allows the extension of both the precondition and the postcondition with an additional predicate $\Theta$, under the requirement that $\Theta$ is disjoint and does not mention any resources modified by $M$ or $N$.
