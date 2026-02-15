@@ -5,7 +5,7 @@ This chapter demonstrates that existential unforgeability under chosen message a
 We begin by recalling the MAC forgery experiment, $\macexp$, as defined in Figure~\ref{fig:macforge-recall}. To bridge the gap between pseudocode and formalization, we specify the types for each component as they appear in $\lamBLL$. The concrete implementation of the terms modeling the key generation
 algorithm $\mathit{Gen}$ and the MAC oracle $\mathit{Mac}_k(\cdot)$ depends on the specific MAC scheme under consideration. For this reason, these terms are left abstract and will be instantiated only after fixing a scheme $\Pi$. In the following paragraphs, we make this instantiation explicit for the schemes $\Pi^F$ and $\widetilde{\Pi}$ which are used in the proof of Theorem~\ref{theorem:mac-security}. 
 
-In $\lamBLL$ typing discipline, the key generation algorithm $Gen$ is a probabilistic computation that yields a secret key of polynomial length. The adversary, $Adv$, is a higher-order computation receiving an oracle. The oracle itself is controlled by the graded modality $\bang_q$, which enforces a polynomial bound on the number of queries.
+In $\lamBLL$ typing discipline, the key generation algorithm $Gen$ is a probabilistic computation that yields a secret key of polynomial length. The adversary, $Adv$, is a higher-order computation having access to an oracle. The oracle itself is controlled by the graded modality $\bang_q$, which enforces a polynomial bound on the number of queries.
 
 \begin{figure}[htpb]
     \centering
@@ -53,6 +53,8 @@ We define the $\lamBLL$ term corresponding to the forgery experiment, shown in F
     \centering
     \begin{align*}
     &MacForge \triangleq \\
+    &\quad\letin{q=\mathtt{initQ}}{} \\
+    &\quad\letin{\_ = \mathtt{set}\,Q\,q}{} \\
     &\quad \letin{k = Gen \star}{} \\
     &\quad \letin{o = Oracle\, k}{} \\
     &\quad \letin{\langle m, t \rangle = Adv\, o}{} \\
@@ -73,8 +75,6 @@ We have to define a $\lamBLL$ term for the experiment using the encryption schem
         \begin{aligned}
             &Gen^F \triangleq \\
             &\quad\lambda u. \\
-            &\quad\letin{tab=\mathtt{initQ}}{} \\
-            &\quad\letin{\_ = \mathtt{set}\,Q\,tab}{} \\
             &\quad\letin{k=\random}{} \\
             &\quad\return k
         \end{aligned}
@@ -92,9 +92,9 @@ We have to define a $\lamBLL$ term for the experiment using the encryption schem
             &Oracle^F \triangleq \\
             &\quad \return(\lambda k.\return \bang(\return \lambda m. \\
             &\quad\quad \letin{q=\get Q}{} \\
-            &\quad\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-            &\quad\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t) \mathtt{then} \\
-            &\quad\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+            &\quad\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+            &\quad\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\, \mathtt{then} \\
+            &\quad\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
             &\quad\quad \mathtt{else}\ \return \star}{} \\
             &\quad\quad \mathit{Mac}^F\lis{k,m}))
         \end{aligned}
@@ -103,15 +103,15 @@ We have to define a $\lamBLL$ term for the experiment using the encryption schem
     \label{fig:macforgeF-subterms}
 \end{figure}
 
-The model for the experiment $\mathtt{MacForge}_{A,\Pi_F}$, which we denote by $\mathit{MacForge}^F$, is obtained by instantiating the generic term $\mathit{MacForge}$ with the components $Gen^F$, $Mac^F$, and $Oracle^F$ defined in Figure~\ref{fig:macforgeF-subterms}. 
+The model for the experiment $\mathtt{MacForge}_{A,\Pi_F}$, which we denote by $\mathit{MacForge}^F$, is obtained by instantiating the generic term $\mathit{MacForge}$ with the components $Gen^F$, $Mac^F$, and $Oracle^F$ defined in Figure~\ref{fig:macforgeF-subterms}. Unlike the pseudocode presented in Figure~\ref{fig:macforge-recall}, the term $\mathit{MacForge}$ is additionally responsible for the initialization of query ledger which is instantiated by setting the value of the reference $Q$ using the function symbol $\mathtt{initQ}$ which generates a string of length $(q\times(i+1))$ filled entirely with zeros.  
 
-The key generation algorithm of $\Pi_F$ is modeled by the term $Gen^F$, which samples a fresh key using the function symbol $\random$, whose type is $\SS[i]$ and initialize the ledger by setting the value of the reference $Q$ using the function symbol $\mathtt{initQ}$ which generates a string of length $(q\times(i+1))$ filled entirely with zeros. 
+The key generation algorithm of $\Pi_F$ is modeled by the term $Gen^F$, which samples a fresh key using the function symbol $\random$, whose type is $\SS[i]$.
 
 The pseudorandom function used by the scheme is abstracted as a generic value $F$, typed as $\vdash_v^\Theta F: (\SS[i] \otimes \SS[i]) \multimap S[i]$ reflecting the fact that the construction is parameterized by an arbitrary pseudorandom function which can be instantiated in many ways. 
 
 The tag generation algorithm of $\Pi_F$ is modeled by the term $\mathit{Mac}^F$. Given a key $k$ and a message $m$ it computes the tag $t$ by evaluating the pseudorandom function $F$ on the pair $(k,m)$, finally returning a tag. 
 
-The oracle $Oracle^F$ encapsulates the secret key and provides access to the MAC function through the graded modality $\bang$. In addition to answering MAC queries, the oracle maintains a record of all messages queried by the adversary. This record is stored in the reference $Q$ thus introducing a non-empty reference context. At each oracle invocation on a message $m$, the current contents of $Q$ are retrieved, updated to include $m$, and written back to the reference before computing and returning the corresponding MAC value. In order to retrieve and update the query ledger, we rely on several function symbols such as $\mathtt{initQ}$, $\mathtt{modifyQ}$ and $\mathtt{isdefinedQ}$, which are reported in Table~\ref{table:new-function-symbols}. To support this behavior, the typing of the terms in Figure~\ref{fig:macforgeF-subterms} is carried out in a reference context $ \Xi = \{\, Q : \SS[(q \times (i+1))] \,\}$ which represents the ledger used to store the adversary's oracle queries. The context $\Theta$ in the corresponding type derivations is instantiated with $\Xi$. In the term $Oracle^F$ in Figure~\ref{fig:macforgeF-subterms} we use the syntactic sugar of Equation~\ref{eq:sugar-return} since $Mac^F$ is a value.
+The oracle $Oracle^F$ encapsulates the secret key and provides access to the MAC function through the graded modality $\bang$. In addition to answering MAC queries, the oracle maintains a record of all messages queried by the adversary. This record is stored in the reference $Q$ thus introducing a non-empty reference context. At each oracle invocation on a message $m$, the current contents of $Q$ are retrieved, updated to include $m$, and written back to the reference before computing and returning the corresponding MAC value. In order to retrieve and update the query ledger, we rely on several function symbols such as $\mathtt{initQ}$, $\mathtt{modifyQ}$ and $\mathtt{contains}$, which are reported in Table~\ref{table:new-function-symbols}. To support this behavior, the typing of the terms in Figure~\ref{fig:macforgeF-subterms} is carried out in a reference context $ \Xi = \{\, Q : \SS[(q \times (i+1))] \,\}$ which represents the ledger used to store the adversary's oracle queries. The context $\Theta$ in the corresponding type derivations is instantiated with $\Xi$. In the term $Oracle^F$ in Figure~\ref{fig:macforgeF-subterms} we use the syntactic sugar of Equation~\ref{eq:sugar-return} since $Mac^F$ is a value.
 
 The model for $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, denoted by $\widetilde{\mathit{MacForge}}$, is obtained from the term $\mathit{MacForge}$ from Figure~\ref{fig:macforge-term} instantiating the terms $Mac$, $Gen$ and $Oracle$ according to $\widetilde{\Pi}$, and is represented in Figure~\ref{fig:macforgef-subterms}. The model for $\widetilde{MacForge}$ relies on a truly random function, which is characterized by the property that each distinct input is deterministically associated with a uniformly random output upon its first evaluation, and that this output remains fixed for all subsequent evaluations of the ranomd function on the same input. To model this behavior within $\lamBLL$, we follow the same ledger based approach introduced in~\cite{lago2024computationalindistinguishabilitylogicalrelations}, which is conceptually analogous to the mechanism used to record oracle queries. We introduce an additional ledger that can be manipulated through a collection of function symbols, detailed in Appendix~\ref{app:1}. As shown in Figure~\ref{fig:macforgef-subterms}, this ledger is stored in the reference $rand$, with type $\SS[(q+1)\times(2i+1)]$. The ledger can be viewed as a table with $q+1$ rows, where each row contains an input-output pair of the random function together with a final bit indicating whether the row is active. The size of the ledger reflects the fact that the random function $f$ can be queried at most $q+1$ times: once by the experiment itself and up to $q$ times by the adversary.
 
@@ -120,8 +120,6 @@ The model for $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, denoted by $\widetilde{\m
         \begin{aligned}
             &\widetilde{Gen} \triangleq \\
             &\quad \lambda u. \\
-            &\quad \letin{q=\mathtt{initQ}}{} \\
-            &\quad \letin{\_ = \mathtt{set}\,Q\,q}{} \\
             &\quad \letin{tab=\mathtt{initTable}}{} \\
             &\quad \letin{\_ = \mathtt{set}\,rand\,tab}{} \\
             &\quad \letin{z=\mathtt{zero}}{} \\
@@ -148,9 +146,9 @@ The model for $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, denoted by $\widetilde{\m
         &\widetilde{Oracle} \triangleq \\
         &\quad \return(\lambda k.\return \bang(\return \lambda m. \\
         &\quad\quad \letin{q=\get Q}{} \\
-        &\quad\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-        &\quad\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t) \mathtt{then} \\
-        &\quad\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+        &\quad\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+        &\quad\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\quad\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
         &\quad\quad \mathtt{else}\ \return \star}{} \\
         &\quad\quad \mathit{\widetilde{Mac}}\lis{k,m}))
     \end{align*}
@@ -158,7 +156,7 @@ The model for $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, denoted by $\widetilde{\m
     \label{fig:macforgef-subterms}
 \end{figure}
 
-The key generation algorithm of $\widetilde{\Pi}$ is modeled by the term $\widetilde{Gen}$. Its role is to initialize the ledger representing the random function by setting the reference $rand$ to the output of the function symbol $\mathtt{initTable}$, which generates a string of length $(q+1)\times(2i+1)$ filled with zeros, corresponding to an empty table. It also initializes the ledger representing the query hisotry by setting the value of the reference $Q$ similarly to $Gen^F$. The term then returns a dummy value generated using the function symbol $\mathtt{zero}$, as the key is not used in the
+The key generation algorithm of $\widetilde{\Pi}$ is modeled by the term $\widetilde{Gen}$. Its role is to initialize the ledger representing the random function by setting the reference $rand$ to the output of the function symbol $\mathtt{initTable}$, which generates a string of length $(q+1)\times(2i+1)$ filled with zeros, corresponding to an empty table. It also initializes the ledger representing the query history by setting the value of the reference $Q$ similarly to $Gen^F$. The term then returns a dummy value generated using the function symbol $\mathtt{zero}$, as the key is not used in the
 experiment $\widetilde{MacForge}$.
 
 The term $\widetilde{\mathit{Mac}}$ models the MAC algorithm of $\widetilde{\Pi}$ built from the random function $f$. Given an input message $m$, it samples a fresh random value $r$ and inspects the ledger stored in $rand$ to determine whether $r$ has already been used as an input to the random function. This check is performed
@@ -178,17 +176,19 @@ The distinguisher $D_A$ constructed from any adversary that succeeds in the $\ma
     \begin{align*}
     &D \triangleq \\
     &\quad \return(\lambda o. \\
+    &\quad\letin{q=\mathtt{initQ}}{} \\
+    &\quad\letin{\_ = \mathtt{set}\,Q\,q}{} \\
     &\quad \letin{\lis{m,t} = Adv\, o}{} \\
     &\quad \letin{queries = \get Q}{} \\
     &\quad \letin{b=\mathtt{contains}(queries, m)}{} \\
     &\quad \mathtt{if}\, b\, \mathtt{then}\, \return \false \\
-    &\quad \mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)}
+    &\quad \mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t))}
     \end{align*}
     \caption{$\lamBLL$ term for the $\mathtt{D}$ distinguisher.}
     \label{fig:d-term}
 \end{figure}
 
-The distinguisher invokes the adversary $Adv$ with oracle access to $o$, obtains a candidate forgery $(m,t)$, and checks its validity using a verification procedure identical to the one used in the $\macexp$ in Figure~\ref{fig:macforge-term}. As in the $\mathtt{MacForge}$ experiment, the reference $Q$ is shared between the oracle and the distinguisher and records all oracle queries performed by the adversary. The distinguisher returns $\true$ if $(m,t)$ is a valid fresh forgery, and
+The distinguisher initializes the query ledger to simulate the environment for the adversary. Then invokes the adversary with oracle access to $o$, obtains a candidate forgery $(m,t)$, and checks its validity using a verification procedure identical to the one used in the $\macexp$ in Figure~\ref{fig:macforge-term}. As in the $\mathtt{MacForge}$ experiment, the reference $Q$ is shared between the oracle and the distinguisher and records all oracle queries performed by the adversary. The distinguisher returns $\true$ if $(m,t)$ is a valid fresh forgery, and
 $\false$ otherwise.
 
 We briefly justify that the distinguisher $D$ is well typed in $\lamBLL$. The term $D$ is a value returning a function that takes an oracle $o$ as input which has type $\bang_{q+1}(\SS[i] \multimap \SS[i])$, matching the oracle type expected by the adversary $Adv$. Since $Adv$ is typed as $\bang_{q}(\SS[i] \multimap \SS[i]) \multimap (\SS[i] \otimes \SS[i])$ for a polynomial $q$ the application $Adv\,o$ is well typed and yields a candidate forgery $(m,t)$ with type $(\SS[i] \otimes \SS[i])$. The distinguisher then reads the reference $Q$ using $\get Q$. As in the $\mathtt{MacForge}$ experiment, the oracle $o$ and the distinguisher $D$ operate within the same reference context $\Theta$, which contains the reference $Q : \SS[(q \times (i+1))]$. This ensures that the query history recorded by the oracle during the execution of $Adv$ is available to the distinguisher when performing the check for the freshness of the message. It is important to note that modifying the reference state would not correspond to a meaningful strategy for distinguishing a pseudorandom function from a truly random one. The verification step is carried out by checking if the message generated by the adversary belongs to the set of registered queries, if it does not then $D$ evaluates the oracle on the message checking if the tag generated by the adversary and the tag generated by the oracle are equals. The type for the distinguisher follows the type derivation $\vdash_c^\Theta \bang_{q+1}(\SS[i] \multimap \SS[i]) \multimap \BB$
@@ -210,9 +210,9 @@ where the subterms $M^F$ and $\widetilde{M}$ defined in Figure~\ref{fig:oracles}
             M^F &\triangleq \\
             &\return(\lambda k.\return(\bang(\return(\lambda m.\\
             &\quad \letin{q=\get Q}{} \\
-            &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-            &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
             &\quad \mathtt{else}\ \return \star}{} \\
             &\quad \return F\lis{k,m}
         \end{aligned}
@@ -227,9 +227,9 @@ where the subterms $M^F$ and $\widetilde{M}$ defined in Figure~\ref{fig:oracles}
             \widetilde{M} &\triangleq \\
             &\return(\lambda k.\return(\bang(\return(\lambda r. \\
             &\quad \letin{q=\get Q}{} \\
-            &\quad \letin{t=\mathtt{isdefinedQ}(q, r)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-            &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q, r) \\
+            &\quad \letin{t=\mathtt{contains}(q, r)}{} \\
+            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q, r) \\
             &\quad \mathtt{else}\ \return \star}{} \\
             &\quad \letin{tab=\mathtt{get}\,rand}{} \\
             &\quad \letin{b=\mathtt{isdefined}(tab, r)}{} \\
@@ -263,10 +263,12 @@ The oracle $\mathit{MacOracle}$, defined in Equation~\ref{eq:mac-oracle}, return
 
 \begin{equation}
 \begin{aligned}\label{eq:mac-oracle}
-    &MacOracle \triangleq \\
-    &\quad\return(\lambda o.\return(\bang(\return(\lambda m. \\ 
-    &\quad\quad \return(\mathtt{der(o)}m) \\
-    &))))
+    &MacOracle \;\triangleq\;
+    \begin{aligned}[t]
+        &\return(\lambda o.\return(\bang(\return(\lambda m. \\ 
+        &\quad \return(\mathtt{der(o)}m) \\
+        &))))
+    \end{aligned}
 \end{aligned}
 \end{equation}
 
@@ -278,7 +280,7 @@ The oracle $\mathit{MacOracle}$, defined in Equation~\ref{eq:mac-oracle}, return
 \section{Formalization of the Proof}
 The security of $\Pi^F$ is established via a proof by reduction (Theorem~\ref{theorem:mac-security}), proceeding contrapositively: from any hypothetical adversary $Adv$ against $\Pi^F$ we obtain a distinguisher $D$ for $F$ which is designed to distinguish the pseudorandom function $F$ from a truly random function $f$. If $D$ is shown to be successful whenever $Adv$ succeeds, we conclude that $\Pi^F$ is secure provided $F$ is a pseudorandom function where security is characterized by the non existence of efficient adversaries of the appropriate kind.
 
-In the context of ${\lamBLL}$, the distinguisher $D$ is represented as the term defined in Figure~\ref{fig:d-term}, with the type $\bang_{q+1}(\mathbb{S}[i] \multimap \mathbb{S}[i]) \multimap \mathbb{B}$. We consider two specific instances of this distinguisher: $D^F$, which interacts with the pseudorandom function $F$, and $\widetilde{D}$, which interacts with a truly random function $f$. Both $F$ and $f$ are modeled using stateful computations. Specifically, a ledger $Q$ records the query history, and in the case of the truly random function, an additional ledger $tab$ is used to provide consistent random outputs. To complete the formalization, we defined an ideal MAC scheme $\widetilde{\Pi}$ that is structurally identical to $\Pi^F$ but uses a truly random function. The components of $\Pi^F$ are specified in Figure~\ref{fig:macforgeF-subterms}, while those of $\widetilde{\Pi}$ are detailed in Figure~\ref{fig:macforgef-subterms}. 
+In the context of ${\lamBLL}$, the distinguisher $D$ is represented as the term defined in Figure~\ref{fig:d-term}, having type $\bang_{q+1}(\mathbb{S}[i] \multimap \mathbb{S}[i]) \multimap \mathbb{B}$. We consider two specific instances of this distinguisher: $D^F$, which interacts with the pseudorandom function $F$, and $\widetilde{D}$, which interacts with a truly random function $f$. Both $F$ and $f$ are modeled using stateful computations. Specifically, a ledger $Q$ records the query history, and in the case of the truly random function, an additional ledger $tab$ is used to provide consistent random outputs. To complete the formalization, we defined an ideal MAC scheme $\widetilde{\Pi}$ that is structurally identical to $\Pi^F$ but uses a truly random function. The components of $\Pi^F$ are specified in Figure~\ref{fig:macforgeF-subterms}, while those of $\widetilde{\Pi}$ are detailed in Figure~\ref{fig:macforgef-subterms}. 
 
 By defining the reference contexts $\Xi=\{Q: \mathbb{S}[q\times(i+1)]\}$ and $\Upsilon = \{rand: \mathbb{S}[(q+1)\times(2i+1)], Q: \mathbb{S}[q\times(i+1)]\}$, the security of $\mathit{MacForge}^F$ is expressed by the equation:
 \begin{equation}\label{eq:macforgeF-sim-false}
@@ -287,8 +289,6 @@ By defining the reference contexts $\Xi=\{Q: \mathbb{S}[q\times(i+1)]\}$ and $\U
 where $\sim_{\Xi\subseteq\Upsilon}$ denotes the $\Theta$-contextual indistinguishability relation as defined in \cite{lago2024computationalindistinguishabilitylogicalrelations}. This equation asserts that the experiment $\mathit{MacForge}^F$ reveals nothing to the adversary, even when accounting for the stateful references stored in the context $\Upsilon$. While this seems a strong requirement, and indeed it is, we show that within the framework of $\lamBLL$ we can structure a proof by reduction by equational reasoning and conclude a proof of the Equation~\ref{eq:macforgeF-sim-false} hence obtaining a formal version of the proof of Theorem~\ref{theorem:mac-security}. The diagram shows that the left component ($\mathit{MacForge}^F$) can be proved insecure only if the lower relation in the diagram is also violated. Since we assume that the pseudorandom function hypothesis holds (see Definition~\ref{def:prf}), it follows that the corresponding MAC is secure.
 
 \newcommand{\simcontext}[0]{\sim_{\Xi\subseteq\Upsilon}}
-
-Consider the diagram in Figure~\ref{fig:proofscheme}. Our objective is to demonstrate that, on both the left-hand and right-hand sides of the diagram, the relation $\sim_{\Xi \subseteq \Upsilon}$ can be used to relate the corresponding terms. On the left-hand side, we must establish that the contextual equivalence  $D^F \simcontext MacForge^F$ holds. Similarly, on the right-hand side, we must show that $\widetilde{D} \simcontext \widetilde{MacForge}$ holds. These two equivalences correspond respectively to Equation~\ref{eq:macforgeF-to-DF} and Equation~\ref{eq:macforgef-to-Df} in Proof~\ref{proof:handwavy}.
 
 \begin{figure}[htpb]
 	\centering
@@ -315,13 +315,15 @@ Consider the diagram in Figure~\ref{fig:proofscheme}. Our objective is to demons
 	\label{fig:proofscheme}
 \end{figure}
 
+Consider the diagram in Figure~\ref{fig:proofscheme}. Our objective is to demonstrate that, on both the left-hand and right-hand sides of the diagram, the relation $\sim_{\Xi \subseteq \Upsilon}$ can be used to relate the corresponding terms. On the left-hand side, we must establish that the contextual equivalence  $D^F \simcontext MacForge^F$ holds. Similarly, on the right-hand side, we must show that $\widetilde{D} \simcontext \widetilde{MacForge}$ holds. These two equivalences correspond respectively to Equation~\ref{eq:macforgeF-to-DF} and Equation~\ref{eq:macforgef-to-Df} in Proof~\ref{proof:handwavy}.
+
 We begin by focusing on the bottom-right side of the diagram. The first step is to establish the relation $\letin{o=\widetilde{M}\,k}{MacOracle\,o} \simcontext \widetilde{Oracle}\,k$, which is stated as Lemma~\ref{lemma:MacOracle-to-tilde-oracle} and proved immediately after. Once this equivalence is established, the relation $\widetilde{D} \simcontext \widetilde{MacForge}$ follows by an application of Equation~\ref{letAss} and Lemma~\ref{lemma:MacOracle-to-tilde-oracle}, and by concluding with a reduction using Equation~\ref{reduc2}.
 
 \begin{lemma}\label{lemma:MacOracle-to-tilde-oracle}
 \[ \letin{o=\widetilde{M}\,k}{MacOracle\,o} \simcontext \widetilde{Oracle}\,k \]
 \end{lemma}
 \begin{proof}
-We begin by unfolding the oracle $\widetilde{M}$ and applying Equation~\ref{reduc2}. We then unfold the definition of $\widetilde{Mac}$, after which the proof is completed by straightforward applications of Equations~\ref{reduc4}, \ref{reduc3}, and finally \ref{reduc2}. Observe that the equations used, which are reported in Figure~\ref{fig:equations}, are parameterized by two contexts, $\Theta$ and $\Xi$. In this case, $\Theta = \Xi = \{\, Q : \mathbb{S}[q \times (i+1)] \,\}$ and $\Xi = \Upsilon = \{\, rand : \mathbb{S}[(q+1) \times (2i+1)], Q : \mathbb{S}[q \times (i+1)]\,\}$, since both the references $Q$ and $rand$ are accessed during the reduction.
+We begin by unfolding the definition of $\widetilde{Oracle}$ and applying Equation~\ref{reduc2}. We then unfold the definition of $\widetilde{Mac}$, after which the proof is completed by straightforward applications of Equations~\ref{reduc4}, \ref{reduc3}, and finally \ref{reduc2}. Observe that the equations used, which are reported in Figure~\ref{fig:equations}, are parameterized by two contexts, $\Theta$ and $\Xi$. In this case, $\Theta = \Xi = \{\, Q : \mathbb{S}[q \times (i+1)] \,\}$ and $\Xi = \Upsilon = \{\, rand : \mathbb{S}[(q+1) \times (2i+1)], Q : \mathbb{S}[q \times (i+1)]\,\}$, since both the references $Q$ and $rand$ are accessed during the reduction.
 
 \small{
 \begin{align}
@@ -329,9 +331,9 @@ We begin by unfolding the oracle $\widetilde{M}$ and applying Equation~\ref{redu
     \begin{aligned}
         &\quad \return(\lambda k.\return \bang(\return \lambda m. \\
         &\quad\quad \letin{q=\get Q}{} \\
-        &\quad\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-        &\quad\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t) \mathtt{then} \\
-        &\quad\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+        &\quad\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+        &\quad\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\quad\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
         &\quad\quad \mathtt{else}\ \return \star}{} \\
         &\quad\quad \mathit{\widetilde{Mac}}\lis{k,m} \\
         &\quad))\,k
@@ -339,21 +341,22 @@ We begin by unfolding the oracle $\widetilde{M}$ and applying Equation~\ref{redu
     \\[2ex]
     &\quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad
     \begin{aligned}
-        &\return \bang(\return \lambda m. \\
+        &\return(\bang(\return(\lambda m. \\
         &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-        &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m)\\
+        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m)\\
         &\quad \mathtt{else}\ \return \star}{} \\
-        &\quad \mathit{\widetilde{Mac}}\lis{k,m})
+        &\quad \mathit{\widetilde{Mac}}\lis{k,m} \\
+        &)))
     \end{aligned} \nonumber
     \quad\triangleq\quad
     \begin{aligned}
-        &\return \bang(\return \lambda m. \\
+        &\return(\bang(\return(\lambda m. \\
         &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-        &\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m)\\
+        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+        &\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m)\\
         &\quad \mathtt{else}\ \return \star}{} \\
         &\quad (\lambda e. \\
         &\quad\quad\letin{\langle k,m\rangle = e}{} \\
@@ -367,18 +370,18 @@ We begin by unfolding the oracle $\widetilde{M}$ and applying Equation~\ref{redu
         &\quad\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
         &\quad\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
         &\quad\quad\quad \return x \\
-        &\quad)\lis{k,m}) 
+        &\quad)\lis{k,m})))
     \end{aligned} \nonumber
     \\[2ex]
     &\quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad
     \begin{aligned}
-        &\return \bang(\return \lambda m. \\
+        &\return(\bang(\return(\lambda m. \\
         &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-        &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m)\\
+        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m)\\
         &\quad \mathtt{else}\ \return \star}{} \\
-        &\quad\letin{\langle k,m\rangle = \lis{k,m}}{} \\
+        &\quad\letin{\lis{k,m} = \lis{k,m}}{} \\
         &\quad\letin{tab = \mathtt{get}\,rand}{} \\
         &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
         &\quad\mathtt{if}\, b\, \mathtt{then} \\
@@ -388,60 +391,17 @@ We begin by unfolding the oracle $\widetilde{M}$ and applying Equation~\ref{redu
         &\quad\quad \letin{x = \random}{} \\
         &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
         &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
-        &\quad\quad \return x)
-    \end{aligned} \nonumber
-    \\[2ex]
-    &\quad\triangleq\quad
-    \begin{aligned}
-        &\return \bang(\return \lambda m. \\
-        &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-        &\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m)\\
-        &\quad \mathtt{else}\ \return \star}{} \\
-        &\quad (\lambda e. \\
-        &\quad\quad\letin{\langle k,m\rangle = e}{} \\
-        &\quad\quad\letin{tab = \mathtt{get}\,rand}{} \\
-        &\quad\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-        &\quad\quad\mathtt{if}\, b\, \mathtt{then} \\
-        &\quad\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
-        &\quad\quad\quad \return x \\
-        &\quad\quad\mathtt{else} \\
-        &\quad\quad\quad \letin{x = \random}{} \\
-        &\quad\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
-        &\quad\quad\quad \return x \\
-        &\quad)\lis{k,m})
-    \end{aligned} \nonumber
-    \\[2ex]
-    &\quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad
-    \begin{aligned}
-        &\return \bang(\return \lambda m. \\
-        &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-        &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m)\\
-        &\quad \mathtt{else}\ \return \star}{} \\
-        &\quad\letin{\langle k,m\rangle = \lis{k,m}}{} \\
-        &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-        &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-        &\quad\mathtt{if}\, b\, \mathtt{then} \\
-        &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
         &\quad\quad \return x \\
-        &\quad\mathtt{else} \\
-        &\quad\quad \letin{x = \random}{} \\
-        &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
-        &\quad\quad \return x)
+        &)))
     \end{aligned} \nonumber
     \\[2ex]
-    &\quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad
+    &\quad\overset{\text{~\ref{reduc5}}}{\simcontext}\quad
     \begin{aligned}
-        &\return \bang(\return \lambda m. \\
+        &\return(\bang(\return(\lambda m. \\
         &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-        &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m)\\
+        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m)\\
         &\quad \mathtt{else}\ \return \star}{} \\
         &\quad\letin{tab = \mathtt{get}\,rand}{} \\
         &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
@@ -452,41 +412,40 @@ We begin by unfolding the oracle $\widetilde{M}$ and applying Equation~\ref{redu
         &\quad\quad \letin{x = \random}{} \\
         &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
         &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
-        &\quad\quad \return x)
+        &\quad\quad \return x \\
+        &)))
     \end{aligned} \label{eq:reduced-oracle}
 \end{align}
 }
 
-Once Lemma~\ref{lemma:MacOracle-to-tilde-oracle} has been proved, the remaining goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracle\,o}$ is $\Theta$-contextually indistinguishable from the term shown in Equation~\ref{eq:reduced-oracle}. We begin by unfolding the definition of $MacOracle$, as given in Equation~\ref{eq:mac-oracle}. This term is a curried function that, when applied to an oracle $o$, returns the corresponding MAC computation. We then apply Equation~\ref{reduc2} to eliminate the lambda abstraction and simplify the application of $MacOracle$ to $o$. Next, we unfold the definition of $\widetilde{M}$ from Figure~\ref{subfig:oracle-truly-random}. Applying $\widetilde{M}$ to a key $k$ yields a function that, on input $m$, inspects the ledger to determine whether a value has already been associated with $m$. If so, the stored value is returned; otherwise, fresh randomness is sampled, the reference storing the ledger is updated, and the newly sampled value is returned. We then apply Equation~\ref{reduc2} to evaluate this application. Finally, the term is simplified by successive applications of Equations~\ref{reduc4}, \ref{reduc3}, and \ref{reduc2}.
+The remaining goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracle\,o}$ is $\Theta$-contextually indistinguishable from the term shown in Equation~\ref{eq:reduced-oracle}. We begin by unfolding the definition of $MacOracle$, as given in Equation~\ref{eq:mac-oracle}. This term is a curried function that, when applied to an oracle $o$, returns the corresponding MAC computation. We then apply Equation~\ref{reduc2} to eliminate the lambda abstraction and simplify the application of $MacOracle$ to $o$. Next, we unfold the definition of $\widetilde{M}$ from Figure~\ref{subfig:oracle-truly-random}. Applying $\widetilde{M}$ to a key $k$ yields a function that, on input $m$, inspects the ledger to determine whether a value has already been associated with $m$. If so, the stored value is returned; otherwise, fresh randomness is sampled, the reference storing the ledger is updated, and the newly sampled value is returned. We then apply Equation~\ref{reduc2} to evaluate this application. Finally, the term is simplified by successive applications of Equations~\ref{reduc4}, \ref{reduc3}, and \ref{reduc2}.
 
 \small{
     \begin{align*}
-        &\letin{o=\widetilde{M}\,k}{MacOracle\,o} 
-        \\[2ex]
-        &\quad\triangleq\quad
+        &\letin{o=\widetilde{M}\,k}{MacOracle\,o} \quad\triangleq\quad
         \begin{aligned}
             &\letin{o=\widetilde{M}\,k}{} \\
             &\return(\lambda o.\return(\bang(\return(\lambda m. \\ 
-            &\quad\return(\mathtt{der(o)}m) \\
+            &\quad \return(\mathtt{der(o)}m) \\
             &))))\,o
         \end{aligned}
-        \quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad
+        \\[2ex]
+        &\quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad
         \begin{aligned}
             &\letin{o=\widetilde{M}\,k}{} \\
             &\return(\bang(\return(\lambda m. \\ 
             &\quad\return(\mathtt{der(o)}m) \\
             &)))
         \end{aligned}
-        \\[2ex]
-        &\quad\triangleq\quad
+        \quad\triangleq\quad
         \begin{aligned}
             &\mathtt{let}\,o=\left(
                 \begin{aligned}
                     &\return(\lambda k.\return(\bang(\return(\lambda r. \\
                     &\quad \letin{q=\get Q}{} \\
-                    &\quad \letin{t=\mathtt{isdefinedQ}(q, r)}{} \\
-                    &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-                    &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q, r) \\
+                    &\quad \letin{t=\mathtt{contains}(q, r)}{} \\
+                    &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+                    &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q, r) \\
                     &\quad \mathtt{else}\ \return \star}{} \\
                     &\quad \letin{tab=\mathtt{get}\,rand}{} \\
                     &\quad \letin{b=\mathtt{isdefined}(tab, r)}{} \\
@@ -497,7 +456,8 @@ Once Lemma~\ref{lemma:MacOracle-to-tilde-oracle} has been proved, the remaining 
                     &\quad\quad \letin{x=\random}{} \\
                     &\quad\quad \letin{newtab=\mathtt{modify}(tab, r, x)}{} \\
                     &\quad\quad \letin{\_=\mathtt{set}\,rand\,newtab}{} \\
-                    &\quad\quad \return x))))
+                    &\quad\quad \return x \\
+                    &))))
                 \end{aligned}
             \right) k\,\mathtt{in} \\
             &\return(\bang(\return(\lambda m.\return(\mathtt{der(o)}m)))
@@ -509,9 +469,9 @@ Once Lemma~\ref{lemma:MacOracle-to-tilde-oracle} has been proved, the remaining 
             \begin{aligned}
                 &\return(\bang(\return(\lambda r. \\
                 &\quad \letin{q=\get Q}{} \\
-                &\quad \letin{t=\mathtt{isdefinedQ}(q, r)}{} \\
-                &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-                &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q, r) \\
+                &\quad \letin{t=\mathtt{contains}(q, r)}{} \\
+                &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+                &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q, r) \\
                 &\quad \mathtt{else}\ \return \star}{} \\
                 &\quad \letin{tab=\mathtt{get}\,rand}{} \\
                 &\quad \letin{b=\mathtt{isdefined}(tab, r)}{} \\
@@ -522,7 +482,8 @@ Once Lemma~\ref{lemma:MacOracle-to-tilde-oracle} has been proved, the remaining 
                 &\quad\quad \letin{x=\random}{} \\
                 &\quad\quad \letin{newtab=\mathtt{modify}(tab, r, x)}{} \\
                 &\quad\quad \letin{\_=\mathtt{set}\,rand\,newtab}{} \\
-                &\quad\quad \return x))))
+                &\quad\quad \return x \\
+                &)))
             \end{aligned}
             \right) \mathtt{in} \\
             &\return(\bang(\return(\lambda m.\return(\mathtt{der(o)}m)))
@@ -535,9 +496,9 @@ Once Lemma~\ref{lemma:MacOracle-to-tilde-oracle} has been proved, the remaining 
             \begin{aligned}
                 &\return(\lambda r. \\
                 &\quad \letin{q=\get Q}{} \\
-                &\quad \letin{t=\mathtt{isdefinedQ}(q, r)}{} \\
-                &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-                &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q, r) \\
+                &\quad \letin{t=\mathtt{contains}(q, r)}{} \\
+                &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+                &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q, r) \\
                 &\quad \mathtt{else}\ \return \star}{} \\
                 &\quad \letin{tab=\mathtt{get}\,rand}{} \\
                 &\quad \letin{b=\mathtt{isdefined}(tab, r)}{} \\
@@ -561,9 +522,9 @@ Once Lemma~\ref{lemma:MacOracle-to-tilde-oracle} has been proved, the remaining 
             \begin{aligned}
                 &\return(\lambda r. \\
                 &\quad \letin{q=\get Q}{} \\
-                &\quad \letin{t=\mathtt{isdefinedQ}(q, r)}{} \\
-                &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-                &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q, r) \\
+                &\quad \letin{t=\mathtt{contains}(q, r)}{} \\
+                &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+                &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q, r) \\
                 &\quad \mathtt{else}\ \return \star}{} \\
                 &\quad \letin{tab=\mathtt{get}\,rand}{} \\
                 &\quad \letin{b=\mathtt{isdefined}(tab, r)}{} \\
@@ -584,9 +545,9 @@ Once Lemma~\ref{lemma:MacOracle-to-tilde-oracle} has been proved, the remaining 
         \begin{aligned}
             &\return(\bang(\return(\lambda m. \\ 
             &\quad \letin{q=\get Q}{} \\
-            &\quad \letin{t=\mathtt{isdefinedQ}(q, m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-            &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q, m) \\
+            &\quad \letin{t=\mathtt{contains}(q, m)}{} \\
+            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q, m) \\
             &\quad \mathtt{else}\ \return \star}{} \\
             &\quad \letin{tab=\mathtt{get}\,rand}{} \\
             &\quad \letin{b=\mathtt{isdefined}(tab, m)}{} \\
@@ -611,7 +572,7 @@ Once Lemma~\ref{lemma:MacOracle-to-tilde-oracle} has been proved, the remaining 
 \end{theorem}
 
 \begin{proof}
-We begin with the definition of $\widetilde{D}$ given in Equation~\ref{eq:d-tilde}. This term describes a computation in which a key $k$ is generated by $\widetilde{Gen}$, after which the function oracle $\widetilde{M}$ is applied to $k$ to produce an oracle $o$. This oracle is then passed to the term $MacOracle$ to produce a MAC oracle $e$, which is finally given as input to the distinguisher $D$ to obtain a boolean outcome. We first apply Equation~\ref{letAss} to restructure the expression which allows us to isolate the application of $MacOracle$. Next, we replace the term $\widetilde{M}$ with $\widetilde{Oracle}$, since these two terms are $\Theta$-contextually indistinguishable by Lemma~\ref{lemma:MacOracle-to-tilde-oracle}. After this, we apply $\alpha$-equivalence, as recalled in Chapter~\ref{chapter:lambda-calculus}, to rename bound variables and align the resulting term with the expected structure of the distinguisher. We then unfold the definition of $D$ from Figure~\ref{fig:d-term} and finally, we apply Equation~\ref{reduc2} to eliminate redundant bindings, yielding a term that is syntactically equal to $\widetilde{MacForge}$, which concludes the proof.
+We begin with the definition of $\widetilde{D}$ given in Equation~\ref{eq:d-tilde}. It describes a computation in which a key $k$ is generated by $\widetilde{Gen}$, after which the function oracle $\widetilde{M}$ is applied to $k$ to produce an oracle $o$. This oracle is then passed to the term $MacOracle$ to produce a MAC oracle $e$, which is finally given as input to the distinguisher $D$ to obtain a boolean outcome. We first apply Equation~\ref{letAss} to restructure the expression which allows us to isolate the application of $MacOracle$. Next, we replace the term $\widetilde{M}$ with $\widetilde{Oracle}$, since these two terms are $\Theta$-contextually indistinguishable by Lemma~\ref{lemma:MacOracle-to-tilde-oracle}. After this, we apply $\alpha$-equivalence, as recalled in Chapter~\ref{chapter:lambda-calculus}, to rename bound variables and align the resulting term with the expected structure of the distinguisher. We then unfold the definition of $D$ from Figure~\ref{fig:d-term} and finally, we apply Equation~\ref{reduc2} to eliminate redundant bindings, yielding a term that is syntactically equal to $\widetilde{MacForge}$, which concludes the proof.
 
 \small{
 \begin{align*}
@@ -641,11 +602,13 @@ We begin with the definition of $\widetilde{D}$ given in Equation~\ref{eq:d-tild
         &\left(
         \begin{aligned}
             &\return(\lambda o. \\
-            &\letin{\lis{m,t} = Adv\, o}{} \\
-            &\letin{queries = \get Q}{} \\
-            &\letin{b=\mathtt{contains}(queries, m)}{} \\
-            &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
-            &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)}
+            &\quad\letin{q=\mathtt{initQ}}{} \\
+            &\quad\letin{\_ = \mathtt{set}\,Q\,q}{} \\
+            &\quad \letin{\lis{m,t} = Adv\, o}{} \\
+            &\quad \letin{queries = \get Q}{} \\
+            &\quad \letin{b=\mathtt{contains}(queries, m)}{} \\
+            &\quad \mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+            &\quad \mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t))}
         \end{aligned}
         \right) o
     \end{aligned}
@@ -654,11 +617,26 @@ We begin with the definition of $\widetilde{D}$ given in Equation~\ref{eq:d-tild
     \begin{aligned}
         &\letin{k=\widetilde{Gen}\star}{} \\
         &\letin{o=\widetilde{Oracle}\,k} {} \\
+        &\letin{q=\mathtt{initQ}}{} \\
+        &\letin{\_ = \mathtt{set}\,Q\,q}{} \\
         &\letin{\lis{m,t} = Adv\, o}{} \\
         &\letin{queries = \get Q}{} \\
         &\letin{b=\mathtt{contains}(queries, m)}{} \\
         &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
-        &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)})
+        &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t))}
+    \end{aligned}
+    \\[2ex]
+    \quad\overset{\text{~\ref{letCom}}}{\simcontext}\quad&
+    \begin{aligned}
+        &\letin{q=\mathtt{initQ}}{} \\
+        &\letin{\_ = \mathtt{set}\,Q\,q}{} \\
+        &\letin{k=\widetilde{Gen}\star}{} \\
+        &\letin{o=\widetilde{Oracle}\,k} {} \\
+        &\letin{\lis{m,t} = Adv\, o}{} \\
+        &\letin{queries = \get Q}{} \\
+        &\letin{b=\mathtt{contains}(queries, m)}{} \\
+        &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+        &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t))}
     \end{aligned}
     \quad
     \triangleq
@@ -682,9 +660,9 @@ The proof follows a similar approach to the proof of Lemma~\ref{lemma:MacOracle-
     \begin{aligned}
         &\return(\lambda k.\return \bang(\return(\lambda m. \\
         &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
+        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
         &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
-        &\quad\quad\mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+        &\quad\quad\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
         &\quad\mathtt{else}\ \return \star}{} \\
         &\quad \mathit{Mac}^F\lis{k,m} \\
         &)))\,k
@@ -694,9 +672,9 @@ The proof follows a similar approach to the proof of Lemma~\ref{lemma:MacOracle-
     \begin{aligned}
         &\return(\bang(\return(\lambda m. \\
         &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
+        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
         &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
-        &\quad\quad\mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+        &\quad\quad\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
         &\quad\mathtt{else}\ \return \star}{} \\
         &\quad \mathit{Mac}^F\lis{k,m} \\
         &)))
@@ -705,9 +683,9 @@ The proof follows a similar approach to the proof of Lemma~\ref{lemma:MacOracle-
     \begin{aligned}
         &\return(\bang(\return(\lambda m. \\
         &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
+        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
         &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
-        &\quad\quad\mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+        &\quad\quad\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
         &\quad\mathtt{else}\ \return \star}{} \\
         &\quad\quad(\lambda x. \\
         &\quad\quad\quad \letin{\lis{k,m}=x}{} \\
@@ -720,9 +698,9 @@ The proof follows a similar approach to the proof of Lemma~\ref{lemma:MacOracle-
     \begin{aligned}
         &\return(\bang(\return(\lambda m. \\
         &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
+        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
         &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
-        &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
         &\quad \mathtt{else}\ \return \star}{} \\
         &\quad \letin{\lis{k,m}=\lis{k,m}}{} \\
         &\quad \return F\lis{k,m} \\
@@ -732,9 +710,9 @@ The proof follows a similar approach to the proof of Lemma~\ref{lemma:MacOracle-
     \begin{aligned} 
         &\return(\bang(\return(\lambda m. \\
         &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
+        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
         &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
-        &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
         &\quad \mathtt{else}\ \return \star}{} \\
         &\quad \return F\lis{k,m} \\
         &)))
@@ -770,9 +748,9 @@ Now, the goal is to show that the term $\letin{o=M^F\,k}{MacOracle\,o}$ is $\The
         \begin{aligned}
             &\return(\lambda k.\return(\bang(\return(\lambda m.\\
             &\quad \letin{q=\get Q}{} \\
-            &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-            &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
             &\quad \mathtt{else}\ \return \star}{} \\
             &\quad \return F\lis{k,m}
         \end{aligned}
@@ -788,9 +766,9 @@ Now, the goal is to show that the term $\letin{o=M^F\,k}{MacOracle\,o}$ is $\The
         \begin{aligned}
             &\return(\bang(\return(\lambda m.\\
             &\quad \letin{q=\get Q}{} \\
-            &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-            &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
             &\quad \mathtt{else}\ \return \star}{} \\
             &\quad \return F\lis{k,m}
         \end{aligned}
@@ -807,9 +785,9 @@ Now, the goal is to show that the term $\letin{o=M^F\,k}{MacOracle\,o}$ is $\The
         \begin{aligned}
             &\return(\lambda m.\\
             &\quad \letin{q=\get Q}{} \\
-            &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-            &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
             &\quad \mathtt{else}\ \return \star}{} \\
             &\quad \return F\lis{k,m}
         \end{aligned}
@@ -824,9 +802,9 @@ Now, the goal is to show that the term $\letin{o=M^F\,k}{MacOracle\,o}$ is $\The
         \begin{aligned}
             &\return(\lambda m.\\
             &\quad \letin{q=\get Q}{} \\
-            &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-            &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
             &\quad \mathtt{else}\ \return \star}{} \\
             &\quad \return F\lis{k,m}
         \end{aligned}
@@ -838,9 +816,9 @@ Now, the goal is to show that the term $\letin{o=M^F\,k}{MacOracle\,o}$ is $\The
     \begin{aligned}
         &\return(\bang(\return(\lambda m. \\ 
         &\quad\quad \letin{q=\get Q}{} \\
-        &\quad\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-        &\quad\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\ 
-        &\quad\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+        &\quad\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+        &\quad\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+        &\quad\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
         &\quad\quad \mathtt{else}\ \return \star}{} \\
         &\quad\quad \return F\lis{k,m} \\
         &)))
@@ -911,10 +889,9 @@ D^F \simcontext \mathit{MacForge}^F
 }
 \end{proof}
 
-% In order to complete the proof it remains to demonstrate that the experiment $\widetilde{\mathit{MacForge}}$ returns true with negligible probability, hence is contextually indistinguishable from false namely $\widetilde{\mathit{MacForge}}\simcontext \mathtt{false}$. By examining the term $\widetilde{MacForge}$ we notice that demonstrating that it is equal to $\mathtt{false}$ just rely on demonstrating the second branch of the $\mathtt{if}-\mathtt{then}-\mathtt{else}$ block since the first branch it is already $\mathtt{false}$. The idea to prove this is that a verified tag implies prior query to the random function namely in the execution of $\widetilde{MacForge}$ whenever the verification procedure evaluates to true, it must hold that $m \in \mathbb{Q}$. In $\widetilde{Oracle}$ every call on input $m$ records $m$ in $\mathbb{Q}$. The only way the adversary can obtain a tag must be by querying the oracle with $m$, hence causing $m$ to be in $\mathbb{Q}$. When we look at the second branch we notice that for sure $m$ is not in the query ledger because if it would be in it we would not be evaluating the $\mathtt{else}$ branch. If $m$ is not in the query ledger evaluating $\letin{x=\mathtt{der}(o)\,m}$ yields a random value by Lemma ~\ref{lemma:mactilde-eq-random} and Lemma~\ref{lemma:oracle-tilde-eq-suspended-random}. Equation~\ref{randFalse} concludes the proof.
+To complete the overall security proof, it remains to establish the relation $\widetilde{MacForge}\simcontext \false$, which corresponds to the right part of the diagram in Figure~\ref{fig:proofscheme}. 
 
-% We start by formalizing the following lemma.
-To complete the overall security proof, it remains to establish the relation $\widetilde{MacForge}\simcontext \false$, which corresponds to the to-right part of the diagram in Figure~\ref{fig:proofscheme}. To this end, we first prove that $\widetilde{Mac} \simcontext \lambda e.\random$, as stated in Lemma~\ref{lemma:mactilde-eq-random}, and then rewrite the oracle of $\widetilde{MacForge}$ according to Lemma~\ref{lemma:oracle-tilde-eq-suspended-random}. Finally, Theorem~\ref{theorem:tilde-macforge-sim-false} conclude the proof.
+% To this end, we first prove that \[\widetilde{Oracle} \simcontext \return(\lambda k.\return\bang(\return \lambda m.\random)),\] as stated in Lemma~\ref{lemma:oracle-tilde-eq-suspended-random} which enables us to rewrite the oracle of $\widetilde{MacForge}$. Finally, Theorem~\ref{theorem:tilde-macforge-sim-false} conclude the proof.
 
 \begin{lemma}\label{lemma:mactilde-eq-random}
 \begin{align*}
@@ -1014,37 +991,37 @@ Our objective is to prove that $\widetilde{Mac}$, is $\Theta$-contextually indis
     \begin{aligned}
         &\return(\lambda k.\return \bang(\return \lambda m. \\
         &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
+        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
         &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-        &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
         &\quad \mathtt{else}\ \return \star}{} \\
         &\quad \mathit{\widetilde{Mac}}\lis{k,m} \\
         &))
     \end{aligned}
-    \\[2ex]
-    \quad\overset{\text{Lemma ~\ref{lemma:mactilde-eq-random}}}{\simcontext}\quad&
-    \begin{aligned}
-        &\return(\lambda k.\return \bang(\return \lambda m. \\
-        &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-        &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
-        &\quad \mathtt{else}\ \return \star}{} \\
-        &\quad (\lambda e.\random)\lis{k,m} \\
-        &))
-    \end{aligned}
-    \\[2ex]
-    \quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad&
-    \begin{aligned}
-        &\return(\lambda k.\return \bang(\return \lambda m. \\
-        &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-        &\quad\quad \mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
-        &\quad \mathtt{else}\ \return \star}{} \\
-        &\quad \random \\
-        &))
-    \end{aligned}
+    % \\[2ex]
+    % \quad\overset{\text{Lemma ~\ref{lemma:mactilde-eq-random}}}{\simcontext}\quad&
+    % \begin{aligned}
+    %     &\return(\lambda k.\return \bang(\return \lambda m. \\
+    %     &\quad \letin{q=\get Q}{} \\
+    %     &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+    %     &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+    %     &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+    %     &\quad \mathtt{else}\ \return \star}{} \\
+    %     &\quad (\lambda e.\random)\lis{k,m} \\
+    %     &))
+    % \end{aligned}
+    % \\[2ex]
+    % \quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad&
+    % \begin{aligned}
+    %     &\return(\lambda k.\return \bang(\return \lambda m. \\
+    %     &\quad \letin{q=\get Q}{} \\
+    %     &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+    %     &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+    %     &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+    %     &\quad \mathtt{else}\ \return \star}{} \\
+    %     &\quad \random \\
+    %     &))
+    % \end{aligned}
     \\[2ex]
     \quad\overset{\text{~\ref{letAss}}}{\simcontext}\quad&
     \begin{aligned}
@@ -1052,19 +1029,19 @@ Our objective is to prove that $\widetilde{Mac}$, is $\Theta$-contextually indis
         &\quad\mathtt{let}\,\_=\left(
         \begin{aligned}
             &\quad \letin{q=\get Q}{} \\
-            &\quad \letin{t=\mathtt{isdefinedQ}(q,m)}{} \\
-            &\quad \mathtt{if}\,\mathtt{not}(t)\,\mathtt{then}\,\mathtt{set}\,Q\,\mathtt{modifyQ}(q,m) \\
+            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+            &\quad \mathtt{if}\,\mathtt{not}(t)\,\mathtt{then}\,\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
             &\quad \mathtt{else}\,\return\star
         \end{aligned}
         \right) \mathtt{in} \\
-        &\quad \random \\
+        &\quad \mathit{\widetilde{Mac}}\lis{k,m} \\
         &))
     \end{aligned}
-    \\[2ex]
-    \quad\overset{\text{~\ref{safeDisc1}}}{\simcontext}\quad&
-    \begin{aligned}
-        &\return(\lambda k.\return \bang(\return \lambda m.\random))
-    \end{aligned}
+    % \\[2ex]
+    % \quad\overset{\text{~\ref{safeDisc1}}}{\simcontext}\quad&
+    % \begin{aligned}
+    %     &\return(\lambda k.\return \bang(\return \lambda m.\random))
+    % \end{aligned}
 \end{align*}
 }
 \end{proof}
@@ -1076,9 +1053,9 @@ Our objective is to prove that $\widetilde{Mac}$, is $\Theta$-contextually indis
 \end{theorem}
 
 \begin{proof}
-We begin by unfolding $\widetilde{MacForge}$ and subsequently applying Lemma~\ref{lemma:oracle-tilde-eq-suspended-random}. This allows us to replace $\widetilde{Oracle}$ with a suspended computation that always produces randomly sampled outputs, independently of its input. Next, we proceed as follows. First, we apply rule~\ref{reduc2} to reduce the oracle application to the unused key. Next, we apply rule~\ref{reduc4} to substitute the term $o$, which at this point denotes a dummy oracle that always returns random outputs, in the remaining computation. Finally, we apply rule~\ref{reduc3} to derelict the suspended oracle computation in the $\mathtt{else}$ branch, and again use rule~\ref{reduc2} to reduce its argument. The next step is to unfold $\widetilde{Gen}$ and to apply rule~\ref{reduc2} in order to reduce its abstraction. 
+% We begin by unfolding $\widetilde{MacForge}$ and subsequently applying Lemma~\ref{lemma:oracle-tilde-eq-suspended-random}. This allows us to replace $\widetilde{Oracle}$ with a suspended computation that always produces randomly sampled outputs, independently of its input. Next, we proceed as follows. First, we apply rule~\ref{reduc2} to reduce the oracle application to the unused key. Next, we apply rule~\ref{reduc4} to substitute the term $o$, which at this point denotes a dummy oracle that always returns random outputs, in the remaining computation. Finally, we apply rule~\ref{reduc3} to derelict the suspended oracle computation in the $\mathtt{else}$ branch, and again use rule~\ref{reduc2} to reduce its argument. The next step is to unfold $\widetilde{Gen}$ and to apply rule~\ref{reduc2} in order to reduce its abstraction. 
 
-The final step consists of invoking Equation~\ref{randEq}, introduced in Section~\ref{sec:useful-functional-symbols-and-equations}. This application is justified by the contextual equivalence relation: the tag output by the adversary and the random value \(x\), obtained as the result of reducing the oracle’s computation (which has been established to be a source of true randomness up to contextual equivalence), are contextually indistinguishable from uniformly distributed bitstrings. Hence, the probability that \(x = t\), under the assumption that \(x\) is sampled uniformly at random from the set of bitstrings of length \(i\), is exactly \(2^{-i}\), where \(x\) and \(t\) are bitstrings whose lengths are bounded by the polynomial \(i\). Since \(2^{-i}\) is a negligible function of \(i\), the term \(\mathtt{eq}(x,t)\) is contextually indistinguishable from \(\false\).
+% The final step consists of invoking Equation~\ref{randEq}, introduced in Section~\ref{sec:useful-functional-symbols-and-equations}. This application is justified by the contextual equivalence relation: the tag output by the adversary and the random value \(x\), obtained as the result of reducing the oracle’s computation (which has been established to be a source of true randomness up to contextual equivalence), are contextually indistinguishable from uniformly distributed bitstrings. Hence, the probability that \(x = t\), under the assumption that \(x\) is sampled uniformly at random from the set of bitstrings of length \(i\), is exactly \(2^{-i}\), where \(x\) and \(t\) are bitstrings whose lengths are bounded by the polynomial \(i\). Since \(2^{-i}\) is a negligible function of \(i\), the term \(\mathtt{eq}(x,t)\) is contextually indistinguishable from \(\false\).
 
 \small{
 \begin{align*}
@@ -1207,8 +1184,8 @@ The final step consists of invoking Equation~\ref{randEq}, introduced in Section
     % \end{aligned}
 \end{align*}
 }
-At this point of the proof, we introduce an assertion-carrying relation in the style of Hoare logic as introduced in Section~\ref{sec:extensions-lambda-bll}. Observe that the term $\widetilde{MacForge}$ evaluates to $\false$ whenever the conditional returns $\false$ in the else branch, since the then branch already returns $\false$. Hence, it suffices to show that the else branch is contextually indistinguishable from $\false$. Inside the else branch we have $b = \mathtt{contains}(queries, m)$ and we are in the case where $\lnot b$ holds.  In order to conclude the proof, we would like to transform the term 
-$\letin{x=\random}{\mathtt{eq}(x,t)}$ into $\false$. This transformation relies on the following facts: $m \notin Q$, which holds in the else branch; the outputs of the oracle are exactly the entries stored in $Q$; the ledgers $Q$ and $rand$ are consistent, namely each oracle output corresponds to an entry in $rand$. This is achieved with the function $\mathtt{consistent_p}$ defined in Table~\ref{table:new-function-symbols}.
-To formalize this reasoning, we introduce a refined contextual indistinguishability relation $\sim_{\Xi \subseteq \Upsilon, \Phi, \Psi}$, where $\Phi$ and $\Psi$ are a set of assertions describing invariants that are preserved before and after the execution.
+% At this point of the proof, we introduce an assertion-carrying relation in the style of Hoare logic as introduced in Section~\ref{sec:extensions-lambda-bll}. Observe that the term $\widetilde{MacForge}$ evaluates to $\false$ whenever the conditional returns $\false$ in the else branch, since the then branch already returns $\false$. Hence, it suffices to show that the else branch is contextually indistinguishable from $\false$. Inside the else branch we have $b = \mathtt{contains}(queries, m)$ and we are in the case where $\lnot b$ holds.  In order to conclude the proof, we would like to transform the term 
+% $\letin{x=\random}{\mathtt{eq}(x,t)}$ into $\false$. This transformation relies on the following facts: $m \notin Q$, which holds in the else branch; the outputs of the oracle are exactly the entries stored in $Q$; the ledgers $Q$ and $rand$ are consistent, namely each oracle output corresponds to an entry in $rand$. This is achieved with the function $\mathtt{consistent_p}$ defined in Table~\ref{table:new-function-symbols}.
+% To formalize this reasoning, we introduce a refined contextual indistinguishability relation $\sim_{\Xi \subseteq \Upsilon, \Phi, \Psi}$, where $\Phi$ and $\Psi$ are a set of assertions describing invariants that are preserved before and after the execution.
 
 \end{proof}
