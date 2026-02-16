@@ -153,11 +153,11 @@ which outputs $0$ if the adversary correctly guesses the secret key $k$ and $1$ 
 \begin{figure}[htpb]
 	\begin{center}
 	\begin{mathpar}\mprset{sep=1em}
-		\inferrule*[right=REF]{\\}{u \sim u}
+		\inferrule*[right=ref]{\\}{u \sim u}
 		\and 
-		\inferrule*[right=REW]{(u = v)\sim \mathtt{true} \quad C[v]\sim w}{C[u] \sim w}
+		\inferrule*[right=rew]{(u = v)\sim \mathtt{true} \quad C[v]\sim w}{C[u] \sim w}
 		\and
-        \inferrule*[right=FRESH]{\\}{(t \neq \mathtt{n})\sim \mathtt{true}}
+        \inferrule*[right=fresh]{\\}{(t \neq \mathtt{n})\sim \mathtt{true}}
 	\end{mathpar}
     \end{center}
     \caption{Inference rules over $\sim$ in Squirrel.}

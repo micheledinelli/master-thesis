@@ -104,9 +104,9 @@ The notion of substitution in $\lamBLL$ is defined with respect to the distingui
 
 \newcommand{\subst}[1]{#1}
 \begin{figure}[ht]
-    \vspace*{-6mm}
-	\begin{center} \scriptsize
-	\begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
+\vspace*{-6mm}
+\begin{center} \scriptsize
+\begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
 		\inferrule* [right=var]{\\}{ \Gamma, x : P \vdash x: P}
 		\and 
 		\inferrule* [right=true]{\\}{\Gamma \vdash \true : \BB}	
@@ -129,7 +129,8 @@ The notion of substitution in $\lamBLL$ is defined with respect to the distingui
 		\and
 		\inferrule* [right=app]{\Gamma ; \Theta \vdash M : P\arrowRef{\Theta} A
 		\\ \Delta \vdash Z : P}{\Gamma\boxplus \Delta ; \Theta \vdash MZ : A}	
-		\and	\inferrule* [right=lam]{\Gamma, x: P ; \Theta \vdash M : A }{\Gamma \vdash \lambda x . M : P\arrowRef{\Theta} A}
+		\and	
+        \inferrule* [right=lam]{\Gamma, x: P ; \Theta \vdash M : A }{\Gamma \vdash \lambda x . M : P\arrowRef{\Theta} A}
 		\and
 		\inferrule* [right=eta]{\Gamma  \vdash V: A}{\Gamma ; \Theta \vdash \return V: A}	
 		\and
@@ -141,8 +142,8 @@ The notion of substitution in $\lamBLL$ is defined with respect to the distingui
 		\and 
 		\inferrule* [right=get]{\\}{ \Gamma ; \Theta, r: G \vdash \get r : G}
 		\and 
-			\inferrule* [right=case]{\Gamma ; \Theta \vdash Z: \BB \\ \Delta ; \Theta \vdash  M : A \\ \Delta ; \Theta \vdash  N : A}{\Gamma \boxplus \Delta ; \Theta \vdash  \ifthen{Z}{M}{N} : A}	
-	\end{mathpar}
+        \inferrule* [right=case]{\Gamma ; \Theta \vdash Z: \BB \\ \Delta ; \Theta \vdash  M : A \\ \Delta ; \Theta \vdash  N : A}{\Gamma \boxplus \Delta ; \Theta \vdash  \ifthen{Z}{M}{N} : A}	
+\end{mathpar}
 \end{center}
 \vspace*{-6mm}
 \caption{Typing rules of $\lamBLL$}

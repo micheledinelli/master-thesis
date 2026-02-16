@@ -50,25 +50,25 @@ Let's consider the expression $\lambda x.x\,y(\lambda y.y\,z)$. Applying the def
 
 Whenever a lambda-term $M$ has $FV(M)=\emptyset$ then it is called combinator (or closed lambda-term).
 
-The computation in lambda-calculus is performed only through function application. Applying functions to each other means rewriting the abstractions by substituting the bounded variables in the body. But substitution is not always safe. Let $M[x:=N]$ denote the term obtained by substituting all free occurrences of the variable $x$ in $M$ with the term $N$. The substitution operation is defined inductively as shown in Figure \ref{fig:untyped-lambda-calculus-substitution}
+The computation in lambda-calculus is performed only through function application. Applying functions to each other means rewriting the abstractions by substituting the bounded variables in the body. But substitution is not always safe. Let $M[N/x]$ denote the term obtained by substituting all free occurrences of the variable $x$ in $M$ with the term $N$. The substitution operation is defined inductively as shown in Figure \ref{fig:untyped-lambda-calculus-substitution}
 \begin{figure}[htpb]
     \begin{align*}
-        x[x:=N]&=N \\
-        y[x:=N]&=y \\
-        (ML)[x:=N]&=(M[x:=N])(L[x:=N]) \\
-        (\lambda x.M)[x:=N]&=\lambda x.M \\
-        (\lambda y.M)[x:=N]&=\lambda y.(M[x:=N]) \ \text{if} \ x \neq y
+        x[N/x]&=N \\
+        y[N/x]&=y \\
+        (ML)[N/x]&=(M[N/x])(L[N/x]) \\
+        (\lambda x.M)[N/x]&=\lambda x.M \\
+        (\lambda y.M)[N/x]&=\lambda y.(M[N/x]) \ \text{if} \ x \neq y
     \end{align*}
     \caption{Definition of substitution in the untyped lambda-calculus.}
     \label{fig:untyped-lambda-calculus-substitution}
 \end{figure}
 The last case could be extended to prevent variable capture: the bound variable $y$ may be first renamed to a \textit{fresh} variable $z$ before performing the substitution. The freshness condition ensures that $z$ does not occur free in either $M$ or $N$. Given a term $M$, the set of its free variables $FV(M)$ is finite, whereas the set of terms that are alpha-equivalent to $M$, denoted by $\stackrel{\alpha}{\equiv}$, is infinite (by \ref{eq:lc-infinite-variables}). Consequently, there always exists a term $t$ such that $M \stackrel{\alpha}{\equiv} t$, allowing bound variables to be renamed as needed to avoid capture.
 
-In the lambda calculus, each step of a computation consists of rewriting an application whose left-hand side is an abstraction, by substituting the free occurrences of the bound variable with the argument. For example the expression $(\lambda x.\lambda y.x\,y)(\lambda z.z)(\lambda z.z)$ evaluates to $(\lambda z.z)$. However, there are multiple ways to reduce the original term, depending on which reducible expression is chosen at each step. A term of the form $(\lambda x.M)$ beta-reduces to a term $u$, written by $(\lambda x.M) \to_\beta u$ if $u$ is the result of substituting $N$ for the free occurrences of $x$ in $M$, that is $u=M[x:=N]$. For example $(\lambda y.x\,y)x \to_\beta \lambda x.x\,x$. An expression of the form $(\lambda x.M)N$ is called a redex (short for reducible-expression) \cite{the-calculi-of-lambda-conversion}. The binary relation $\to_\beta$ is defined using the following inference rules 
+In the lambda calculus, each step of a computation consists of rewriting an application whose left-hand side is an abstraction, by substituting the free occurrences of the bound variable with the argument. For example the expression $(\lambda x.\lambda y.x\,y)(\lambda z.z)(\lambda z.z)$ evaluates to $(\lambda z.z)$. However, there are multiple ways to reduce the original term, depending on which reducible expression is chosen at each step. A term of the form $(\lambda x.M)$ beta-reduces to a term $u$, written by $(\lambda x.M) \to_\beta u$ if $u$ is the result of substituting $N$ for the free occurrences of $x$ in $M$, that is $u=M[N/x]$. For example $(\lambda y.x\,y)x \to_\beta \lambda x.x\,x$. An expression of the form $(\lambda x.M)N$ is called a redex (short for reducible-expression) \cite{the-calculi-of-lambda-conversion}. The binary relation $\to_\beta$ is defined using the following inference rules 
 \begin{figure}[htpb]
 	\begin{center}
 	\begin{mathpar}\mprset{sep=1em}
-		\inferrule*[]{\\}{(\lambda x.M)N \to_\beta M[x:=N] }
+		\inferrule*[]{\\}{(\lambda x.M)N \to_\beta M[N/x] }
 		\and 
 		\inferrule*[]{M \to_\beta M'}{MN \to_\beta M'N }
 		\\ 

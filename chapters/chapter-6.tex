@@ -881,6 +881,60 @@ To complete the overall security proof, it remains to establish the relation $\w
 \end{theorem}
 
 \begin{proof}
+
+\[\mathcal{I}(\Theta) \equiv \mathtt{coherent}(Q,rand)\]
+
+\begin{center} \scriptsize 
+\begin{mathpar}\mprset{sep=1em, vskip =-0.1ex} 
+\inferrule*[right=h-let] {
+    \inferrule*[right=h-eta]
+    { \Gamma \vdash \mathtt{initQ} : \SS }
+    { \Gamma;\Theta \vdash \{ \mathcal{I} \}\, \mathtt{initQ} \,\{\lambda v.\mathcal{I}(v)\}:\SS }
+    \and
+    \inferrule*[right=h-eta]
+    {\Delta \vdash \false : \BB }
+    { \Delta, q:\SS; \Theta \vdash \forall v.\{\mathcal{I}(v)\}\, \return \false \,\{\lambda b. \mathcal{I}(b) \land b = \false\}: \BB }
+} 
+{
+    \Gamma \boxplus \Delta; \Theta \vdash \{ \mathcal{I} \} \, \letin{q = \mathtt{initQ}}{\return \false} \, \{ \lambda b. \mathcal{I}(b) \land b = \false\} : \BB
+} 
+\end{mathpar} 
+\end{center}
+
+\begin{center} \scriptsize 
+\begin{mathpar}\mprset{sep=1em, vskip =-0.1ex} 
+\inferrule*[right=h-let] {
+    \inferrule*[right=h-set]
+    { \Gamma \vdash q : \SS }
+    { \Gamma; \Theta, Q:\SS \vdash \{ \mathcal{I}[Q/q] \} \, \mathtt{set}\,Q\,q \, \{ \lambda \_. \mathcal{I} \} : \UU }
+    \and
+    \inferrule*[right=h-eta]
+    { \Delta \vdash \false : \BB }
+    { \Delta, \_:\UU; \Theta \vdash \forall \_. \{ \mathcal{I} \} \, \return \false \, \{ \lambda b. \mathcal{I}(b) \land b = \false \} : \BB }
+} 
+{
+    \Gamma \boxplus \Delta; \Theta \vdash \{ \mathcal{I}[Q/q] \} \, \letin{\_ = \mathtt{set}\,Q\,q}{\return \false} \, \{ \lambda b. \mathcal{I}(b) \land b = \false \} : \BB
+} 
+\end{mathpar} 
+\end{center}
+
+\begin{center} \scriptsize 
+\begin{mathpar}\mprset{sep=1em, vskip =-0.1ex} 
+\inferrule*[right=h-let] {
+    \inferrule*[right=h-app]
+    { \Gamma; \Theta \vdash \widetilde{Gen} : \UU \xrightarrow[\mathcal{I}, \mathcal{I}]{\Theta} \SS \\ \Delta \vdash \star : \UU }
+    { \Gamma \boxplus \Delta; \Theta \vdash \{ \mathcal{I} \} \, \widetilde{Gen} \star \, \{ \lambda v. \mathcal{I}(v) \} : \SS }
+    \and
+    \inferrule*[right=h-eta]
+    { \Delta \vdash \false : \BB }
+    { \Delta, k:\mathcal{K}; \Theta \vdash \forall v. \{ \mathcal{I} \} \, \return \false \, \{ \lambda b. \mathcal{I}(b) \land b = \false \} : \BB }
+} 
+{
+    \Gamma \boxplus \Delta; \Theta \vdash \{ \mathcal{I} \} \, \letin{k = \widetilde{Gen} \star}{\return \false} \, \{ \lambda b. \mathcal{I} \land b = \false \} : \BB
+} 
+\end{mathpar} 
+\end{center}
+
 \small{
 \begin{align*}
     \widetilde{MacForge} \quad\triangleq\quad&
@@ -1011,8 +1065,41 @@ To complete the overall security proof, it remains to establish the relation $\w
 \end{align*}
 }
 
-% \begin{mathpar}
-% \inferrule*{\\}{\{\top\}\; \mathtt{let}\,q=\mathtt{initQ} \;\{\mathtt{coherent}(Q, rand)\}}
-% \end{mathpar}
+We introduce a Hoare logic \cite{axiomatic-basis-for-computer-programming} based on the Hoare triples $\{P\}\,e\,\{\lambda v.Q(v)\}$ for terms from $\lamBLL$. The interpretation is that whenever if $P$ holds initially and $e$ terminates in a value $v$, then $Q(v)$ holds. The proposition $P$ is called the pre-condition and $Q$ is the post-condition. Note that $Q$ is a function of a value, which is the value that $e$ reduces to. An expression $\{P\}\,e\,\{\lambda v.Q(v)\}$ is called a partial correctness specification. It is partial because for $\{P\}\,e\,\{\lambda v.Q(v)\}$ to be true, it is not necessary for the execution of $e$ to terminate when stated in a state satisfying $P$ (if it loops forever and doesn't reduce to a value, the Hoare triple doesn't say anything). Propositions are defined by the following grammar
+\begin{align*}
+P ::= \phi \mid \exists x.P(x) \mid \forall x.Q(x) \mid P\land Q \mid P \lor Q \tag{Propositions}
+\end{align*}
+where $\phi$ is an arbitrary meta level proposition e.g., $\true, \false, n < 0$.
+
+\begin{figure}[ht]
+% \vspace*{-6mm}
+\begin{center} \footnotesize
+\begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
+    \inferrule* [right=h-eta]{\Gamma \vdash V: A}{\Gamma ; \Theta \vdash \{P(V)\}\,\return V \,\{\lambda v.P(v)\}: A}
+    \and
+    \inferrule* [right=h-bang]{ \Gamma ; \Theta \vdash \{P\} M \{\lambda v. Q\} }{ p \ast \Gamma \vdash \{P\}\, \bang M: \bang_p^{\Theta, Q} A }
+    \and
+    \inferrule* [right=h-lam]{\Gamma, x: A; \Theta \vdash \{P\}\,M\,\{\lambda v.Q(v)\}: B}{\Gamma \vdash \lambda x . M : A\xrightarrow[P, Q]{\Theta} B}
+    \and
+    \inferrule* [right=h-app]{\Gamma ; \Theta \vdash M : A\xrightarrow[P,Q]{\Theta} B
+    \\ \Delta \vdash Z : A}{\Gamma\boxplus \Delta ; \Theta \vdash \{P\}\, MZ \,\{\lambda v.Q(v)\} : B}
+    \and
+    \inferrule* [right=h-get]{\\}{\Gamma ; \Theta, r: G \vdash \{P(r)\}\,\get r \,\{\lambda x.P(x)\}: G}
+    \and
+    \inferrule* [right=h-set]{\Gamma \vdash Z: G}{ \Gamma;  \Theta, r: G  \vdash \{P[r/Z]\}\, \setr{r}{Z} \,\{\lambda\_.P\}: \UU }
+    \and
+    \inferrule* [right=h-let]{\Gamma;\Theta \vdash \{P\}\, M \,\{\lambda v.Q(v)\}:A \quad \Delta, x:A; \Theta \vdash \forall v.\{Q(v)\}\, N[v/x] \,\{S\}:C}{\Gamma \boxplus \Delta;\Theta \vdash \{P\}\, \letin{x=M}{N} \,\{S\}: C}
+    \and
+    \inferrule* [right=h-case]{\Gamma ; \Theta \vdash \{P\}\, Z \,\{\lambda b.(b=\true \land Q_t) \lor (b=\false \land Q_f)\}: \BB \quad \Delta ; \Theta \vdash \{Q_t\}\, M \,\{R\} : A \\ \Delta ; \Theta \vdash  \{Q_f\}\, N \,\{R\} : A}{\Gamma \boxplus \Delta ; \Theta \vdash \{P\}\, \ifthen{Z}{M}{N} \,\{R\} : A}
+    \and
+    \inferrule* [right=h-cons]{P' \vdash P \quad (\forall v.Q(v) \vdash Q'(v)) \quad \Gamma ; \Theta \vdash \{P\}\, M \,\{\lambda v.Q(v)\}: A }{\Gamma ; \Theta \vdash \{P'\}\, M \,\{\lambda v.Q'(v)\} : A}
+\end{mathpar}
+\end{center}
+% \vspace*{-6mm}
+\caption{Extended typing rules of $\lamBLL$ with Hoare Logic}
+\label{fig:hl-typing-rules}
+\end{figure}
+
+% Notice that the postcondition of M is $\{\lambda v.Q[v/x]\}$, because every expression $M$ is a computation that results in a value. Since $M$ returns a value $v$ which is then bound to $x$ in $N$, the invariant $Q$ for the next term must account for that value.
 
 \end{proof}
