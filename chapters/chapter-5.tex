@@ -194,14 +194,14 @@ where $\dlambda$ denotes currying and $\eval$ is the evaluation map induced by t
 
 In $\lamBLL$, application is written as $MZ$, and the constructor $\return$ is used to lift values into computations. The syntactic sugar
 \begin{align}
-    VZ \triangleq (\return V)\,Z\label{eq:sugar-return},
+VZ \triangleq (\return V)\,Z\label{eq:sugar-return}
 \end{align}
 allows to simplify expressions by implicitly promoting values to computations, thereby reducing the need for nested $\return$ construct.
 
 \section{Useful Functional Symbols and Equations}\label{sec:useful-functional-symbols-and-equations}
-\begin{align}
-\letin{x=\random}{\mathtt{eq}(x,t)}&\sim_{\Theta\subseteq\Xi} \false \tag{$\mathtt{randEq}$}\label{randEq}
-\end{align}
+In this section, we introduce a collection of function symbols for $\lamBLL$. These symbols capture fundamental computational patterns such as randomness, bitstring manipulation, and memory operations. They extend the set of function symbols presented in \cite{lago2024computationalindistinguishabilitylogicalrelations}, which are recalled in Appendix~\ref{app:1}, Table~\ref{table:function-symbols}.
+
+Table~\ref{table:new-function-symbols} presents the new function symbols operating over boolean values and bitstrings. For clarity, the symbols in Table~\ref{table:new-function-symbols} are organized into two categories according to their intended purpose.
 
 \setlength{\tabcolsep}{3pt}
 \renewcommand{\arraystretch}{1.0}
@@ -215,17 +215,40 @@ $\mathtt{eq}$ & $\SS[i]\times\SS[i]\to\BB$ & Function that takes as input two st
 
 \multicolumn{3}{|c|}{\textbf{Function Symbols for Ledger Manipulation}} \\ \hline
 
-$\mathtt{initQ}_p$ & $\SS[(q\times(i+1))]$ & Function that initializes a  queryledger by generating a string of length $q\times(i+1)$ filled entirely with zeros. \\ \hline
-$\mathtt{modifyQ}_q$ & $\SS[q\times(i+1)]$ & Function that, given a query ledger and two input strings of length $i$, identifies the first inactive row in the ledger, inserts into that row the concatenation of the two strings followed by a bit set to 1 (indicating activation), and returns the resulting updated ledger. \\ \hline
+$\mathtt{initQ}_q$ & $\SS[(q\times(i+1))]$ & Function that initializes a  queryledger by generating a string of length $q\times(i+1)$ filled entirely with zeros. \\ \hline
 
 $\mathtt{contains}_q$ & $\SS[q \times (i+1)] \times \SS[i] \to \BB$ & Function that, given a query ledger and an input string of length $i$, searches for a row in the ledger whose first $i$ bits are equal to the input string and whose final bit is set to 1 and returns a boolean indicating whether the substring was found or not. \\ \hline
 
-$\mathtt{coherent}_{q,p}$ & $\SS[q \times (i+1)] \times \SS[p \times (2i + 1)] \to \BB$ & Function that, given a query ledger and a ledger representing a random function, returns a boolean indicating whether for every message $m$ in the query ledger there exists a corresponding entry in the random function ledger. \\ \hline  
+$\mathtt{modify}_q$ &
+$\begin{aligned}[t]
+    &\SS[q\times(i+1)] \times \SS[i] \times \SS[i] \\ 
+    &\to \SS[q\times(i+1)]
+\end{aligned}$ & 
+Function that, given a query ledger and two input strings of length $i$, identifies the first inactive row in the ledger, inserts into that row the concatenation of the two strings followed by a bit set to 1 (indicating activation), and returns the resulting updated ledger. \\ \hline
 
-\caption{Table of function symbols and their interpretations. We consider ledgers modelled by strings of length $(q\times(i+1))$ and $(p\times(2i+1))$, where $p$ is a polynomial in $\mathbb{N}_{\geq1}[i]$. This string represents a table with $q$ (resp., $p$) rows, where each row consists of two strings of length $i$ (resp., $2i + 1$) followed by a single bit, which is set to 1 if the corresponding row is active, and 0 otherwise.}
+$\mathtt{coherent}_{q,p}$ &
+$\begin{aligned}[t]
+    &\SS[q \times (i+1)] \times \SS[p \times (2i + 1)] \\
+    &\to \BB
+\end{aligned}$ &  
+Function that, given a query ledger and a ledger representing a random function, returns a boolean indicating whether for every string $s$ in the first ledger there exists a corresponding entry in the second ledger. \\ \hline  
+
+\caption{Table of function symbols and their interpretations. We consider ledgers modelled by strings of length $(q\times(i+1))$ and $(p\times(2i+1))$, where $p$ and $q$ are polynomials in $\mathbb{N}_{\geq1}[i]$. This string represents a table with $q$ (resp., $p$) rows, where each row consists of two strings of length $i$ (resp., $2i$) followed by a single bit, which is set to 1 if the corresponding row is active, and 0 otherwise.}
 \label{table:new-function-symbols}
 \end{xltabular}
 \end{footnotesize}
+
+The first group of function symbols concerns operations on bitstrings. In particular, this group contains only the function symbol $\mathtt{eq}$, which denotes a function that, given two bitstrings of length $i$, returns a boolean value indicating whether they are equal.
+
+The second group consists of function symbols used to interact with a ledger, a structure that behaves as a finite table. The ledger is represented as a flat binary string segmented into rows of length $i+1$. Each row is composed of a bitstring of length $i$ together with an additional bit that indicates whether the row is active (set to $1$) or inactive (set to $0$). The total size of the ledger is chosen to accommodate $q$ such rows, where $q$ is a polynomial in $\mathbb{N}_{\geq 1}[i]$. The number of rows must be polynomially bounded otherwise the resulting string could exceed the size constraints imposed by $\lamBLL$.
+
+The function symbol $\mathtt{initQ}$ constructs an empty ledger by returning a bitstring initialized entirely with zeros, thus representing a table with no active entries. The symbol $\mathtt{contains}$ checks whether a given input string is already present in the ledger. It scans the ledger to determine whether there exists a row whose first $i$ bits match the input string and whose final bit is set to $1$. If such a row is found, the input string is considered to be defined in the ledger and the function returns $\true$. The function symbol $\mathtt{modifyQ}$ enables the insertion of a new string into the ledger: it searches for the first inactive row, writes the string into the first $i$ positions, and sets the final bit to $1$, thereby marking the row as active. Finally the function symbol $\mathtt{coherent}$ accepts two ledgers of size $q\times(i+1)$ and $p\times(2i+1)$ for $q,p$ polynomials and returns a boolean indicating wether for every string in the first ledger, there exists a corresponding string in the second ledger.
+
+These function symbols extend the set introduced in \cite{lago2024computationalindistinguishabilitylogicalrelations}, which also defines a collection of equations involving the original function symbols. For completeness, these equations are recalled in Appendix~\ref{app:1}, Figure~\ref{fig:equations}. They serve as semantic constraints, or rewriting rules, specifying how the function symbols behave under evaluation.
+
+\begin{align}
+\letin{x=\random}{\mathtt{eq}(x,t)}&\sim_{\Theta\subseteq\Xi} \false \tag{$\mathtt{randEq}$}\label{randEq}
+\end{align}
 
 % A computation in $\lamBLL$ can be probabilistic, and read or modify the global reference context. In order to model probabilistic effects with references $\lamBLL$ uses the distribution monad and the state monad. The idea is that the result of a computation is not just a value, it depends on the initial store, it produces a distribution of outcomes, and each outcome comes with an updated store. Computations are interpreted as functions that accepts the initial store and produce outcoomes as probability distribution over (value, store) pairs.
 

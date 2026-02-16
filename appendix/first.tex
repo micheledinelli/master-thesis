@@ -1,7 +1,7 @@
 \renewcommand{\chaptermark}[1]{\markright{\thechapter \ #1}{}}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
 \appendix
-\chapter{Useful Function Symbols and Equations in lambda-BLL}\label{app:1}
+\chapter{Useful Functional Symbols and Equations in lambda-BLL}\label{app:1}
 
 Table~\ref{table:function-symbols} introduces a collection of function symbols operating over boolean values and bitstrings, specifically tailored to facilitate random generation, basic data manipulation, and operations on a specialized ledger structure. While individually simple, these symbols collectively provide a robust framework for modeling both pure computation and stateful interaction within $\lamBLL$. The symbols in Table~\ref{table:function-symbols} are divided in three groups based on their functional roles. It's important to note that $\lamBLL$, each function symbol in $\mathcal{F}$ denotes a mapping into a probability distribution over values of its respective output type, as established in Section 1 of \cite{lago2024computationalindistinguishabilitylogicalrelations}. Consequently, when a function symbol is interpreted as returning a specific value $v$, it corresponds to the Dirac distribution centered at $v$ (denoted $\delta_v$), which assigns probability $1$ to $v$ and $0$ to all other outcomes.
 
@@ -29,8 +29,14 @@ Table~\ref{table:function-symbols} introduces a collection of function symbols o
     $\mathtt{isdefined_p}$ & $\SS[p\times(2i+ 1)]\times\SS[i]\to\BB$ & Function that takes as input a ledger and a string of length $i$, and returns true if the row, whose first $i$ bits match the input string, is active and false otherwise. \\ \hline
     
     $\mathtt{getValue_p}$ & $\SS[p\times(2i+ 1)]\times\SS[i]\to\SS[i]$ & Function that, given a ledger and an input string of length $i$, searches for a row in the ledger whose first $i$ bits are equal to the input string and whose final bit is set to 1 (indicating that the row is active), and returns the substring spanning from position $i+1$ to position $2i$ within the selected row. If no matching active row is found, it returns a dummy value. \\ \hline
+
+    $\mathtt{modify}_p$ &
+    $\begin{aligned}[t]
+        &\SS[p\times(2i+1)] \times \SS[i] \times \SS[i] \\ 
+        &\to \SS[p\times(2i+1)]
+    \end{aligned}$ & 
+    Function that, given a ledger and two input strings of length $i$, identifies the first inactive row in the ledger, inserts into that row the concatenation of the two strings followed by a bit set to 1 (indicating activation), and returns the resulting updated ledger. \\ \hline
     
-    $\mathtt{modify}_p$ & $\SS[p\times(2i+1)]$ & Function that, given a ledger and two input strings of length $i$, identifies the first inactive row in the ledger, inserts into that row the concatenation of the two strings followed by a bit set to 1 (indicating activation), and returns the resulting updated ledger. \\ \hline
     \noalign{\smallskip}
     \noalign{\smallskip}
     \noalign{\smallskip}
@@ -43,6 +49,7 @@ Table~\ref{table:function-symbols} introduces a collection of function symbols o
 
 The equations presented in Figure~\ref{fig:equations} establish a set of equivalences between $\lamBLL$ terms, which are sound with respect to the notion of $\Theta$-contextual indistinguishability introduced in \cite{lago2024computationalindistinguishabilitylogicalrelations} and denoted here by $\sim_{\Theta\subseteq\Xi}$. These equations characterize behavioral equivalence for terms that remain indistinguishable to any probabilistic polynomial-time context, restricted by a specific set of observable references.
 
+\small{
 \begin{figure}[htpb]
     \centering
     \footnotesize
@@ -73,3 +80,4 @@ The equations presented in Figure~\ref{fig:equations} establish a set of equival
     \caption{Equations in $\lamBLL$ as presented in \cite{lago2024computationalindistinguishabilitylogicalrelations}. Let $\mathcal{R}(M)$ be the set of references accessed by the term $M$. The equations in this figure hold for all reference contexts $\Theta, \Xi$ such that $\Theta \subseteq \Xi$, except where stated otherwise.}
     \label{fig:equations}
 \end{figure}
+}
