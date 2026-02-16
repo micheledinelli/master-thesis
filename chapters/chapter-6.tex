@@ -39,13 +39,13 @@ once instantiated with a key, provides a function mapping messages of length $i$
 \[
 \mathbb{Q} \gets \{\, m \mid A \text{ queries } Mac_k(m) \,\}.
 \]
-To model this behavior in $\lamBLL$, we rely on the notion of a \emph{ledger}, which allows mutable storage with a statically bounded size. The reference $Q$ has type $Q : \SS[(q \times (i+1))]$ and can be viewed as a table with $q$ rows, where each row consists of a message of length $i$ together with a final bit indicating whether the row is active. The size of the ledger reflects the fact that the oracle can be queried at most $q$ times. At each oracle invocation on a message $m$, the oracle updates the ledger stored in $Q$ as follows: it scans the ledger for an active row containing $m$; if none exists, it writes $m$ into the first inactive row and marks that row as active. In this way, the reference $Q$ always encodes exactly the set $\mathbb{Q}$ of messages previously queried by the adversary. To inspect the adversary's query history, we introduced in Section~\ref{sec:useful-functional-symbols-and-equations} some useful functions symbols. In particular in Table~\ref{table:new-function-symbols} we defined the function $\mathtt{contains}$, whose purpose is to determine whether a given message occurs in the encoding of the set $\mathbb{Q}$ stored in the reference context. More precisely, $\mathtt{contains}$ checks whether a bitstring of type $\SS[i]$ appears in a \textit{query ledger} of type $\SS[(q \times (i+1))]$. It takes as input the stored query history together with a message and returns a boolean value.
+To model this behavior in $\lamBLL$, we rely on the notion of a \emph{ledger}, which allows mutable storage with a statically bounded size. The reference $Q$ has type $Q : \SS[q \times (i+1)]$ and can be viewed as a table with $q$ rows, where each row consists of a message of length $i$ together with a final bit indicating whether the row is active. The size of the ledger reflects the fact that the oracle can be queried at most $q$ times. At each oracle invocation on a message $m$, the oracle updates the ledger stored in $Q$ as follows: it scans the ledger for an active row containing $m$; if none exists, it writes $m$ into the first inactive row and marks that row as active. In this way, the reference $Q$ always encodes exactly the set $\mathbb{Q}$ of messages previously queried by the adversary. To inspect the adversary's query history, we introduced in Section~\ref{sec:useful-functional-symbols-and-equations} some useful functions symbols. In particular in Table~\ref{table:new-function-symbols} we defined the function $\mathtt{contains}$, whose purpose is to determine whether a given message occurs in the encoding of the set $\mathbb{Q}$ stored in the reference context. More precisely, $\mathtt{contains}$ checks whether a bitstring of type $\SS[i]$ appears in a \textit{query ledger} of type $\SS[q\times(i+1)]$. It takes as input the stored query history together with a message and returns a boolean value.
 
 The adversary $Adv$ takes as input the closure obtained by currying and encapsulating the key within the $Oracle$ term. Based on its interaction with the oracle, it produces a candidate forgery $(m,t)$ of type $(\SS[i] \otimes \SS[i])$. 
 
 The verification function $\vrfy$ is not introduced since the validity of a proposed tag can be checked just by recomputing the MAC on the message and comparing it with the supplied tag.
 
-It is worth noting that the type derivations of the terms introduced so far are parameterized by a reference context $\Theta$, which varies depending on the cryptographic experiment considered. In the model for the scheme $\Pi_F$, the context $\Theta$ contains the reference $Q$ used to record oracle queries so the types of the terms in Figure~\ref{fig:macforgeF-subterms} must be adapted by defining a reference context $\Xi=\{\,Q: \SS[(q\times(i+1)]\,\}$ and setting $\Theta$ accordingly. In contrast, in the model for the scheme $\widetilde{\Pi}$, the context $\Theta$ is instantiated with a reference context containing also the ledger used to model the random function $f$, namely $\Upsilon=\{\,rand : \SS[(q+1)\times(2i+1)], \dots\,\}$.
+It is worth noting that the type derivations of the terms introduced so far are parameterized by a reference context $\Theta$, which varies depending on the cryptographic experiment considered. In the model for the scheme $\Pi_F$, the context $\Theta$ contains the reference $Q$ used to record oracle queries so the types of the terms in Figure~\ref{fig:macforgeF-subterms} must be adapted by defining a reference context $\Xi=\{\,Q: \SS[(q\times(i+1)]\,\}$ and setting $\Theta$ accordingly. In contrast, in the model for the scheme $\widetilde{\Pi}$, the context $\Theta$ is instantiated with a reference context containing also the ledger used to model the random function $f$, namely $\Upsilon=\{\,rand : \SS[(q+1)\times(2i+1)], Q: \SS[(q\times(i+1)]\,\}$.
 
 We define the $\lamBLL$ term corresponding to the forgery experiment, shown in Figure~\ref{fig:macforge-term}. The experiment begins by generating a fresh key $k$ and constructing the corresponding oracle $o$. The adversary $Adv$ is then given access to $o$ and returns an attempted forgery $(m,t)$. The experiment first checks  whether the message $m$ appears in the query set $\mathbb{Q}$ by reading the reference $Q$ containing the query ledger and applying the predicate $\mathtt{contains}$. If verification succeeds the experiment immediately returns $\mathtt{false}$, otherwise if it succeeds, the experiment tests if the tag provided by the adversary is equal to the recomputed tag on the same message obtained through the oracle. The experiment returns $\true$ if $m$ was not previously queried, and $\false$ otherwise. If verification fails, the experiment immediately returns $\false$.
 
@@ -53,8 +53,6 @@ We define the $\lamBLL$ term corresponding to the forgery experiment, shown in F
     \centering
     \begin{align*}
     &MacForge \triangleq \\
-    &\quad\letin{q=\mathtt{initQ}}{} \\
-    &\quad\letin{\_ = \mathtt{set}\,Q\,q}{} \\
     &\quad \letin{k = Gen \star}{} \\
     &\quad \letin{o = Oracle\, k}{} \\
     &\quad \letin{\langle m, t \rangle = Adv\, o}{} \\
@@ -75,6 +73,8 @@ We have to define a $\lamBLL$ term for the experiment using the encryption schem
         \begin{aligned}
             &Gen^F \triangleq \\
             &\quad\lambda u. \\
+            &\quad\letin{q=\mathtt{initQ}}{} \\
+            &\quad\letin{\_ = \mathtt{set}\,Q\,q}{} \\
             &\quad\letin{k=\random}{} \\
             &\quad\return k
         \end{aligned}
@@ -103,15 +103,15 @@ We have to define a $\lamBLL$ term for the experiment using the encryption schem
     \label{fig:macforgeF-subterms}
 \end{figure}
 
-The model for the experiment $\mathtt{MacForge}_{A,\Pi_F}$, which we denote by $\mathit{MacForge}^F$, is obtained by instantiating the generic term $\mathit{MacForge}$ with the components $Gen^F$, $Mac^F$, and $Oracle^F$ defined in Figure~\ref{fig:macforgeF-subterms}. Unlike the pseudocode presented in Figure~\ref{fig:macforge-recall}, the term $\mathit{MacForge}$ is additionally responsible for the initialization of query ledger which is instantiated by setting the value of the reference $Q$ using the function symbol $\mathtt{initQ}$ which generates a string of length $(q\times(i+1))$ filled entirely with zeros.  
+The model for the experiment $\mathtt{MacForge}_{A,\Pi_F}$, which we denote by $\mathit{MacForge}^F$, is obtained by instantiating the generic term $\mathit{MacForge}$ with the components $Gen^F$, $Mac^F$, and $Oracle^F$ defined in Figure~\ref{fig:macforgeF-subterms}. Unlike the pseudocode presented in Figure~\ref{fig:macforge-recall}.
 
-The key generation algorithm of $\Pi_F$ is modeled by the term $Gen^F$, which samples a fresh key using the function symbol $\random$, whose type is $\SS[i]$.
+The key generation algorithm of $\Pi_F$ is modeled by the term $Gen^F$, which samples a fresh key using the function symbol $\random$, whose type is $\SS[i]$. The term $\mathit{Gen}^F$ is additionally responsible for the initialization of query ledger which is instantiated by setting the value of the reference $Q$ using the function symbol $\mathtt{initQ}$ which generates a string of length $q\times(i+1)$ filled entirely with zeros.  
 
 The pseudorandom function used by the scheme is abstracted as a generic value $F$, typed as $\vdash_v^\Theta F: (\SS[i] \otimes \SS[i]) \multimap S[i]$ reflecting the fact that the construction is parameterized by an arbitrary pseudorandom function which can be instantiated in many ways. 
 
 The tag generation algorithm of $\Pi_F$ is modeled by the term $\mathit{Mac}^F$. Given a key $k$ and a message $m$ it computes the tag $t$ by evaluating the pseudorandom function $F$ on the pair $(k,m)$, finally returning a tag. 
 
-The oracle $Oracle^F$ encapsulates the secret key and provides access to the MAC function through the graded modality $\bang$. In addition to answering MAC queries, the oracle maintains a record of all messages queried by the adversary. This record is stored in the reference $Q$ thus introducing a non-empty reference context. At each oracle invocation on a message $m$, the current contents of $Q$ are retrieved, updated to include $m$, and written back to the reference before computing and returning the corresponding MAC value. In order to retrieve and update the query ledger, we rely on several function symbols such as $\mathtt{initQ}$, $\mathtt{modifyQ}$ and $\mathtt{contains}$, which are reported in Table~\ref{table:new-function-symbols}. To support this behavior, the typing of the terms in Figure~\ref{fig:macforgeF-subterms} is carried out in a reference context $ \Xi = \{\, Q : \SS[(q \times (i+1))] \,\}$ which represents the ledger used to store the adversary's oracle queries. The context $\Theta$ in the corresponding type derivations is instantiated with $\Xi$. In the term $Oracle^F$ in Figure~\ref{fig:macforgeF-subterms} we use the syntactic sugar of Equation~\ref{eq:sugar-return} since $Mac^F$ is a value.
+The oracle $Oracle^F$ encapsulates the secret key and provides access to the MAC function through the graded modality $\bang$. In addition to answering MAC queries, the oracle maintains a record of all messages queried by the adversary. This record is stored in the reference $Q$ thus introducing a non-empty reference context. At each oracle invocation on a message $m$, the current contents of $Q$ are retrieved, updated to include $m$, and written back to the reference before computing and returning the corresponding MAC value. In order to retrieve and update the query ledger, we rely on several function symbols such as $\mathtt{initQ}$, $\mathtt{modifyQ}$ and $\mathtt{contains}$, which are reported in Table~\ref{table:new-function-symbols}. To support this behavior, the typing of the terms in Figure~\ref{fig:macforgeF-subterms} is carried out in a reference context $ \Xi = \{\, Q : \SS[q\times(i+1)] \,\}$ which represents the ledger used to store the adversary's oracle queries. The context $\Theta$ in the corresponding type derivations is instantiated with $\Xi$. In the term $Oracle^F$ in Figure~\ref{fig:macforgeF-subterms} we use the syntactic sugar of Equation~\ref{eq:sugar-return} since $Mac^F$ is a value.
 
 The model for $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, denoted by $\widetilde{\mathit{MacForge}}$, is obtained from the term $\mathit{MacForge}$ from Figure~\ref{fig:macforge-term} instantiating the terms $Mac$, $Gen$ and $Oracle$ according to $\widetilde{\Pi}$, and is represented in Figure~\ref{fig:macforgef-subterms}. The model for $\widetilde{MacForge}$ relies on a truly random function, which is characterized by the property that each distinct input is deterministically associated with a uniformly random output upon its first evaluation, and that this output remains fixed for all subsequent evaluations of the ranomd function on the same input. To model this behavior within $\lamBLL$, we follow the same ledger based approach introduced in~\cite{lago2024computationalindistinguishabilitylogicalrelations}, which is conceptually analogous to the mechanism used to record oracle queries. We introduce an additional ledger that can be manipulated through a collection of function symbols, detailed in Appendix~\ref{app:1}. As shown in Figure~\ref{fig:macforgef-subterms}, this ledger is stored in the reference $rand$, with type $\SS[(q+1)\times(2i+1)]$. The ledger can be viewed as a table with $q+1$ rows, where each row contains an input-output pair of the random function together with a final bit indicating whether the row is active. The size of the ledger reflects the fact that the random function $f$ can be queried at most $q+1$ times: once by the experiment itself and up to $q$ times by the adversary.
 
@@ -120,6 +120,8 @@ The model for $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, denoted by $\widetilde{\m
         \begin{aligned}
             &\widetilde{Gen} \triangleq \\
             &\quad \lambda u. \\
+            &\quad\letin{q=\mathtt{initQ}}{} \\
+            &\quad\letin{\_ = \mathtt{set}\,Q\,q}{} \\
             &\quad \letin{tab=\mathtt{initTable}}{} \\
             &\quad \letin{\_ = \mathtt{set}\,rand\,tab}{} \\
             &\quad \letin{z=\mathtt{zero}}{} \\
@@ -159,11 +161,10 @@ The model for $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, denoted by $\widetilde{\m
 The key generation algorithm of $\widetilde{\Pi}$ is modeled by the term $\widetilde{Gen}$. Its role is to initialize the ledger representing the random function by setting the reference $rand$ to the output of the function symbol $\mathtt{initTable}$, which generates a string of length $(q+1)\times(2i+1)$ filled with zeros, corresponding to an empty table. It also initializes the ledger representing the query history by setting the value of the reference $Q$ similarly to $Gen^F$. The term then returns a dummy value generated using the function symbol $\mathtt{zero}$, as the key is not used in the
 experiment $\widetilde{MacForge}$.
 
-The term $\widetilde{\mathit{Mac}}$ models the MAC algorithm of $\widetilde{\Pi}$ built from the random function $f$. Given an input message $m$, it samples a fresh random value $r$ and inspects the ledger stored in $rand$ to determine whether $r$ has already been used as an input to the random function. This check is performed
-using the predicate $\mathtt{isdefined}$. If $r$ is already present in the ledger, the corresponding output value $x$ is retrieved using $\mathtt{getValue}$, and the
+The term $\widetilde{\mathit{Mac}}$ models the MAC algorithm of $\widetilde{\Pi}$ built from the random function $f$. Given an input message $m$, it samples a fresh random value $r$ and inspects the ledger stored in $rand$ to determine whether $r$ has already been used as an input to the random function. This check is performed using the predicate $\mathtt{isdefined}$ which is reported in Table~\ref{table:function-symbols}. If $r$ is already present in the ledger, the corresponding output value $x$ is retrieved using $\mathtt{getValue}$, and the
 resulting tag is computed deterministically. Otherwise, if $r$ is a fresh input, the term samples a new uniformly random value $x$, records the association $(r,x)$ in the ledger using $\mathtt{modify}$, updates the reference $rand$, and then returns the corresponding tag. In this way, the ledger ensures that repeated evaluations of $f$ on the same input yield consistent outputs. 
 
-As in the case of the query ledger, the algorithms of the scheme $\widetilde{\Pi}$ operate directly on the ledger stored in the reference $rand$. Accordingly, the typing of the terms in Figure~\ref{fig:macforgef-subterms} is carried out in a reference context $\Upsilon = \{\, rand : \SS[(q+1)\times(2i+1)], Q: \SS[(q\times(i+1))] \,\}$ and the context $\Theta$ appearing in the corresponding typing judgments is instantiated with $\Upsilon$. It is worth observing that the underlying function $f$ can be queried at most $q+1$ times: up to $q$ times by the adversary through its oracle access, and once by the experiment itself during verification via an oracle evaluation on the candidate message generated by the adversary. The size of the ledger stored in $rand$ reflects this bound, as it contains exactly $q+1$ rows, corresponding to the maximum number of distinct messages on which $f$ may be evaluated throughout the execution of the experiment.
+As in the case of the query ledger, the algorithms of the scheme $\widetilde{\Pi}$ operate directly on the ledger stored in the reference $rand$. Accordingly, the typing of the terms in Figure~\ref{fig:macforgef-subterms} is carried out in a reference context $\Upsilon = \{\, rand : \SS[(q+1)\times(2i+1)], Q: \SS[q\times(i+1)] \,\}$ and the context $\Theta$ appearing in the corresponding typing judgments is instantiated with $\Upsilon$. It is worth observing that the underlying function $f$ can be queried at most $q+1$ times: up to $q$ times by the adversary through its oracle access, and once by the experiment itself during verification via an oracle evaluation on the candidate message generated by the adversary. The size of the ledger stored in $rand$ reflects this bound, as it contains exactly $q+1$ rows, corresponding to the maximum number of distinct messages on which $f$ may be evaluated throughout the execution of the experiment.
 
 In the term $\widetilde{Oracle}$ in Figure~\ref{fig:macforgef-subterms} we use the syntactic sugar of Equation~\ref{eq:sugar-return} since $\widetilde{Mac}$ is a value.
 
@@ -176,8 +177,6 @@ The distinguisher $D_A$ constructed from any adversary that succeeds in the $\ma
     \begin{align*}
         &D \triangleq \\
         &\quad \return(\lambda o. \\
-        &\quad\letin{q=\mathtt{initQ}}{} \\
-        &\quad\letin{\_ = \mathtt{set}\,Q\,q}{} \\
         &\quad \letin{\lis{m,t} = Adv\, o}{} \\
         &\quad \letin{queries = \get Q}{} \\
         &\quad \letin{b=\mathtt{contains}(queries, m)}{} \\
@@ -188,10 +187,10 @@ The distinguisher $D_A$ constructed from any adversary that succeeds in the $\ma
     \label{fig:d-term}
 \end{figure}
 
-The distinguisher initializes the query ledger to simulate the environment for the adversary. Then invokes the adversary with oracle access to $o$, obtains a candidate forgery $(m,t)$, and checks its validity using a verification procedure identical to the one used in the $\macexp$ in Figure~\ref{fig:macforge-term}. As in the $\mathtt{MacForge}$ experiment, the reference $Q$ is shared between the oracle and the distinguisher and records all oracle queries performed by the adversary. The distinguisher returns $\true$ if $(m,t)$ is a valid fresh forgery, and
+The distinguisher invokes the adversary with oracle access to $o$, obtains a candidate forgery $(m,t)$, and checks its validity using a verification procedure identical to the one used in the $\macexp$ in Figure~\ref{fig:macforge-term}. As in the $\mathtt{MacForge}$ experiment, the reference $Q$ is shared between the oracle and the distinguisher and records all oracle queries performed by the adversary. The distinguisher returns $\true$ if $(m,t)$ is a valid fresh forgery, and
 $\false$ otherwise.
 
-We briefly justify that the distinguisher $D$ is well typed in $\lamBLL$. The term $D$ is a value returning a function that takes an oracle $o$ as input which has type $\bang_{q+1}(\SS[i] \multimap \SS[i])$, matching the oracle type expected by the adversary $Adv$. Since $Adv$ is typed as $\bang_{q}(\SS[i] \multimap \SS[i]) \multimap (\SS[i] \otimes \SS[i])$ for a polynomial $q$ the application $Adv\,o$ is well typed and yields a candidate forgery $(m,t)$ with type $(\SS[i] \otimes \SS[i])$. The distinguisher then reads the reference $Q$ using $\get Q$. As in the $\mathtt{MacForge}$ experiment, the oracle $o$ and the distinguisher $D$ operate within the same reference context $\Theta$, which contains the reference $Q : \SS[(q \times (i+1))]$. This ensures that the query history recorded by the oracle during the execution of $Adv$ is available to the distinguisher when performing the check for the freshness of the message. It is important to note that modifying the reference state would not correspond to a meaningful strategy for distinguishing a pseudorandom function from a truly random one. The verification step is carried out by checking if the message generated by the adversary belongs to the set of registered queries, if it does not then $D$ evaluates the oracle on the message checking if the tag generated by the adversary and the tag generated by the oracle are equals. The type for the distinguisher follows the type derivation $\vdash_c^\Theta \bang_{q+1}(\SS[i] \multimap \SS[i]) \multimap \BB$
+We briefly justify that the distinguisher $D$ is well typed in $\lamBLL$. The term $D$ is a value returning a function that takes an oracle $o$ as input which has type $\bang_{q+1}(\SS[i] \multimap \SS[i])$, matching the oracle type expected by the adversary $Adv$. Since $Adv$ is typed as $\bang_{q}(\SS[i] \multimap \SS[i]) \multimap (\SS[i] \otimes \SS[i])$ for a polynomial $q$ the application $Adv\,o$ is well typed and yields a candidate forgery $(m,t)$ with type $(\SS[i] \otimes \SS[i])$. The distinguisher then reads the reference $Q$ using $\get Q$. As in the $\mathtt{MacForge}$ experiment, the oracle $o$ and the distinguisher $D$ operate within the same reference context $\Theta$, which contains the reference $Q : \SS[q\times(i+1)]$. This ensures that the query history recorded by the oracle during the execution of $Adv$ is available to the distinguisher when performing the check for the freshness of the message. It is important to note that modifying the reference state would not correspond to a meaningful strategy for distinguishing a pseudorandom function from a truly random one. The verification step is carried out by checking if the message generated by the adversary belongs to the set of registered queries, if it does not then $D$ evaluates the oracle on the message checking if the tag generated by the adversary and the tag generated by the oracle are equals. The type for the distinguisher follows the type derivation $\vdash_c^\Theta \bang_{q+1}(\SS[i] \multimap \SS[i]) \multimap \BB$
 
 We can now model the distinguishers $D^{F_k(\cdot)}$ and $D^{f(\cdot)}$ as follows:
 \begin{align}
@@ -602,8 +601,6 @@ We begin with the definition of $\widetilde{D}$ given in Equation~\ref{eq:d-tild
         &\left(
         \begin{aligned}
             &\return(\lambda o. \\
-            &\quad\letin{q=\mathtt{initQ}}{} \\
-            &\quad\letin{\_ = \mathtt{set}\,Q\,q}{} \\
             &\quad \letin{\lis{m,t} = Adv\, o}{} \\
             &\quad \letin{queries = \get Q}{} \\
             &\quad \letin{b=\mathtt{contains}(queries, m)}{} \\
@@ -617,30 +614,13 @@ We begin with the definition of $\widetilde{D}$ given in Equation~\ref{eq:d-tild
     \begin{aligned}
         &\letin{k=\widetilde{Gen}\star}{} \\
         &\letin{o=\widetilde{Oracle}\,k} {} \\
-        &\letin{q=\mathtt{initQ}}{} \\
-        &\letin{\_ = \mathtt{set}\,Q\,q}{} \\
         &\letin{\lis{m,t} = Adv\, o}{} \\
         &\letin{queries = \get Q}{} \\
         &\letin{b=\mathtt{contains}(queries, m)}{} \\
         &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
         &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t))}
     \end{aligned}
-    \\[2ex]
-    \quad\overset{\text{~\ref{letCom}}}{\simcontext}\quad&
-    \begin{aligned}
-        &\letin{q=\mathtt{initQ}}{} \\
-        &\letin{\_ = \mathtt{set}\,Q\,q}{} \\
-        &\letin{k=\widetilde{Gen}\star}{} \\
-        &\letin{o=\widetilde{Oracle}\,k} {} \\
-        &\letin{\lis{m,t} = Adv\, o}{} \\
-        &\letin{queries = \get Q}{} \\
-        &\letin{b=\mathtt{contains}(queries, m)}{} \\
-        &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
-        &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t))}
-    \end{aligned}
-    \quad
-    \triangleq
-    \quad
+    \quad=\quad
     \mathit{\widetilde{MacForge}}
 \end{align*}
 }
@@ -868,8 +848,6 @@ The proof follows a similar approach to the proof of Theorem~\ref{theorem:tildeD
         &\left(
         \begin{aligned}
             &\return(\lambda o. \\
-            &\quad\letin{q=\mathtt{initQ}}{} \\
-            &\quad\letin{\_ = \mathtt{set}\,Q\,q}{} \\
             &\quad\letin{\lis{m,t} = Adv\, o}{} \\
             &\quad\letin{queries = \get Q}{} \\
             &\quad\letin{b=\mathtt{contains}(queries, m)}{} \\
@@ -881,21 +859,6 @@ The proof follows a similar approach to the proof of Theorem~\ref{theorem:tildeD
     \\[2ex]
     \quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad&
     \begin{aligned}
-        &\letin{k=Gen^F \star}{} \\
-        &\letin{o=Oracle^F\,k}{} \\
-        &\letin{q=\mathtt{initQ}}{} \\
-        &\letin{\_ = \mathtt{set}\,Q\,q}{} \\
-        &\letin{\lis{m,t} = Adv\, o}{} \\
-        &\letin{queries = \get Q}{} \\
-        &\letin{b=\mathtt{contains}(queries, m)}{} \\
-        &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
-        &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)}
-    \end{aligned}
-    \\[2ex]
-    \quad\overset{\text{~\ref{letCom}}}{\simcontext}\quad&
-    \begin{aligned}
-        &\letin{q=\mathtt{initQ}}{} \\
-        &\letin{\_ = \mathtt{set}\,Q\,q}{} \\
         &\letin{k=Gen^F \star}{} \\
         &\letin{o=Oracle^F\,k}{} \\
         &\letin{\lis{m,t} = Adv\, o}{} \\
