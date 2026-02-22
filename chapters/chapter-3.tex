@@ -167,18 +167,27 @@ which outputs $0$ if the adversary correctly guesses the secret key $k$ and $1$ 
 The inference rules over $\sim$ in Squirrel represented in Figure \ref{fig:inference-rules-over-sim-squirrel}. The key rule is the second one that states that if given $u$ indistinguishable from $v$, then $u$ can be replaced with $v$ inside any context $C$ without changing the overall indistinguishability from $w$. 
 
 One can verify that it is true that $(\mathtt{if}\,\,(\mathtt{att_0}(\cdot) = k) \,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1$ as follows
-
-\begin{gather*}
-    \begin{prooftree}
-    \hypo{}
-    \infer1[FRESH]{(\mathtt{att}_0(\cdot) \neq k)\sim \mathtt{true}}
-    \infer1[$\mathrm{SIMPL}_\equiv$]{((\mathtt{att_0}(\cdot) = k) = \mathtt{false}) \sim \mathtt{true}}
-    \hypo{}
-    \infer1[REF]{1\sim1}
-    \infer1[$\mathrm{SIMPL}_\equiv$]{(\mathtt{if}\,\,\mathtt{false}\,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1}
-    \infer2[REW]{(\mathtt{if}\,\,(\mathtt{att_0}(\cdot) = k) \,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1}
-    \end{prooftree}
-\end{gather*}
+\begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
+    \inferrule*[right=rew]
+    {
+        \inferrule*[right=simpl$_\equiv$]
+        {
+            \inferrule*[right=fresh]
+            {\ }
+            {(\mathtt{att}_0(\cdot) \neq k)\sim \mathtt{true}}
+        }
+        {((\mathtt{att_0}(\cdot) = k) = \mathtt{false}) \sim \mathtt{true}}
+        \and
+        \inferrule*[right=simpl$_\equiv$]
+        {
+            \inferrule*[right=ref]
+            {\ }
+            {1\sim 1}
+        }
+        {(\mathtt{if}\,\,\mathtt{false}\,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1}
+    }
+    {(\mathtt{if}\,\,(\mathtt{att_0}(\cdot) = k) \,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1}
+\end{mathpar}
 Here it is assumed an additional proof rule $\mathrm{SIMPL}_\equiv$ that allows to replace a term with another one equal to it with probability one.
 
 \section{CryptoVerif}
@@ -187,13 +196,6 @@ CryptoVerif is a mechanized proof assistant designed for the computational model
 The central notion used to express security properties in CryptoVerif is observational equivalence. Proofs proceed by transforming an initial game, representing the real protocol, into a final game in which the desired security property is evident. Each transformation step corresponds either to a syntactic rewriting or to the application of a security assumption for a cryptographic primitive. The difference in the adversary's success probability between successive games must be negligible, ensuring that the overall transformation preserves security up to a negligible function.
 
 CryptoVerif uses a formal probabilistic process calculus for representing cryptographic experiments. In this calculus, messages are modeled as bitstrings, and cryptographic primitives are represented as functions over bitstrings. Games are expressed as probabilistic processes that execute in polynomial time, while the adversary is modeled as a probabilistic Turing machine, thus faithfully capturing the standard computational assumptions underlying cryptographic security definitions.
-
-In particular in the calculus of CryptoVerif terms represent computations on messages (bitstrings):
-\begin{align*}
-M ::= x \mid f(M_1, \dots, M_n).
-\end{align*}
-Function symbols $f$ correspond to functions computable by deterministic
-Turing machines that always terminate.
 
 In order to define oracles, CryptoVerif uses the following grammar:
 \begin{align*}
@@ -218,9 +220,9 @@ where the symbol 0 denotes termination, $Q \mid Q'$ denotes parallel computation
 Here, $\mathtt{yield}$ denotes termination of the oracle execution, while the expression $\mathtt{return}(M_1, \dots, M_m); Q$ outputs a tuple of messages and continues with process  $Q$. The construct $\mathtt{event}\, e(M_1, \dots, M_m); P$ records an event $e$ and then proceeds with $P$. The command $x \xleftarrow{R} T; P$ denotes uniform random sampling of a value of type 
 $T$ binding the result to $x$, whereas $x: T \leftarrow M; P$ represents deterministic assignment. The conditional $\ifthen{M}{P}{P'}$ branches on the boolean value of $M$. Finally, $\mathtt{insert}\, L(M_1, \dots, M_m); P$ adds an entry to a list $L$, while $\mathtt{get}\, L(M_1, \dots, M_m)\,\mathtt{suchthat}\, M\, \mathtt{in}\, P\, \mathtt{else}\, P'$ performs a lookup in $L$ satisfying the condition $M$, proceeding with $P$ if successful and with $P'$ otherwise. 
 
-The processes in CryptoVerif are expressed using the syntax introduced above. These processes specify the oracles that an adversary may invoke, and their execution is bounded with respect to a security parameter, denoted by $\eta$. In particular, processes are bounded both in the number of oracle invocations (copies) and in the length of the messages provided as inputs to these oracles. Let $I_\eta(n)$ denote the interpretation of a bound $n$ for a given value of the security parameter $\eta$. Then $I_\eta(n)$ is required to be an efficiently computable function of $\eta$ that is bounded by a polynomial in $\eta$.
+The processes in CryptoVerif are expressed using the syntax introduced above. These processes specify the oracles that an adversary may invoke, and their execution is bounded with respect to a security parameter, denoted by $\eta$. In particular, processes are bounded both in the number of oracle invocations and in the length of the messages provided as inputs to these oracles. Let $I_\eta(n)$ denote the interpretation of a bound $n$ for a given value of the security parameter $\eta$. Then $I_\eta(n)$ is required to be an efficiently computable function of $\eta$ that is bounded by a polynomial in $\eta$.
 
-At the type level, the CryptoVerif calculus is parameterized by the security parameter $\eta$. For each $\eta$, every type $T$ is interpreted as a subset $I_\eta(T)$ of $Bitstring \cup \{\bot\}$, where $Bitstring$ denotes the set of all finite bitstrings and $\bot$ is a special symbol. The set $I_\eta(T)$ must be recognizable in polynomial time: there exists an algorithm that, on input $x$, decides whether $x \in I_\eta(T)$ in time polynomial in the length of $x$ and in the value of $\eta$.
+At the type level, the CryptoVerif calculus is parameterized by the security parameter $\eta$. For each $\eta$, every type $T$ is interpreted as a subset $I_\eta(T)$ of $Bitstring \cup \{\bot\}$, where $Bitstring$ denotes the set of all finite bitstrings and $\bot$ is a special symbol. The set $I_\eta(T)$ must be recognizable in polynomial time, hence there exists an algorithm that, on input $x$, decides whether $x \in I_\eta(T)$ in time polynomial in the length of $x$ and in the value of $\eta$.
 
 A type is called \textit{fixed-length} if $T$ is such that $I_\eta(T)$ consists exactly of all bitstrings of a certain length $\ell(\eta)$, where $\ell$ is a polynomially bounded function of $\eta$ while a type is called \textit{large} if its cardinality is sufficiently high so that collisions between elements sampled uniformly at random from $I_\eta(T)$ occur only with negligible probability, while still allowing the tool to keep explicit track of the residual collision probability; formally, $\frac{1}{|I_\eta(T)|}$ is negligible as a function of $\eta$.
 
@@ -230,9 +232,78 @@ The calculus further assumes a finite set of function symbols $f$, each equipped
 \[
 f : T_1 \times \dots \times T_m \to T.
 \]
-Each such symbol $f$ denotes a function, also written $f$, from $T_1 \times \dots \times T_m$ to $T$, such that $f(x_1, \dots, x_m)$ is computable within time $t_f$, where $t_f$ is bounded by a function of the lengths of the inputs $x_1, \dots, x_m$. Some function symbols are written in infix notation, for example:
-- $M = N$ denotes the equality test, which takes two values of the same type $T$ and returns a value of type $bool$;
-- $M \land N$ denotes the boolean conjunction, which takes and returns values of type $bool$.
+Each such symbol $f$ denotes a function, also written $f$, from $T_1 \times \dots \times T_m$ to $T$, such that $f(x_1, \dots, x_m)$ is computable within time $t_f$, where $t_f$ is bounded by a function of the lengths of the inputs $x_1, \dots, x_m$. Function symbols $f$ correspond to functions computable by deterministic Turing machines that always terminate. Some function symbols are written in infix notation, for example: $M = N$ denotes the equality test, which takes two values of the same type $T$ and returns a value of type $bool$ and $M \land N$ denotes the boolean conjunction, which takes and returns values of type $bool$.
+
+Recalling Chapter~\ref{chapter:computational-cryptography}, a MAC consists of a function $\mathsf{mac}(m,k)$ that takes as input a message $m$ and a secret key $k$, together with a verification function $\vrfy(m,k,t)$ such that 
+\[
+\vrfy(m, k, mac(m, k)) = \mathtt{true}
+\]
+
+An authenticated encryption scheme can be constructed using the \emph{encrypt-then-MAC} paradigm:
+\[
+enc'(m,(k,mk)) = c_1 \,\|\, mac(c_1,mk),
+\]
+where $c_1 = enc(m,k)$ and $enc$ is a secure symmetric encryption algorithm. This construction can be modeled in Cryptoverif, using the following terms.
+\begin{align*}
+&\mathbf{\mathtt{letfun}}\,full\_enc(m: bitstring, k: key, mk : mkey ) = \\
+&\quad c_1 \leftarrow enc(m, k); \\
+&\quad \mathtt{concat}(c_1 , mac(c_1 , mk)). \\[2ex]
+&\mathbf{\mathtt{letfun}}\,full\_dec(c: bitstring, k: key, mk : mkey ) = \\
+&\quad \mathbf{\mathtt{let}}\,\mathtt{concat}(c_1, mac1) = c \,\mathbf{\mathtt{in}} \\
+&\qquad(\mathbf{\mathtt{if}}\,\mathtt{verify}(c_1, mk, mac1)\, \mathbf{\mathtt{then}}\, \mathtt{dec}(c_1, k)\,\mathbf{\mathtt{else}} \mathtt{bottom}) \\
+&\quad\mathbf{\mathtt{else}} \\
+&\qquad\mathtt{bottom}.
+\end{align*}
+
+In this construction, the MAC is assumed to be SUF-CMA (strongly unforgeable under chosen-message attacks). Even an adversary with access to both the MAC and verification oracles has only negligible probability of producing a fresh valid tag not previously output by the MAC oracle. The encryption scheme is assumed to be IND-CPA (indistinguishable under chosen-plaintext attacks) that is, no efficient adversary can distinguish encryptions of two equal-length messages with more than negligible advantage.
+
+\begin{definition}[Indistinguishability under Chosen Plaintext Attacks]
+\begin{align*}
+&\mathrm{Succ}^{ind-cpa}_{SE}(t, q_e, l) = \\
+&\quad\underset{\mathcal{A}}{\mathrm{max}}\,2\,\mathrm{Pr}\left[b \xleftarrow{R} \{0, 1\}; k \xleftarrow{R} key; b' \xleftarrow{R} A^{enc(LR(.,.,b),k)}: b' = b \right] 
+- 1
+\end{align*}
+where $\mathcal{A}$ runs in time at most $t$, calls $enc(LR(., ., b), k)$ at most $q_e$ times on messages of length at most $l$, the left-or-right oracle $LR$ is defined as $LR(x, y , 0) = x$, $LR(x, y , 1) = y$, and $LR(x, y , b)$ and is defined only when $x$ and $y$ have the same length.
+\end{definition}
+
+\begin{theorem}
+The encrypt-then-MAC scheme is IND-CPA.
+\end{theorem}
+
+\begin{proof}
+We formalize the IND-CPA experiment for the encrypt-then-MAC scheme in CryptoVerif. 
+We begin by defining an initialization oracle $Ostart$ that is invoked by the adversary. 
+The oracle samples a random bit $b$ and generates fresh keys for both the encryption scheme and the MAC scheme.
+
+\begin{align*}
+Ostart() := b \xleftarrow{R} bool; k \xleftarrow{R} key; mk \xleftarrow{R} mkey; \mathbf{\mathtt{return}}.
+\end{align*}
+
+Next, we define the left-or-right encryption oracle.
+\begin{align*}
+&\mathbf{\mathtt{let}}\; QencLR(b:\mathit{bool}, k:\mathit{key}, mk:\mathit{mkey}) = \\
+&\quad \mathbf{\mathtt{foreach}}\; i \leq qEnc\; \mathbf{\mathtt{do}} \\
+&\quad Oenc(m_1:\mathit{bitstring}, m_2:\mathit{bitstring}) := \\
+&\quad \mathbf{\mathtt{if}}\; Z(m_1) = Z(m_2)\; \mathbf{\mathtt{then}} \\
+&\quad m_0 \leftarrow \mathbf{\mathtt{if}}\; b\; \mathbf{\mathtt{then}}\; m_1\; \mathbf{\mathtt{else}}\; m_2; \\
+&\quad \mathbf{\mathtt{return}}\; full\_enc(m_0,k,mk).
+\end{align*}
+The construct $\mathbf{\mathtt{foreach}}\; i \leq qEnc$ represents $qEnc$ independent oracle instances, indexed by $i \in \{1,\dots,qEnc\}$, so that the adversary may issue at most $qEnc$ encryption queries. 
+The oracle takes two messages $m_1$ and $m_2$ as input and first checks that they have the same length. 
+The condition $Z(m_1)=Z(m_2)$ ensures that $m_1$ and $m_2$ are of equal length, where $Z(x)$ denotes the bitstring of the same length as $x$ containing only zeroes. 
+If the test succeeds, the oracle selects $m_0 = LR(m_1,m_2,b)$ and returns $full\_enc(m_0,k,mk)$.
+
+Finally, we consider the following process:
+\begin{align*}
+&\mathtt{process} \\
+&\quad Ostart() := b \xleftarrow{R} bool; k \xleftarrow{R} key; mk \xleftarrow{R} mkey; \mathbf{\mathtt{return}}; \\
+&\quad \mathtt{run}\; QencLR(b, k, mk).
+\end{align*}
+
+CryptoVerif proves secrecy of the bit $b$ in this process under the assumptions that the encryption scheme is IND-CPA secure and the MAC is SUF-CMA secure. 
+Secrecy of $b$ is equivalent to stating that no polynomial-time adversary can distinguish whether encryptions correspond to the left or the right messages with non-negligible advantage. Therefore, the encrypt-then-MAC construction is IND-CPA secure. A full example of this proof is available online at \href{http://proverif24.paris.inria.fr/cryptoverif.php}{proverif24.paris.inria.fr/cryptoverif.php}.
+\end{proof}
+
 
 % : $Q$ is observationally equilalent to $Q'$ and is written $Q \approx Q'$, when the adversary has a negligible probability of distinguishing $Q$ from $Q'$. 
 

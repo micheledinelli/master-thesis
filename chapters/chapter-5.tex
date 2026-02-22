@@ -100,49 +100,55 @@ The operation $(p\,*)$ on positive types can also be extended to a total operati
 	p \ast  (x : P,\Gamma )&:= (x : p \ast P),  p\ast \Gamma 
 \end{aligned}\]
 
-The notion of substitution in $\lamBLL$ is defined with respect to the distinguished security parameter $i$. Given a polynomial $p \in \mathbb{N}_{\geq 1}[i]$ and a type $A$, the type $Ap$ is the type obtained by substituting every occurrence of the parameter $i$ in $A$ with the polynomial $p$, that is, $A[i:=p]$. Similarly, for a term $M$, the type $Mp$ to denote the term obtained by substituting $p$ for $i$ in all polynomial annotations occurring in $M$, namely $M[i:=p]$. The substitution acts only on polynomial indices appearing in types and terms, and does not affect term variables or computational structure.
+The notion of substitution in $\lamBLL$ is defined with respect to the distinguished security parameter $i$. Given a polynomial $p \in \mathbb{N}_{\geq 1}[i]$ and a type $A$, the type $Ap$ is the type obtained by substituting every occurrence of the parameter $i$ in $A$ with the polynomial $p$, that is, $A[p/i]$. Similarly, for a term $M$, the type $Mp$ to denote the term obtained by substituting $p$ for $i$ in all polynomial annotations occurring in $M$, namely $M[p/i]$. The substitution acts only on polynomial indices appearing in types and terms, and does not affect term variables or computational structure.
+
+The notation $\Gamma \vdashtheta{v} M:A$ and $\Gamma \vdashtheta{c} M:A$ indicates a type derivation witnessing, respectively, the value or computation typing judgment under variable context $\Gamma$ and reference context $\Theta$.
 
 \newcommand{\subst}[1]{#1}
 \begin{figure}[ht]
 \vspace*{-6mm}
 \begin{center} \scriptsize
 \begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
-		\inferrule* [right=var]{\\}{ \Gamma, x : P \vdash x: P}
+		\inferrule* [right=\scriptsize var]{\\}{ x : P \vdashtheta{v} x: P}
 		\and 
-		\inferrule* [right=true]{\\}{\Gamma \vdash \true : \BB}	
+		\inferrule* [right=\scriptsize true]{\\}{\vdashtheta{v} \true : \BB}	
 		\and
-		\inferrule* [right=false]{\\}{\Gamma \vdash \false : \BB}	
+		\inferrule* [right=\scriptsize false]{\\}{\vdashtheta{v} \false: \BB}	
 		\and
-		\inferrule* [right=fun]{ \mathsf{typeof}(f) = G_1 \times \dots \times G_m \to G \\ (\Gamma_k\subst{p} \vdash Z_k : G_k\subst{p})_{1\leq k \leq m} \\ p \in \N_{\geq 1}[i]}{ \boxplus_k \Gamma_k\subst{p} ; \Theta \vdash f_p(Z_1, \dots, Z_m):G\subst{p}}
+		\inferrule* [right=\scriptsize fun]{ \mathsf{typeof}(f) = G_1 \times \dots \times G_m \to G \\ (\Gamma_k\subst{p} \vdashtheta{v} Z_k : G_k\subst{p})_{1\leq k \leq m} \\ p \in \N_{\geq 1}[i]}{ \boxplus_k \Gamma_k\subst{p} ; \Theta \vdashtheta{c} f_p(Z_1, \dots, Z_m):G\subst{p}}
 		\and
-		\inferrule* [right=string]{s\in \{0,1\}^{c} \\ p : i \mapsto c\text{ is a constant polynomial}}{\Gamma \vdash s : \SS[p]}	
+		\inferrule* [right=\scriptsize string]{s\in \{0,1\}^{c} \\ p : i \mapsto c\text{ is a constant polynomial}}{\Gamma \vdashtheta{v} s : \SS[p]}	
 		\and
-		\inferrule* [right=tensor]{\Gamma \vdash Z_1 : P \\ \Delta \vdash Z_2: Q}{\Gamma \boxplus \Delta \vdash \lis{Z_1, Z_2} : P\otimes Q}	
+		\inferrule* [right=\scriptsize tensor]{\Gamma \vdashtheta{v} Z_1 : P \\ \Delta \vdashtheta{v} Z_2: Q}{\Gamma \boxplus \Delta \vdashtheta{v} \lis{Z_1, Z_2} : P\otimes Q}	
 		\and
-		\inferrule* [right=let]{\Gamma \vdash Z :  P \otimes Q\\x : P, y : Q, \Delta ; \Theta \vdash  M : A}{\Gamma \boxplus \Delta; \Theta \vdash  \letin{ \lis{x,y} = Z}{M} : A }
+		\inferrule* [right=\scriptsize let-pair]{\Gamma \vdashtheta{v} Z : P \otimes Q \\ \Delta, x : P, y : Q \vdashtheta{c}  M : A}{\Gamma \boxplus \Delta \vdashtheta{c} \letin{ \lis{x,y} = Z}{M} : A }
 		\and
-		\inferrule* [right=unit]{\\}{\Gamma \vdash \star : \UU}	
+        \inferrule* [right=\scriptsize unit]{\\}{\vdashtheta{v} \star : \UU}
+        \and
+        \inferrule* [right=\scriptsize bang]{\Gamma \vdashtheta{c} M : A}{p \ast \Gamma \vdashtheta{v} \bang M : \bang_p^{\Theta} A}
 		\and
-		\inferrule* [right=bang]{\Gamma ; \Theta \vdash M : A}{p \ast \Gamma \vdash \bang M : \bang_p^{\Theta} A}	
+		\inferrule* [right=\scriptsize der]{\Gamma \vdashtheta{v} Z : \bang_1^{\Theta} A }{\Gamma \vdashtheta{c} \der (Z):A } 	
 		\and
-		\inferrule* [right=der]{\Gamma \vdash Z : \bang_1^{\Theta} A }{\Gamma;   \Theta \vdash \der (Z):A } 	
-		\and
-		\inferrule* [right=app]{\Gamma ; \Theta \vdash M : P\arrowRef{\Theta} A
-		\\ \Delta \vdash Z : P}{\Gamma\boxplus \Delta ; \Theta \vdash MZ : A}	
+		\inferrule* [right=\scriptsize app]{\Gamma \vdashtheta{c} M : P\arrowRef{\Theta} A
+		\\ \Delta \vdashtheta{v} Z : P}{\Gamma\boxplus \Delta \vdashtheta{c} MZ : A}	
 		\and	
-        \inferrule* [right=lam]{\Gamma, x: P ; \Theta \vdash M : A }{\Gamma \vdash \lambda x . M : P\arrowRef{\Theta} A}
+        \inferrule* [right=\scriptsize lam]{\Gamma, x: P \vdashtheta{c} M : A }{\Gamma \vdashtheta{v} \lambda x.M : P \multimap A}
+        \and
+		\inferrule* [right=\scriptsize eta]{\Gamma \vdashtheta{v} V: A}{\Gamma \vdashtheta{c} \return V: A}
+        \and
+		\inferrule* [right=\scriptsize let]{\Gamma \vdashtheta{v} Z :  P \otimes Q \\ \Delta, x : P, y : Q \vdashtheta{c} M : A}{\Gamma \boxplus \Delta \vdashtheta{c} \letin{ \lis{x,y} = Z}{M} : A }
 		\and
-		\inferrule* [right=eta]{\Gamma  \vdash V: A}{\Gamma ; \Theta \vdash \return V: A}	
+		\inferrule* [right=\scriptsize loop]{\Gamma \vdashtheta{v} V: P \multimap P \\ \Delta \vdashtheta{c} M : P }{(p \ast \Gamma)\boxplus \Delta \vdashtheta{c} \loopp{V}{p}{M} : P }	
 		\and
-		\inferrule* [right=let]{\Gamma ; \Theta \vdash N: P \\ x : P, \Delta ; \Theta \vdash M : A }{ \Gamma\boxplus \Delta ; \Theta \vdash \letin{ x = N}{M} : A}	
-		\and
-		\inferrule* [right=loop]{\Gamma \vdash V: P\arrowRef{\Theta} P \\ \Delta ; \Theta \vdash  M : P }{(p \ast \Gamma)\boxplus \Delta ; \Theta \vdash  \loopp{V}{p}{M} : P }	
-		\and
-		\inferrule* [right=set]{  \Gamma \vdash Z: G }{ \Gamma;  \Theta, r: G  \vdash \setr{r}{Z} : \UU }	
+		\inferrule* [right=\scriptsize set]{\Gamma \vdashtheta{v} Z: G \\ r:G \in \Theta}{\Gamma \vdashtheta{c} \setr{r}{Z} : \UU }	
 		\and 
-		\inferrule* [right=get]{\\}{ \Gamma ; \Theta, r: G \vdash \get r : G}
+		\inferrule* [right=\scriptsize get]{ r:G \in \Theta}{ \vdashtheta{c} \get r: G}
 		\and 
-        \inferrule* [right=case]{\Gamma ; \Theta \vdash Z: \BB \\ \Delta ; \Theta \vdash  M : A \\ \Delta ; \Theta \vdash  N : A}{\Gamma \boxplus \Delta ; \Theta \vdash  \ifthen{Z}{M}{N} : A}	
+        \inferrule* [right=\scriptsize case]{\Gamma \vdashtheta{v} Z: \BB \\ \Delta \vdashtheta{c} M : A \\ \Delta \vdashtheta{c} N : A}{\Gamma \boxplus \Delta \vdashtheta{c} \ifthen{Z}{M}{N} : A}
+        \and
+        \inferrule*[right=\scriptsize weak]{\Gamma \vdashtheta{v}V: A \\ x \ \text{not free in} \ \Gamma}{\Gamma, x: P \vdashtheta{v} V:A}
+        \and
+        \inferrule*[right=\scriptsize weak]{\Gamma \vdashtheta{c}M: A \\ x \ \text{not free in} \ \Gamma}{\Gamma, x: P \vdashtheta{c} M:A}
 \end{mathpar}
 \end{center}
 \vspace*{-6mm}
@@ -243,7 +249,8 @@ The first group of function symbols concerns operations on bitstrings. In partic
 
 The second group consists of function symbols used to interact with a ledger, a structure that behaves as a finite table. The ledger is represented as a flat binary string segmented into rows of length $i+1$. Each row is composed of a bitstring of length $i$ together with an additional bit that indicates whether the row is active (set to $1$) or inactive (set to $0$). The total size of the ledger is chosen to accommodate $q$ such rows, where $q$ is a polynomial in $\mathbb{N}_{\geq 1}[i]$. The number of rows must be polynomially bounded otherwise the resulting string could exceed the size constraints imposed by $\lamBLL$.
 
-The function symbol $\mathtt{initQ}$ constructs an empty ledger by returning a bitstring initialized entirely with zeros, thus representing a table with no active entries. The symbol $\mathtt{contains}$ checks whether a given input string is already present in the ledger. It scans the ledger to determine whether there exists a row whose first $i$ bits match the input string and whose final bit is set to $1$. If such a row is found, the input string is considered to be defined in the ledger and the function returns $\true$. The function symbol $\mathtt{modifyQ}$ enables the insertion of a new string into the ledger: it searches for the first inactive row, writes the string into the first $i$ positions, and sets the final bit to $1$, thereby marking the row as active. Finally the function symbol $\mathtt{coherent}$ accepts two ledgers of size $q\times(i+1)$ and $p\times(2i+1)$ for $q,p$ polynomials and returns a boolean indicating wether for every string in the first ledger, there exists a corresponding string in the second ledger.
+The function symbol $\mathtt{initQ}$ constructs an empty ledger by returning a bitstring initialized entirely with zeros, thus representing a table with no active entries. The symbol $\mathtt{contains}$ checks whether a given input string is already present in the ledger. It scans the ledger to determine whether there exists a row whose first $i$ bits match the input string and whose final bit is set to $1$. If such a row is found, the input string is considered to be defined in the ledger and the function returns $\true$. The function symbol $\mathtt{modifyQ}$ enables the insertion of a new string into the ledger: it searches for the first inactive row, writes the string into the first $i$ positions, and sets the final bit to $1$, thereby marking the row as active. The function symbol $\mathtt{coherent}$ accepts two ledgers of size $q\times(i+1)$ and $p\times(2i+1)$ for $q,p$ polynomials and returns a boolean indicating wether for every string in the first ledger, there exists a corresponding string in the second ledger. Finally, the function symbol $\mathtt{coherent}$ checks whether every active entry in a ledger of size $q \times (i+1)$ also appears as an active entry in a ledger of size $p \times (2i+1)$. More precisely, for every row in the first ledger whose last bit is set to $1$, there exists a corresponding active row in the second ledger such that the last $i$ bits of its $2i$-bit payload coincide with the $i$-bit string stored in the first ledger ensuring that all messages recorded as active in the first ledger are consistently reflected in the second one.
+
 
 These function symbols extend the set introduced in \cite{lago2024computationalindistinguishabilitylogicalrelations}, which also defines a collection of equations involving the original function symbols. For completeness, these equations are recalled in Appendix~\ref{app:1}, Figure~\ref{fig:equations}. They serve as semantic constraints, or rewriting rules, specifying how the function symbols behave under evaluation.
 
@@ -277,43 +284,46 @@ These function symbols extend the set introduced in \cite{lago2024computationali
 % \]
 % Sequential probabilistic choices are composed by propagating and weighting probabilities. The probabilities from the first distribution are pushed forward through the second.
 
-% \section{Lambda-BLL Extension for Proving MAC Security}\label{sec:extensions-lambda-bll}
-% We introduce a formal system of Hoare Logic \cite{axiomatic-basis-for-computer-programming}, which will be required to establish the existential unforgeability under chosen-message attacks (EUF-CMA) of PRF-induced MACs within the $\lamBLL$ framework. Following Hoare's original formalism, we describe program behavior by means of \emph{partial correctness specifications}, written as triples of the form
-% \[
-% \{P\} S \{Q\}.
-% \]
-% Here, $S$ denotes a program, and $P$ and $Q$ are predicates representing, respectively, the precondition and postcondition. The intended semantics of this triple are that, if the execution of $S$ is started in any state that satisfies $P$, then every terminating execution of $S$ will result in a state that satisfies $Q$.
+\section{Lambda-BLL Extension for Proving MAC Security}\label{sec:extensions-lambda-bll}
 
-% A \emph{state} is defined as an assignment of values to all program variables. Predicates over states are written using standard mathematical notation and logical connectives, thereby characterizing sets of such states. The specification is termed \emph{partial} because the validity of $\{P\} S \{Q\}$ does not require that the execution of $S$ actually terminates when initiated in a state satisfying $P$, it only constrains the states reached upon termination, should termination occur. 
+We introduce a Hoare logic \cite{axiomatic-basis-for-computer-programming}, which will be required to establish the existential unforgeability under chosen-message attacks (EUF-CMA) of PRF-induced MACs within the $\lamBLL$ framework. Following Hoare's original formalism, we describe program behavior by means of \emph{partial correctness specifications}, written as triples of the form
+\[
+\{P\} S \{Q\}.
+\]
+Here, $S$ denotes a program, and $P$ and $Q$ are predicates representing, respectively, the precondition and postcondition. Hoare Logic is essentially a deductive proof system for reasoning about Hoare triples $\{P\} S \{Q\}$. The intended semantics of this triple are that, if the execution of $S$ is started in any state that satisfies $P$, then every terminating execution of $S$ will result in a state that satisfies $Q$. Note that $Q$ is a function of a value, which is the value that $e$ reduces to. An expression $\{P\}\,e\,\{\lambda v.Q(v)\}$ is called a partial correctness specification. It is partial because for $\{P\}\,e\,\{\lambda v.Q(v)\}$ to be true, it is not necessary for the execution of $e$ to terminate when stated in a state satisfying $P$ (if it loops forever and doesn't reduce to a value, the Hoare triple doesn't say anything). Propositions are defined by the following grammar:
+\begin{align*}
+P ::= \phi \mid \exists x.P(x) \mid \forall x.Q(x) \mid P\land Q \mid P \lor Q \tag{Propositions}
+\end{align*}
+where $\phi$ is an arbitrary meta level proposition e.g., $\true, \false, n < 0$.
 
-% A stronger notion, referred to as \emph{total correctness specifications}, is written as $[P] S [Q]$. This triple asserts that whenever $S$ is executed from a state satisfying $P$, (i) the execution of $S$ terminates, and (ii) the resulting state satisfies $Q$. In the setting considered here, we assume that all programs $S$ terminate.
+\begin{figure}[ht]
+\vspace*{-6mm}
+\begin{center} \footnotesize
+\begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
+    \inferrule* [right=\footnotesize h-eta]{\Gamma \vdashtheta{v} V: A}{\Gamma \vdashtheta{c} \{P[V/v]\}\,\return V \,\{\lambda v.P(v)\}: A}
+    \and
+    \inferrule* [right=\footnotesize h-bang]{ \Gamma \vdashtheta{c} \{P\} M \{\lambda v. Q(v)\}: A \\ Q \vdash P}{ p \ast \Gamma \vdashtheta{v} \bang M: \bang_p^{P, Q} A}
+    \and
+    \inferrule* [right=\footnotesize h-app]{ \Gamma \vdashtheta{c} \{P\} M \{\lambda f. Q(f)\} : A \underset{R, S}{\multimap} B \\ \Delta \vdashtheta{v} Z : A \\ \forall f. (Q(f) \Rightarrow R) }{ \Gamma \boxplus \Delta \vdashtheta{c} \{P\} \, MZ \, \{\lambda v. S(v)\} : B }
+    \and
+    \inferrule* [right=\footnotesize h-lam]{\Gamma, x: A \vdashtheta{c} \{P(x)\}\,M\,\{\lambda v.Q(x, v)\}: B}{\Gamma \vdashtheta{v} \lambda x . M : A \underset{\lambda x.P(x), \lambda x.\lambda v.Q(x,v)}{\multimap} B }
+    \and
+    \inferrule* [right=\footnotesize h-get]{r:G\in \Theta}{\Gamma \vdashtheta{c} \{P(r)\}\,\get r \,\{\lambda x.P(x)\}: G}
+    \and
+    \inferrule* [right=\footnotesize h-set]{\Gamma \vdashtheta{v} Z: G \\ r:G\in \Theta}{ \Gamma \vdashtheta{c} \{P[Z/r]\}\, \setr{r}{Z} \,\{\lambda\_.P\}: \UU }
+    \and
+    \inferrule* [right=\footnotesize h-let]{\Gamma \vdashtheta{c} \{P\}\, M \,\{\lambda v.Q(v)\}:A \\ \Delta, x:A \vdashtheta{c} \forall v.\{Q(v)\}\, N[v/x] \,\{S\}: B}{\Gamma \boxplus \Delta \vdashtheta{c} \{P\}\, \letin{x=M}{N} \,\{S\}: B}
+    \and
+    \inferrule* [right=\footnotesize h-case]{\Gamma \vdashtheta{v} Z: \BB \\ \Delta \vdashtheta{c} \{P \land Z=\true\}\, M \,\{R\} : A \\ \Delta \vdashtheta{c} \{P \land Z=\false\}\, N \,\{R\} : A}{\Gamma \boxplus \Delta \vdashtheta{c} \{P\}\, \ifthen{Z}{M}{N} \,\{R\} : A}
+    \and
+    \inferrule* [right=\footnotesize h-cons]{P' \vdash P \quad Q \vdash Q' \\ \Gamma \vdashtheta{c} \{P\}\, M \,\{\lambda v.Q(v)\}: A }{\Gamma \vdashtheta{c} \{P'\}\, M \,\{\lambda v.Q'(v)\} : A}
+    % \and
+    % \inferrule*[right=h-inv]{\Gamma;\Theta \vdash \{P\}\,M\,\{\lambda v.Q(v)\} \\ \forall v.I\land Q(v) \Rightarrow I}{\Gamma;\Theta \vdash \{P \land I\}\,M\,\{\lambda v.Q(v) \land I\}}
+\end{mathpar}
+\end{center}
+\vspace*{-6mm}
+\caption{Typing rules of $\lamBLL$ extended with Hoare Logic}
+\label{fig:hl-typing-rules}
+\end{figure}
 
-% Hoare Logic is essentially a deductive proof system for reasoning about Hoare triples $\{P\} S \{Q\}$. Let $\mathcal{R}(\Phi)$ denote the set of program variables (or references) that occur in a predicate $\Phi$. Using this notation, we formulate the following inference rules presented in Figure~\ref{fig:hoare-rules} that instantiate a simple Hoare Logic for the $\lamBLL$ calculus. In particular, several rules play a crucial role in formalizing the proof of Theorem~\ref{theorem:mac-security}. 
-
-% \begin{figure}[ht]
-%     \vspace*{-6mm}
-% 	\begin{center} \footnotesize
-% 	\begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
-% 		\inferrule* [right=H-REFL]{\\}{\{\Phi\} M \sim M \{\Phi\}}
-% 		\and 
-% 		\inferrule* [right=H-CONS]{\Phi' \Rightarrow \Phi \quad \{\Phi\}M \sim N \{\Psi\} \quad \Psi \Rightarrow \Psi'}{\{\Phi'\}M \sim N \{\Psi'\}}
-% 		\and
-% 		\inferrule* [right=H-LET]{\{\Phi\} M \sim M' \{\Theta\} \quad \{\Theta\} N \sim N' \{\Psi\}}{\{\Phi\} \letin{x=M}{N} \sim \letin{x=M'}{N'}\{\Psi\}}
-% 		\and
-% 		\inferrule* [right=H-IF]{\{\Phi \land b\} M \sim M' \{\Psi\} \quad \{\Phi \land \neg b\} N \sim N' \{\Psi\}}{\{\Phi\} \ifthen{b}{M}{N} \sim \ifthen{b}{M'}{N'}\{\Psi\}}
-% 		\and
-% 		\inferrule* [right=H-THEN]{\\}{\{\Phi \land b=\true\} \ifthen{b}{M}{N} \sim M \{\Psi \land b=\true\}}
-% 		\and
-% 		\inferrule* [right=H-ELSE]{\\}{\{\Phi \land b=\false\} \ifthen{b}{M}{N} \sim N \{\Psi \land b=\false\}}
-%         \and
-% 		\inferrule* [right=H-PRES]{\mathcal{R}(M) \cap \mathcal{R}(\Phi)=\emptyset}{\{\Phi\} M \{\Phi\}}
-%         \and
-% 		\inferrule* [right=H-FRAME]{\{\Phi\}M\sim N\{\Psi\} \quad \mathcal{R}(M) \cap \mathcal{R}(\Theta)=\emptyset \quad \mathcal{R}(N) \cap \mathcal{R}(\Theta)=\emptyset}{\{\Phi \land \Theta\} M \sim N \{\Psi \land \Theta\}}
-% 	\end{mathpar}
-% \end{center}
-% \vspace*{-6mm}
-% \caption{Hoare rules for $\lamBLL$}
-% \label{fig:hoare-rules}
-% \end{figure}
-
-% The \textit{reflexivity} rule (\textsc{H-REFL}) rule captures the reflexivity of the logic, stating that any expression $M$ preserves a predicate $\Phi$ when it is related to itself. The \textit{consequence rule} (\textsc{H-CONS}) enables the strengthening of preconditions and the weakening of postconditions. The \textit{let rule} (\textsc{H-LET}) rule formalizes sequential composition, chaining the transition from an initial precondition $\Phi$ to a final postcondition $\Psi$ via an intermediate predicate $\Theta$. The \textit{if rule} (\textsc{H-IF}) rule handles conditional branching: it requires that both branches of a conditional expression establish the postcondition $\Psi$ under their respective boolean constraints. The rules \textsc{H-THEN} and \textsc{H-ELSE} constitute the axiomatic basis for reasoning about conditionals when the guard $b$ is known to evaluate to true or false, respectively. The \textit{preservation rule} (\textsc{H-PRES}) states that a predicate $\Phi$ remains invariant provided that the set of resources $\mathcal{R}(M)$ modified by the expression $M$ does not intersect the set of resources $\mathcal{R}(\Phi)$ referenced by $\Phi$. Finally, the \textsc{H-Frame} rule allows the extension of both the precondition and the postcondition with an additional predicate $\Theta$, under the requirement that $\Theta$ is disjoint and does not mention any resources modified by $M$ or $N$.
+Typing rules are defined in Figure~\ref{fig:hl-typing-rules}.

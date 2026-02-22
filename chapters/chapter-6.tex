@@ -874,6 +874,13 @@ The proof follows a similar approach to the proof of Theorem~\ref{theorem:tildeD
 
 To complete the overall security proof, it remains to establish the relation $\widetilde{MacForge}\simcontext \false$, which corresponds to the right part of the diagram in Figure~\ref{fig:proofscheme}. 
 
+\begin{lemma}\label{lemma:coherent-empty-q}
+For any ledger $rand$ and for any ledger $Q$ the predicates $\mathtt{coherent}(\mathtt{initQ}, rand)$ and $\mathtt{coherent}(Q, \mathtt{initTable})$ are true.
+\end{lemma}
+\begin{proof}
+Let $s=\mathtt{initQ}$. From Table~\ref{table:new-function-symbols}, $\mathtt{initQ}$ returns a string of length $q\times(i+1)$ for a polynomial $q$, filled with zeros. In the query ledger which is modelled by $s$ a row is active if and only if the $(i+1)$-th bit is set to 1. Since every bit in $s$ is 0, the activation bit for every row $k\in\{1,\dots,q\}$ is 0. Therefore, there are no active rows in $s$. The predicate $\mathtt{coherent}$ requires that for every active string $s$ in the query ledger, there exists a corresponding entry in the random ledger ($rand$). Since the set of active strings in $s$ is empty ($\emptyset$), the universal quantification is true. The same reasoning can be applied to predicate $\mathtt{coherent}(Q, \mathtt{initTable})$.
+\end{proof}
+
 \begin{theorem}\label{theorem:tilde-macforge-sim-false}
 \begin{align*}
 \widetilde{MacForge}\simcontext \false
@@ -882,65 +889,10 @@ To complete the overall security proof, it remains to establish the relation $\w
 
 \begin{proof}
 
-\[\mathcal{I}(\Theta) \equiv \mathtt{coherent}(Q,rand)\]
-
-\begin{center} \scriptsize 
-\begin{mathpar}\mprset{sep=1em, vskip =-0.1ex} 
-\inferrule*[right=h-let] {
-    \inferrule*[right=h-eta]
-    { \Gamma \vdash \mathtt{initQ} : \SS }
-    { \Gamma;\Theta \vdash \{ \mathcal{I} \}\, \mathtt{initQ} \,\{\lambda v.\mathcal{I}(v)\}:\SS }
-    \and
-    \inferrule*[right=h-eta]
-    {\Delta \vdash \false : \BB }
-    { \Delta, q:\SS; \Theta \vdash \forall v.\{\mathcal{I}(v)\}\, \return \false \,\{\lambda b. \mathcal{I}(b) \land b = \false\}: \BB }
-} 
-{
-    \Gamma \boxplus \Delta; \Theta \vdash \{ \mathcal{I} \} \, \letin{q = \mathtt{initQ}}{\return \false} \, \{ \lambda b. \mathcal{I}(b) \land b = \false\} : \BB
-} 
-\end{mathpar} 
-\end{center}
-
-\begin{center} \scriptsize 
-\begin{mathpar}\mprset{sep=1em, vskip =-0.1ex} 
-\inferrule*[right=h-let] {
-    \inferrule*[right=h-set]
-    { \Gamma \vdash q : \SS }
-    { \Gamma; \Theta, Q:\SS \vdash \{ \mathcal{I}[Q/q] \} \, \mathtt{set}\,Q\,q \, \{ \lambda \_. \mathcal{I} \} : \UU }
-    \and
-    \inferrule*[right=h-eta]
-    { \Delta \vdash \false : \BB }
-    { \Delta, \_:\UU; \Theta \vdash \forall \_. \{ \mathcal{I} \} \, \return \false \, \{ \lambda b. \mathcal{I}(b) \land b = \false \} : \BB }
-} 
-{
-    \Gamma \boxplus \Delta; \Theta \vdash \{ \mathcal{I}[Q/q] \} \, \letin{\_ = \mathtt{set}\,Q\,q}{\return \false} \, \{ \lambda b. \mathcal{I}(b) \land b = \false \} : \BB
-} 
-\end{mathpar} 
-\end{center}
-
-\begin{center} \scriptsize 
-\begin{mathpar}\mprset{sep=1em, vskip =-0.1ex} 
-\inferrule*[right=h-let] {
-    \inferrule*[right=h-app]
-    { \Gamma; \Theta \vdash \widetilde{Gen} : \UU \xrightarrow[\mathcal{I}, \mathcal{I}]{\Theta} \SS \\ \Delta \vdash \star : \UU }
-    { \Gamma \boxplus \Delta; \Theta \vdash \{ \mathcal{I} \} \, \widetilde{Gen} \star \, \{ \lambda v. \mathcal{I}(v) \} : \SS }
-    \and
-    \inferrule*[right=h-eta]
-    { \Delta \vdash \false : \BB }
-    { \Delta, k:\mathcal{K}; \Theta \vdash \forall v. \{ \mathcal{I} \} \, \return \false \, \{ \lambda b. \mathcal{I}(b) \land b = \false \} : \BB }
-} 
-{
-    \Gamma \boxplus \Delta; \Theta \vdash \{ \mathcal{I} \} \, \letin{k = \widetilde{Gen} \star}{\return \false} \, \{ \lambda b. \mathcal{I} \land b = \false \} : \BB
-} 
-\end{mathpar} 
-\end{center}
-
 \small{
 \begin{align*}
     \widetilde{MacForge} \quad\triangleq\quad&
     \begin{aligned}
-        &\letin{q=\mathtt{initQ}}{} \\
-        &\letin{\_ = \mathtt{set}\,Q\,q}{} \\
         &\letin{k = \widetilde{Gen} \star}{} \\
         &\letin{o = \widetilde{Oracle}\, k}{} \\
         &\letin{\lis{m,t} = Adv\, o}{} \\
@@ -1065,41 +1017,186 @@ To complete the overall security proof, it remains to establish the relation $\w
 \end{align*}
 }
 
-We introduce a Hoare logic \cite{axiomatic-basis-for-computer-programming} based on the Hoare triples $\{P\}\,e\,\{\lambda v.Q(v)\}$ for terms from $\lamBLL$. The interpretation is that whenever if $P$ holds initially and $e$ terminates in a value $v$, then $Q(v)$ holds. The proposition $P$ is called the pre-condition and $Q$ is the post-condition. Note that $Q$ is a function of a value, which is the value that $e$ reduces to. An expression $\{P\}\,e\,\{\lambda v.Q(v)\}$ is called a partial correctness specification. It is partial because for $\{P\}\,e\,\{\lambda v.Q(v)\}$ to be true, it is not necessary for the execution of $e$ to terminate when stated in a state satisfying $P$ (if it loops forever and doesn't reduce to a value, the Hoare triple doesn't say anything). Propositions are defined by the following grammar
-\begin{align*}
-P ::= \phi \mid \exists x.P(x) \mid \forall x.Q(x) \mid P\land Q \mid P \lor Q \tag{Propositions}
-\end{align*}
-where $\phi$ is an arbitrary meta level proposition e.g., $\true, \false, n < 0$.
+% \begin{lemma}
+% \begin{mathpar}
+% \inferrule*[right=\footnotesize h-let]
+% { \Gamma \vdashtheta{c} \{P\} \, M \, \{\lambda f. Q(f)\}: A \underset{P, Q}{\multimap} B
+% \\
+% \Delta, f: A \underset{P, Q}{\multimap} B
+% \vdashtheta{c} \forall v.\{Q(v)\} \, fZ[v/f] \, \{S\}: B }
+% { \Gamma \boxplus \Delta \vdashtheta{c} \{P\} \, \letin{f = M}{fZ} \,\{S\}: B }
+% \end{mathpar}
+% \end{lemma}
 
-\begin{figure}[ht]
-% \vspace*{-6mm}
-\begin{center} \footnotesize
-\begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
-    \inferrule* [right=h-eta]{\Gamma \vdash V: A}{\Gamma ; \Theta \vdash \{P(V)\}\,\return V \,\{\lambda v.P(v)\}: A}
-    \and
-    \inferrule* [right=h-bang]{ \Gamma ; \Theta \vdash \{P\} M \{\lambda v. Q\} }{ p \ast \Gamma \vdash \{P\}\, \bang M: \bang_p^{\Theta, Q} A }
-    \and
-    \inferrule* [right=h-lam]{\Gamma, x: A; \Theta \vdash \{P\}\,M\,\{\lambda v.Q(v)\}: B}{\Gamma \vdash \lambda x . M : A\xrightarrow[P, Q]{\Theta} B}
-    \and
-    \inferrule* [right=h-app]{\Gamma ; \Theta \vdash M : A\xrightarrow[P,Q]{\Theta} B
-    \\ \Delta \vdash Z : A}{\Gamma\boxplus \Delta ; \Theta \vdash \{P\}\, MZ \,\{\lambda v.Q(v)\} : B}
-    \and
-    \inferrule* [right=h-get]{\\}{\Gamma ; \Theta, r: G \vdash \{P(r)\}\,\get r \,\{\lambda x.P(x)\}: G}
-    \and
-    \inferrule* [right=h-set]{\Gamma \vdash Z: G}{ \Gamma;  \Theta, r: G  \vdash \{P[r/Z]\}\, \setr{r}{Z} \,\{\lambda\_.P\}: \UU }
-    \and
-    \inferrule* [right=h-let]{\Gamma;\Theta \vdash \{P\}\, M \,\{\lambda v.Q(v)\}:A \quad \Delta, x:A; \Theta \vdash \forall v.\{Q(v)\}\, N[v/x] \,\{S\}:C}{\Gamma \boxplus \Delta;\Theta \vdash \{P\}\, \letin{x=M}{N} \,\{S\}: C}
-    \and
-    \inferrule* [right=h-case]{\Gamma ; \Theta \vdash \{P\}\, Z \,\{\lambda b.(b=\true \land Q_t) \lor (b=\false \land Q_f)\}: \BB \quad \Delta ; \Theta \vdash \{Q_t\}\, M \,\{R\} : A \\ \Delta ; \Theta \vdash  \{Q_f\}\, N \,\{R\} : A}{\Gamma \boxplus \Delta ; \Theta \vdash \{P\}\, \ifthen{Z}{M}{N} \,\{R\} : A}
-    \and
-    \inferrule* [right=h-cons]{P' \vdash P \quad (\forall v.Q(v) \vdash Q'(v)) \quad \Gamma ; \Theta \vdash \{P\}\, M \,\{\lambda v.Q(v)\}: A }{\Gamma ; \Theta \vdash \{P'\}\, M \,\{\lambda v.Q'(v)\} : A}
-\end{mathpar}
-\end{center}
-% \vspace*{-6mm}
-\caption{Extended typing rules of $\lamBLL$ with Hoare Logic}
-\label{fig:hl-typing-rules}
-\end{figure}
+% \begin{mathpar}
+% \inferrule*[right=\footnotesize $\mathcal{D}_{init}$]{\vdashtheta{c}\mathtt{initQ}: \SS}{\vdashtheta{c} \{\top\}\,\mathtt{initQ}\,\{\lambda\_.\mathtt{coherent}(Q, rand)\} : \SS}
+% \end{mathpar}
 
-% Notice that the postcondition of M is $\{\lambda v.Q[v/x]\}$, because every expression $M$ is a computation that results in a value. Since $M$ returns a value $v$ which is then bound to $x$ in $N$, the invariant $Q$ for the next term must account for that value.
+% \begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex} \scriptsize
+% \inferrule*[left=\footnotesize $\mathcal{D}_{init}$]
+% { 
+%     \vdashtheta{c}\{P[\star/v]\}\,\return \star\,\{\lambda v.P(v)\}: \UU
+% }
+% { \vdashtheta{c}\{\top\}\, \letin{q=\mathtt{initQ}}{\letin{\_=\mathtt{set}\,Q\,q}{\return \star}} \, \{ \lambda \_. \mathtt{coherent}(Q, rand) \} : \SS }
+% \end{mathpar}
+
+\begin{lemma}\label{lemma:gen-tilde-hoare-lemma}
+The Hoare triple 
+\[\{\top\}\, \widetilde{Gen}\,\star \,\{\lambda \_.\mathtt{coherent}(Q, rand)\}\] 
+is true.
+\end{lemma}
+\begin{proof}
+We prove Lemma~\ref{lemma:gen-tilde-hoare-lemma} simply using inference rules over subterms of $\widetilde{Gen}$.
+
+% \begin{center} \scriptsize
+% \begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
+% \inferrule* [right=\footnotesize h-let]
+% {
+%     \inferrule*[right=\scriptsize h-cons]
+%     {
+%         \inferrule*[right=\scriptsize h-eta]
+%         { \Gamma \vdashtheta{v} \mathtt{initQ} : \SS }
+%         { \Gamma \vdashtheta{c} \{ \top \} \, \return \mathtt{initQ} \, \{ \lambda v. v = \mathtt{initQ} \} : \SS }
+%         \\
+%         v = \mathtt{initQ} \vdash v = \emptyset
+%     }
+%     { \Gamma \vdashtheta{c} \{ \top \}\, \mathtt{initQ} \,\{\lambda v. v = \emptyset\}: \SS }
+%     \and
+%     \inferrule*[right=\scriptsize h-set]
+%     { q:\SS \vdashtheta{v} q : \SS \\ Q \in \Theta }
+%     { \Gamma, q:\SS \vdashtheta{c} \forall v.\{ v = \emptyset \}\, \mathtt{set}\,Q\,v \,\{\lambda \_. Q = \emptyset\}: \UU }
+% }
+% { \Gamma \vdashtheta{c} \{ \top \}\, \letin{q=\mathtt{initQ}}{\mathtt{set}\,Q\,q} \,\{\lambda \_.\mathtt{coherent}(Q, rand)\} : \UU }
+% \and
+% \inferrule*[right=\scriptsize h-lam]
+% {
+%     \Gamma, u: \UU \vdashtheta{c} \{ \top \}\,\letin{q=\mathtt{initQ}}{\mathtt{set}\,Q\,q} \,\{\lambda\_.\mathtt{coherent}(Q, rand)\} : \UU
+% }
+% {
+%     \Gamma \vdashtheta{v} \lambda u.\letin{q=\mathtt{initQ}}{\mathtt{set}\,Q\,q} : \UU \underset{\lambda u.\top, \lambda u.\lambda \_.\mathtt{coherent}(Q, rand)}{\multimap} \UU
+% }
+
+% \inferrule*[right=\scriptsize h-cons, left=\scriptsize $\mathcal{D}_{initQ}$]
+% {
+%     \inferrule*[right=\scriptsize h-eta]
+%     { \vdashtheta{v} \mathtt{initQ} : \SS }
+%     { \vdashtheta{c} \{\top\} \, \return \mathtt{initQ} \, \{\lambda v. v = \mathtt{initQ}\} : \SS }
+%     \quad
+%     \forall v. v = \mathtt{initQ} \vdash \mathtt{coherent}(v, rand) \quad \text{(Lemma~\ref{lemma:coherent-empty-q})}
+% }
+% {
+%     \vdashtheta{c} \{\top\}\, \return \mathtt{initQ} \,\{\lambda v.\mathtt{coherent}(v, rand)\} : \SS
+% }
+% \and
+% \inferrule* [right=\scriptsize h-set, left=\scriptsize $\mathcal{D}_{setQ}$]
+% {
+%     q : \SS \vdashtheta{v} q : \SS \\ Q \in \Theta
+% }
+% {
+%     q: \SS \vdashtheta{c} \{\mathtt{coherent}(q, rand)\}\, \mathtt{set}\,Q\,q \,\{\lambda\_.\mathtt{coherent}(Q, rand)\} : \UU
+% }
+% \and
+% \inferrule* [right=\scriptsize h-let, left=\scriptsize $\mathcal{D}_{Qledger}$]
+% {
+%     \mathcal{D}_{initQ} \\ \mathcal{D}_{setQ}
+% }
+% {
+%     \vdashtheta{c} \{\top\}\, \lambda u.\letin{q=\mathtt{initQ}}{\mathtt{set}\,Q\,q} \,\{\lambda\_.\mathtt{coherent}(Q, rand)\} : \UU
+% }
+% \and
+% \inferrule*[right=\scriptsize h-cons, left=\scriptsize $\mathcal{D}_{initR}$]
+% {
+%     \inferrule*[right=\scriptsize h-eta]
+%     { \vdashtheta{v} \mathtt{initTable} : \SS }
+%     { \vdashtheta{c} \{\top\} \, \return \mathtt{initTable} \, \{\lambda v. v = \mathtt{initTable}\} : \SS }
+%     \quad
+%     \forall v. v = \mathtt{initTable} \vdash \mathtt{coherent}(Q, v) \quad \text{(Lemma~\ref{lemma:coherent-empty-q})}
+% }
+% {
+%     \vdashtheta{c} \{\mathtt{coherent}(Q, rand)\}\, \return \mathtt{initTable} \,\{\lambda v.\mathtt{coherent}(Q, v)\} : \SS
+% }
+% \and
+% \inferrule* [right=\scriptsize h-set, left=\scriptsize $\mathcal{D}_{setR}$]
+% {
+%     tab : \SS \vdashtheta{v} tab : \SS \\ rand \in \Theta
+% }
+% {
+%     tab: \SS \vdashtheta{c} \{\mathtt{coherent}(Q, tab)\}\, \mathtt{set}\,rand\,tab \,\{\lambda\_.\mathtt{coherent}(Q, rand)\} : \UU
+% }
+% \and
+% \inferrule* [right=\scriptsize h-let, left=\scriptsize $\mathcal{D}_{Rledger}$]
+% {
+%     \mathcal{D}_{initR} \\ \mathcal{D}_{setR}
+% }
+% {
+%     \vdashtheta{c} \{\mathtt{coherent}(Q, rand)\}\, \letin{tab=\mathtt{initTable}}{\mathtt{set}\,rand\,tab} \,\{\lambda\_.\mathtt{coherent}(Q, rand)\} : \UU
+% }
+% \and
+% \inferrule*[right=\scriptsize h-eta, left=\scriptsize $\mathcal{D}_{retZero}$]
+% { \vdashtheta{v} \mathtt{zero} : \SS }
+% { \vdashtheta{c} \{ \mathtt{coherent}(Q, rand) \} \, \return \mathtt{zero} \, \{ \lambda \_.\mathtt{coherent}(Q, rand) \} : \SS }
+% \and
+% \inferrule* [right=\scriptsize h-let, left=\scriptsize $\mathcal{D}_{Gen}$]
+% {
+%     \mathcal{D}_{Qledger} \\
+%     \inferrule* [right=\scriptsize h-let]
+%     {
+%         \mathcal{D}_{Rledger} \\
+%         \mathcal{D}_{retZero}
+%     }
+%     {
+%         \vdashtheta{c} \{\mathtt{coherent}(Q, rand)\}\, \\\\
+%         \letin{tab=\mathtt{initTable}}{\letin{\_=\mathtt{set}\,rand\,tab}{\return \mathtt{zero}}} \\\\ 
+%         \,\{\lambda \_.\mathtt{coherent}(Q, rand)\} : \SS
+%     }
+% }
+% {
+%     \vdashtheta{c} \{\top\}\, 
+%     \widetilde{Gen} \star
+%     \,\{\lambda \_.\mathtt{coherent}(Q, rand)\} : \SS
+% }
+% \end{mathpar}
+% \end{center}
+
+\end{proof}
+
+\begin{lemma}
+The Hoare triple 
+\[\{\mathtt{coherent}(Q, rand)\}\, \widetilde{Mac}\,\lis{k,m} \,\{\lambda \_.\mathtt{coherent}(Q, rand)\}\] 
+is true.
+\end{lemma}
+
+\begin{proof}
+We prove Lemma~\ref{lemma:gen-tilde-hoare-lemma} simply using inference rules over subterms of $\widetilde{Mac}$.
+
+% \begin{center} \scriptsize
+% \begin{mathpar} \mprset{sep=1em,  vskip =-0.1ex}
+% \inferrule*[]
+% {}
+% {\vdashtheta{c} \{\mathtt{coherent}(Q, rand)\}\, \widetilde{Mac}\,\lis{k,m} \,\{\lambda \_.\mathtt{coherent}(Q, rand)\}}
+% \end{mathpar}
+% \end{center}
+
+\end{proof}
+
+\begin{lemma}
+The Hoare triple 
+\[\{\mathtt{coherent}(Q, rand)\}\, \widetilde{Oracle}\,k \,\{\lambda \_.\mathtt{coherent}(Q, rand)\}\] 
+is true.
+\end{lemma}
+
+\begin{proof}
+We prove Lemma~\ref{lemma:gen-tilde-hoare-lemma} simply using inference rules over subterms of $\widetilde{Oracle}$.
+
+% \begin{center} \scriptsize
+% \begin{mathpar} \mprset{sep=1em,  vskip =-0.1ex}
+% \inferrule*[]
+% {}
+% {\vdashtheta{c} \{\mathtt{coherent}(Q, rand)\}\, \widetilde{Mac}\,\lis{k,m} \,\{\lambda \_.\mathtt{coherent}(Q, rand)\}}
+% \end{mathpar}
+% \end{center}
+
+\end{proof}
+
 
 \end{proof}
