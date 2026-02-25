@@ -69,6 +69,11 @@ The equations presented in Figure~\ref{fig:equations} establish a set of equival
     \letin{x=M_1}{\letin{y=M_2}{N}}{} &\sim_{\Theta\subseteq\Xi} \letin{y=(\letin{x=M_1}{M_2)}}{N} \label{letAss}\tag{$\mathtt{letAss}$} \\
     \text{if}\ x &\not\in FV(N) \nonumber
     \\[2ex]
+    \left(\begin{aligned}
+    &\mathtt{if}\,{b}\,\mathtt{then}\,\letin{x=M}{N} \\
+    &\mathtt{else}\,\letin{x=L}{N}
+    \end{aligned}\right) &\sim_{\Theta\subseteq\Xi} \letin{x=(\ifthen{b}{M}{L}}{N)} \tag{$\mathtt{iflet}$}\label{iflet}
+    \\[2ex]
     \letin{x_1=M_1}{\letin{x_2=M_2}{N}} &\sim_{\Theta\subseteq\Xi} \letin{x_2=M_2}{\letin{x_1=M_1}{N}}\tag{$\mathtt{letCom}$}\label{letCom}
     \\[2ex]
     \letin{x=M}{N}&\sim_{\Theta\subseteq\Xi}N \tag{$\mathtt{safeDisc1}$}\label{safeDisc1} \\
