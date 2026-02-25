@@ -57,8 +57,8 @@ We define the $\lamBLL$ term corresponding to the forgery experiment, shown in F
     &\quad \letin{o = Oracle\, k}{} \\
     &\quad \letin{\langle m, t \rangle = Adv\, o}{} \\
     &\quad \letin{queries = \get Q}{} \\
-    &\quad \letin{b=\mathtt{contains}(queries, m)}{} \\
-    &\quad \mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+    &\quad \letin{c=\mathtt{contains}(queries, m)}{} \\
+    &\quad \mathtt{if}\, c\, \mathtt{then}\, \return \false \\
     &\quad \mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)}
     \end{align*}
     \caption{$\lamBLL$ term for the $\mathtt{MacForge}$ experiment.}
@@ -113,7 +113,7 @@ The tag generation algorithm of $\Pi_F$ is modeled by the term $\mathit{Mac}^F$.
 
 The oracle $Oracle^F$ encapsulates the secret key and provides access to the MAC function through the graded modality $\bang$. In addition to answering MAC queries, the oracle maintains a record of all messages queried by the adversary. This record is stored in the reference $Q$ thus introducing a non-empty reference context. At each oracle invocation on a message $m$, the current contents of $Q$ are retrieved, updated to include $m$, and written back to the reference before computing and returning the corresponding MAC value. In order to retrieve and update the query ledger, we rely on several function symbols such as $\mathtt{initQ}$, $\mathtt{modifyQ}$ and $\mathtt{contains}$, which are reported in Table~\ref{table:new-function-symbols}. To support this behavior, the typing of the terms in Figure~\ref{fig:macforgeF-subterms} is carried out in a reference context $ \Xi = \{\, Q : \SS[q\times(i+1)] \,\}$ which represents the ledger used to store the adversary's oracle queries. The context $\Theta$ in the corresponding type derivations is instantiated with $\Xi$. In the term $Oracle^F$ in Figure~\ref{fig:macforgeF-subterms} we use the syntactic sugar of Equation~\ref{eq:sugar-return} since $Mac^F$ is a value.
 
-The model for $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, denoted by $\widetilde{\mathit{MacForge}}$, is obtained from the term $\mathit{MacForge}$ from Figure~\ref{fig:macforge-term} instantiating the terms $Mac$, $Gen$ and $Oracle$ according to $\widetilde{\Pi}$, and is represented in Figure~\ref{fig:macforgef-subterms}. The model for $\widetilde{MacForge}$ relies on a truly random function, which is characterized by the property that each distinct input is deterministically associated with a uniformly random output upon its first evaluation, and that this output remains fixed for all subsequent evaluations of the ranomd function on the same input. To model this behavior within $\lamBLL$, we follow the same ledger based approach introduced in~\cite{lago2024computationalindistinguishabilitylogicalrelations}, which is conceptually analogous to the mechanism used to record oracle queries. We introduce an additional ledger that can be manipulated through a collection of function symbols, detailed in Appendix~\ref{app:1}. As shown in Figure~\ref{fig:macforgef-subterms}, this ledger is stored in the reference $rand$, with type $\SS[(q+1)\times(2i+1)]$. The ledger can be viewed as a table with $q+1$ rows, where each row contains an input-output pair of the random function together with a final bit indicating whether the row is active. The size of the ledger reflects the fact that the random function $f$ can be queried at most $q+1$ times: once by the experiment itself and up to $q$ times by the adversary.
+The model for $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, denoted by $\widetilde{\mathit{MacForge}}$, is obtained from the term $\mathit{MacForge}$ from Figure~\ref{fig:macforge-term} instantiating the terms $Mac$, $Gen$ and $Oracle$ according to $\widetilde{\Pi}$, and is represented in Figure~\ref{fig:macforgef-subterms}. The model for $\widetilde{MacForge}$ relies on a truly random function, which is characterized by the property that each distinct input is deterministically associated with a uniformly random output upon its first evaluation, and that this output remains fixed for all subsequent evaluations of the random function on the same input. To model this behavior within $\lamBLL$, we follow the same ledger based approach introduced in~\cite{lago2024computationalindistinguishabilitylogicalrelations}, which is conceptually analogous to the mechanism used to record oracle queries. We introduce an additional ledger that can be manipulated through a collection of function symbols, detailed in Appendix~\ref{app:1}. As shown in Figure~\ref{fig:macforgef-subterms}, this ledger is stored in the reference $rand$, with type $\SS[(q+1)\times(2i+1)]$. The ledger can be viewed as a table with $q+1$ rows, where each row contains an input-output pair of the random function together with a final bit indicating whether the row is active. The size of the ledger reflects the fact that the random function $f$ can be queried at most $q+1$ times: once by the experiment itself and up to $q$ times by the adversary.
 
 \begin{figure}[htpb]
     \begin{align*}
@@ -179,8 +179,8 @@ The distinguisher $D_A$ constructed from any adversary that succeeds in the $\ma
         &\quad \return(\lambda o. \\
         &\quad \letin{\lis{m,t} = Adv\, o}{} \\
         &\quad \letin{queries = \get Q}{} \\
-        &\quad \letin{b=\mathtt{contains}(queries, m)}{} \\
-        &\quad \mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+        &\quad \letin{c=\mathtt{contains}(queries, m)}{} \\
+        &\quad \mathtt{if}\, c\, \mathtt{then}\, \return \false \\
         &\quad \mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t))}
     \end{align*}
     \caption{$\lamBLL$ term for the $\mathtt{D}$ distinguisher.}
@@ -603,8 +603,8 @@ We begin with the definition of $\widetilde{D}$ given in Equation~\ref{eq:d-tild
             &\return(\lambda o. \\
             &\quad \letin{\lis{m,t} = Adv\, o}{} \\
             &\quad \letin{queries = \get Q}{} \\
-            &\quad \letin{b=\mathtt{contains}(queries, m)}{} \\
-            &\quad \mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+            &\quad \letin{c=\mathtt{contains}(queries, m)}{} \\
+            &\quad \mathtt{if}\, c\, \mathtt{then}\, \return \false \\
             &\quad \mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t))}
         \end{aligned}
         \right) o
@@ -616,8 +616,8 @@ We begin with the definition of $\widetilde{D}$ given in Equation~\ref{eq:d-tild
         &\letin{o=\widetilde{Oracle}\,k} {} \\
         &\letin{\lis{m,t} = Adv\, o}{} \\
         &\letin{queries = \get Q}{} \\
-        &\letin{b=\mathtt{contains}(queries, m)}{} \\
-        &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+        &\letin{c=\mathtt{contains}(queries, m)}{} \\
+        &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
         &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t))}
     \end{aligned}
     \quad=\quad
@@ -850,8 +850,8 @@ The proof follows a similar approach to the proof of Theorem~\ref{theorem:tildeD
             &\return(\lambda o. \\
             &\quad\letin{\lis{m,t} = Adv\, o}{} \\
             &\quad\letin{queries = \get Q}{} \\
-            &\quad\letin{b=\mathtt{contains}(queries, m)}{} \\
-            &\quad\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+            &\quad\letin{c=\mathtt{contains}(queries, m)}{} \\
+            &\quad\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
             &\quad\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)})
         \end{aligned}
         \right) o
@@ -863,8 +863,8 @@ The proof follows a similar approach to the proof of Theorem~\ref{theorem:tildeD
         &\letin{o=Oracle^F\,k}{} \\
         &\letin{\lis{m,t} = Adv\, o}{} \\
         &\letin{queries = \get Q}{} \\
-        &\letin{b=\mathtt{contains}(queries, m)}{} \\
-        &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
+        &\letin{c=\mathtt{contains}(queries, m)}{} \\
+        &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
         &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)}
     \end{aligned}
     \quad=\quad\mathit{MacForge^F}
@@ -874,179 +874,43 @@ The proof follows a similar approach to the proof of Theorem~\ref{theorem:tildeD
 
 To complete the overall security proof, it remains to establish the relation $\widetilde{MacForge}\simcontext \false$, which corresponds to the right part of the diagram in Figure~\ref{fig:proofscheme}. 
 
-\begin{lemma}\label{lemma:coherent-empty-q}
-For any ledger $rand$ and for any ledger $Q$ the predicates $\mathtt{coherent}(\mathtt{initQ}, rand)$ and $\mathtt{coherent}(Q, \mathtt{initTable})$ are true.
-\end{lemma}
-\begin{proof}
-Let $s=\mathtt{initQ}$. From Table~\ref{table:new-function-symbols}, $\mathtt{initQ}$ returns a string of length $q\times(i+1)$ for a polynomial $q$, filled with zeros. In the query ledger which is modelled by $s$ a row is active if and only if the $(i+1)$-th bit is set to 1. Since every bit in $s$ is 0, the activation bit for every row $k\in\{1,\dots,q\}$ is 0. Therefore, there are no active rows in $s$. The predicate $\mathtt{coherent}$ requires that for every active string $s$ in the query ledger, there exists a corresponding entry in the random ledger ($rand$). Since the set of active strings in $s$ is empty ($\emptyset$), the universal quantification is true. The same reasoning can be applied to predicate $\mathtt{coherent}(Q, \mathtt{initTable})$.
-\end{proof}
-
-\begin{theorem}\label{theorem:tilde-macforge-sim-false}
-\begin{align*}
-\widetilde{MacForge}\simcontext \false
-\end{align*}
-\end{theorem}
-
-\begin{proof}
-
-\small{
-\begin{align*}
-    \widetilde{MacForge} \quad\triangleq\quad&
-    \begin{aligned}
-        &\letin{k = \widetilde{Gen} \star}{} \\
-        &\letin{o = \widetilde{Oracle}\, k}{} \\
-        &\letin{\lis{m,t} = Adv\, o}{} \\
-        &\letin{queries = \get Q}{} \\
-        &\letin{b=\mathtt{contains}(queries, m)}{} \\
-        &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
-        &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)}
-    \end{aligned}
-    % \\[2ex]
-    % \quad\overset{\text{Lemma ~\ref{lemma:oracle-tilde-eq-suspended-random}}}{\simcontext}\quad&
-    % \begin{aligned}
-    %     &\letin{k = \widetilde{Gen} \star}{} \\
-    %     &\letin{o = \return(\lambda k.\return\bang(\return \lambda m.\random))\, k}{} \\
-    %     &\letin{\langle m, t \rangle = Adv\, o}{} \\
-    %     &\letin{queries = \get Q}{} \\
-    %     &\letin{b=\mathtt{contains}(queries, m)}{} \\
-    %     &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
-    %     &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)}
-    % \end{aligned}
-    % \\[2ex]
-    % \quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad&
-    % \begin{aligned}
-    %     &\letin{k = \widetilde{Gen} \star}{} \\
-    %     &\letin{o = \bang(\return \lambda m.\random)}{} \\
-    %     &\letin{\langle m, t \rangle = Adv\, o}{} \\
-    %     &\letin{queries = \get Q}{} \\
-    %     &\letin{b=\mathtt{contains}(queries, m)}{} \\
-    %     &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
-    %     &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)}
-    % \end{aligned}
-    % \\[2ex]
-    % \quad\overset{\text{~\ref{reduc4}}}{\simcontext}\quad&
-    % \begin{aligned}
-    %     &\letin{k = \widetilde{Gen} \star}{} \\
-    %     &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random)}{} \\
-    %     &\letin{queries = \get Q}{} \\
-    %     &\letin{b=\mathtt{contains}(queries, m)}{} \\
-    %     &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
-    %     &\mathtt{else}\,\letin{x=\mathtt{der}(\bang(\return \lambda m.\random))\, m}{\mathtt{eq}(x,t)}
-    % \end{aligned}
-    % \\[2ex]
-    % \quad\overset{\text{~\ref{reduc3}}}{\simcontext}\quad&
-    % \begin{aligned}
-    %     &\letin{k = \widetilde{Gen} \star}{} \\
-    %     &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random)}{} \\
-    %     &\letin{queries = \get Q}{} \\
-    %     &\letin{b=\mathtt{contains}(queries, m)}{} \\
-    %     &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
-    %     &\mathtt{else}\,\letin{x=(\return \lambda m.\random)\, m}{\mathtt{eq}(x,t)}
-    % \end{aligned}
-    % \\[2ex]
-    % \quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad&
-    % \begin{aligned}
-    %     &\letin{k = \widetilde{Gen} \star}{} \\
-    %     &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random)}{} \\
-    %     &\letin{queries = \get Q}{} \\
-    %     &\letin{b=\mathtt{contains}(queries, m)}{} \\
-    %     &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
-    %     &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
-    % \end{aligned}
-    % \begin{aligned}
-    %     &\mathtt{let}\,k= \\
-    %     &\left(
-    %     \begin{aligned}
-    %         &\lambda u. \\
-    %         &\letin{q=\mathtt{initQ}}{} \\
-    %         &\letin{\_ = \mathtt{set}\,Q\,q}{} \\
-    %         &\letin{tab=\mathtt{initTable}}{} \\
-    %         &\letin{\_ = \mathtt{set}\,rand\,tab}{} \\
-    %         &\letin{z=\mathtt{zero}}{} \\
-    %         &\return z
-    %     \end{aligned}
-    %     \right)\mathtt{in}\;\star \\
-    %     &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random)}{} \\
-    %     &\letin{queries = \get Q}{} \\
-    %     &\letin{b=\mathtt{contains}(queries, m)}{} \\
-    %     &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
-    %     &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
-    % \end{aligned}
-    % \\[2ex]
-    % \quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad&
-    % \begin{aligned}
-    %     &\mathtt{let}\,k= \\
-    %     &\left(
-    %     \begin{aligned}
-    %         &\letin{q=\mathtt{initQ}}{} \\
-    %         &\letin{\_ = \mathtt{set}\,Q\,q}{} \\
-    %         &\letin{tab=\mathtt{initTable}}{} \\
-    %         &\letin{\_ = \mathtt{set}\,rand\,tab}{} \\
-    %         &\letin{z=\mathtt{zero}}{} \\
-    %         &\return z
-    %     \end{aligned}
-    %     \right)\mathtt{in} \\
-    %     &\letin{\langle m, t \rangle = Adv\;\bang(\return \lambda m.\random)}{} \\
-    %     &\letin{queries = \get Q}{} \\
-    %     &\letin{b=\mathtt{contains}(queries, m)}{} \\
-    %     &\mathtt{if}\, b\, \mathtt{then}\, \return \false \\
-    %     &\mathtt{else}\,\letin{x=\random}{\mathtt{eq}(x,t)}
-    % \end{aligned}
-    % \\[2ex]
-    % \quad\simcontext\quad&
-    % \begin{aligned}
-    % \left(\dots\right)
-    % \end{aligned}
-    % \\[2ex]
-    % \quad\simcontext\quad&
-    % \begin{aligned}
-    %     &\letin{\lis{m,t} = Adv\;\bang(\return \lambda m.\random)}{} \\
-    %     &\letin{x=\random}{\mathtt{eq}(x,t)}
-    % \end{aligned}
-    % \\[2ex]
-    % \quad\overset{\text{\ref{randEq}}}{\simcontext}\quad&
-    % \begin{aligned}
-    %     &\letin{\lis{m,t} = Adv\;\bang(\return \lambda m.\random)}{} \\
-    %     &\false
-    % \end{aligned}
-    % \\[2ex]
-    % \quad\overset{\text{\ref{safeDisc2}}}{\simcontext}\quad&
-    % \begin{aligned}
-    %     &\false
-    % \end{aligned}
-\end{align*}
-}
-
-% \begin{lemma}
-% \begin{mathpar}
-% \inferrule*[right=\footnotesize h-let]
-% { \Gamma \vdashtheta{c} \{P\} \, M \, \{\lambda f. Q(f)\}: A \underset{P, Q}{\multimap} B
-% \\
-% \Delta, f: A \underset{P, Q}{\multimap} B
-% \vdashtheta{c} \forall v.\{Q(v)\} \, fZ[v/f] \, \{S\}: B }
-% { \Gamma \boxplus \Delta \vdashtheta{c} \{P\} \, \letin{f = M}{fZ} \,\{S\}: B }
-% \end{mathpar}
+% \begin{lemma}\label{lemma:coherent-empty-q}
+% For any ledger $rand$ and for any ledger $Q$ the predicates $\mathtt{coherent}(\mathtt{initQ}, rand)$ and $\mathtt{coherent}(Q, \mathtt{initTable})$ are true.
 % \end{lemma}
+% \begin{proof}
+% Let $s=\mathtt{initQ}$. From Table~\ref{table:new-function-symbols}, $\mathtt{initQ}$ returns a string of length $q\times(i+1)$ for a polynomial $q$, filled with zeros. In the query ledger which is modelled by $s$ a row is active if and only if the $(i+1)$-th bit is set to 1. Since every bit in $s$ is 0, the activation bit for every row $k\in\{1,\dots,q\}$ is 0. Therefore, there are no active rows in $s$. The predicate $\mathtt{coherent}$ requires that for every active string $s$ in the query ledger, there exists a corresponding entry in the random ledger ($rand$). Since the set of active strings in $s$ is empty ($\emptyset$), the universal quantification is true. The same reasoning can be applied to predicate $\mathtt{coherent}(Q, \mathtt{initTable})$.
+% \end{proof}
 
-% \begin{mathpar}
-% \inferrule*[right=\footnotesize $\mathcal{D}_{init}$]{\vdashtheta{c}\mathtt{initQ}: \SS}{\vdashtheta{c} \{\top\}\,\mathtt{initQ}\,\{\lambda\_.\mathtt{coherent}(Q, rand)\} : \SS}
-% \end{mathpar}
-
-% \begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex} \scriptsize
-% \inferrule*[left=\footnotesize $\mathcal{D}_{init}$]
-% { 
-%     \vdashtheta{c}\{P[\star/v]\}\,\return \star\,\{\lambda v.P(v)\}: \UU
-% }
-% { \vdashtheta{c}\{\top\}\, \letin{q=\mathtt{initQ}}{\letin{\_=\mathtt{set}\,Q\,q}{\return \star}} \, \{ \lambda \_. \mathtt{coherent}(Q, rand) \} : \SS }
-% \end{mathpar}
-
-\begin{lemma}\label{lemma:gen-tilde-hoare-lemma}
+\begin{lemma}\label{lemma:gen-oracle-coherence}
 The Hoare triple 
-\[\{\top\}\, \widetilde{Gen}\,\star \,\{\lambda \_.\mathtt{coherent}(Q, rand)\}\] 
+\begin{align*}
+\{\top\}\,\widetilde{Gen}\, \star\,\{\lambda \_.\mathtt{coherent}(Q, rand)\}
+\end{align*}
 is true.
 \end{lemma}
+
 \begin{proof}
-We prove Lemma~\ref{lemma:gen-tilde-hoare-lemma} simply using inference rules over subterms of $\widetilde{Gen}$.
+Since we evaluate $\widetilde{Gen}$ at $\star$, we first eliminate the abstraction using \ref{rule:h-lam} and \ref{rule:h-app}. Then we reason about the body of $\widetilde{Gen}$ and we need to prove the triple for the body. Sequential composition is justified by repeated applications of \ref{rule:h-let} while the strengthening step (\ref{rule:h-cons}) uses the definition of $\mathtt{coherent}$.
+\small{
+\begin{align*}
+\begin{aligned}
+    &\color{blue} \{\top\} \\
+    &\letin{q = \mathtt{initQ}}{} \\
+    &\color{blue} \{ \top \} \quad \text{\ref{rule:h-eta}, \ref{rule:h-let}} \\
+    &\letin{\_ = \mathtt{set}\, Q\, q}{} \\
+    &\color{blue} \{ Q = \mathtt{initQ} \} \quad \text{\ref{rule:h-set}} \\
+    &\letin{tab = \mathtt{initTable}}{} \\
+    &\color{blue} \{ Q = \mathtt{initQ} \} \quad \text{\ref{rule:h-eta}, \ref{rule:h-let}} \\
+    &\letin{\_ = \mathtt{set}\, rand\, tab}{} \\
+    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-set}, \ref{rule:h-cons}} \\
+    &\letin{z=\mathtt{zero}}{} \\
+    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-eta}, \ref{rule:h-let}} \\
+    &\return z \\
+    &\color{blue} \{ \lambda \_. \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-eta}}
+\end{aligned}
+\end{align*}
+}
+\end{proof}
 
 % \begin{center} \scriptsize
 % \begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
@@ -1158,45 +1022,346 @@ We prove Lemma~\ref{lemma:gen-tilde-hoare-lemma} simply using inference rules ov
 % \end{mathpar}
 % \end{center}
 
-\end{proof}
-
-\begin{lemma}
-The Hoare triple 
-\[\{\mathtt{coherent}(Q, rand)\}\, \widetilde{Mac}\,\lis{k,m} \,\{\lambda \_.\mathtt{coherent}(Q, rand)\}\] 
-is true.
-\end{lemma}
+\begin{theorem}\label{theorem:tilde-macforge-sim-false}
+\begin{align*}
+\widetilde{MacForge}\simcontext \false
+\end{align*}
+\end{theorem}
 
 \begin{proof}
-We prove Lemma~\ref{lemma:gen-tilde-hoare-lemma} simply using inference rules over subterms of $\widetilde{Mac}$.
 
-% \begin{center} \scriptsize
-% \begin{mathpar} \mprset{sep=1em,  vskip =-0.1ex}
-% \inferrule*[]
-% {}
-% {\vdashtheta{c} \{\mathtt{coherent}(Q, rand)\}\, \widetilde{Mac}\,\lis{k,m} \,\{\lambda \_.\mathtt{coherent}(Q, rand)\}}
-% \end{mathpar}
-% \end{center}
+\small{
+\begin{align*}
+    \widetilde{MacForge} &\quad\triangleq\quad
+    \begin{aligned}
+        &\letin{k = \widetilde{Gen} \star}{} \\
+        &\letin{o = \widetilde{Oracle}\, k}{} \\
+        &\letin{\lis{m,t} = Adv\, o}{} \\
+        &\letin{queries = \get Q}{} \\
+        &\letin{c=\mathtt{contains}(queries, m)}{} \\
+        &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
+        &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)}
+    \end{aligned}
+    \\[2ex]
+    &\quad\triangleq\quad
+    \begin{aligned}
+        &\letin{k = \widetilde{Gen} \star}{} \\
+        &\mathtt{let}\, o = \left(
+        \begin{aligned}
+            &\return(\lambda k.\return \bang(\return \lambda m. \\
+            &\quad \letin{q=\get Q}{} \\
+            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \mathit{\widetilde{Mac}}\lis{k,m}))
+        \end{aligned}
+        \right) k \,\mathtt{in}\\
+        &\letin{\lis{m,t} = Adv\, o}{} \\
+        &\letin{queries = \get Q}{} \\
+        &\letin{c=\mathtt{contains}(queries, m)}{} \\
+        &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
+        &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)}
+    \end{aligned}
+    \\[2ex]
+    &\quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad
+    \begin{aligned}
+        &\letin{k = \widetilde{Gen} \star}{} \\
+        &\mathtt{let}\, o = \left(
+        \begin{aligned}
+            &\return \bang(\return \lambda m. \\
+            &\quad \letin{q=\get Q}{} \\
+            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \mathit{\widetilde{Mac}}\lis{k,m}))
+        \end{aligned}
+        \right)\mathtt{in}\\
+        &\letin{\lis{m,t} = Adv\, o}{} \\
+        &\letin{queries = \get Q}{} \\
+        &\letin{c=\mathtt{contains}(queries, m)}{} \\
+        &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
+        &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,t)}
+    \end{aligned}
+    \\[2ex]
+    &\quad\overset{\text{~\ref{reduc4}}}{\simcontext}\quad
+    \begin{aligned}
+        &\letin{k = \widetilde{Gen} \star}{} \\
+        &\mathtt{let}\, \lis{m,t} = Adv \left(
+        \begin{aligned}
+            &\bang(\return \lambda m. \\
+            &\quad \letin{q=\get Q}{} \\
+            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \mathit{\widetilde{Mac}}\lis{k,m}))
+        \end{aligned}
+        \right)\mathtt{in} \\
+        &\letin{queries = \get Q}{} \\
+        &\letin{c=\mathtt{contains}(queries, m)}{} \\
+        &\mathtt{if}\,c\, \mathtt{then}\, \return \false \\
+        &\mathtt{else}\,\mathtt{let}\, x=\mathtt{der} \left(
+        \begin{aligned}
+            &\bang(\return \lambda m. \\
+            &\quad \letin{q=\get Q}{} \\
+            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \mathit{\widetilde{Mac}}\lis{k,m}))
+        \end{aligned}
+        \right) m \,\mathtt{in} \\
+        &\mathtt{eq}(x,t)
+    \end{aligned}
+    \\[2ex]
+    &\quad\overset{\text{~\ref{reduc3}}}{\simcontext}\quad
+    \begin{aligned}
+        &\letin{k = \widetilde{Gen} \star}{} \\
+        &\mathtt{let}\, \lis{m,t} = Adv \left(
+        \begin{aligned}
+            &\bang(\return \lambda m. \\
+            &\quad \letin{q=\get Q}{} \\
+            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \mathit{\widetilde{Mac}}\lis{k,m}))
+        \end{aligned}
+        \right)\,\mathtt{in} \\
+        &\letin{queries = \get Q}{} \\
+        &\letin{c=\mathtt{contains}(queries, m)}{} \\
+        &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
+        &\mathtt{else}\,\mathtt{let}\, x=\left(
+        \begin{aligned}
+            &\return(\lambda m. \\
+            &\quad \letin{q=\get Q}{} \\
+            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \mathit{\widetilde{Mac}}\lis{k,m})
+        \end{aligned}
+        \right) m \,\mathtt{in} \\
+        &\mathtt{eq}(x,t)
+    \end{aligned}
+    \\[2ex]
+    &\quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad
+    \begin{aligned}
+        &\letin{k = \widetilde{Gen} \star}{} \\
+        &\mathtt{let}\, \lis{m,t} = Adv \left(
+        \begin{aligned}
+            &\bang(\return \lambda m. \\
+            &\quad \letin{q=\get Q}{} \\
+            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \mathit{\widetilde{Mac}}\lis{k,m}))
+        \end{aligned}
+        \right)\mathtt{in} \\
+        &\letin{queries = \get Q}{} \\
+        &\letin{c=\mathtt{contains}(queries, m)}{} \\
+        &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
+        &\mathtt{else}\,\mathtt{let}\, x=\left(
+        \begin{aligned}
+            &\letin{q=\get Q}{} \\
+            &\letin{t=\mathtt{contains}(q,m)}{} \\
+            &\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+            &\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\mathtt{else}\ \return \star}{} \\
+            &\mathit{\widetilde{Mac}}\lis{k,m})
+        \end{aligned}
+        \right)\mathtt{in} \\
+        &\mathtt{eq}(x,t)
+    \end{aligned}
+    \\[2ex]
+    &\quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad
+    \begin{aligned}
+        &\letin{k = \widetilde{Gen} \star}{} \\
+        &\mathtt{let}\, \lis{m,t} = Adv \left(
+        \begin{aligned}
+            &\bang(\return \lambda m. \\
+            &\quad \letin{q=\get Q}{} \\
+            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \mathit{\widetilde{Mac}}\lis{k,m}))
+        \end{aligned}
+        \right)\mathtt{in} \\
+        &\letin{queries = \get Q}{} \\
+        &\letin{c=\mathtt{contains}(queries, m)}{} \\
+        &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
+        &\mathtt{else}\,\mathtt{let}\, x=\left(
+        \begin{aligned}
+            &\letin{q=\get Q}{} \\
+            &\letin{t=\mathtt{contains}(q,m)}{} \\
+            &\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+            &\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\mathtt{else}\ \return \star}{} \\
+            &\mathit{\widetilde{Mac}}\lis{k,m})
+        \end{aligned}
+        \right)\mathtt{in} \\
+        &\mathtt{eq}(x,t)
+    \end{aligned}
+\end{align*}
+}
 
-\end{proof}
+At this point the adversary has access to a term that can be evaluated up to a polynomial $q$ and it has to produce a candidate forgery. In the else branch the oracle has been reduced to an expression that performs some operations on the query ledger and returns the result of $\widetilde{Mac}$.
 
-\begin{lemma}
-The Hoare triple 
-\[\{\mathtt{coherent}(Q, rand)\}\, \widetilde{Oracle}\,k \,\{\lambda \_.\mathtt{coherent}(Q, rand)\}\] 
-is true.
-\end{lemma}
-
-\begin{proof}
-We prove Lemma~\ref{lemma:gen-tilde-hoare-lemma} simply using inference rules over subterms of $\widetilde{Oracle}$.
-
-% \begin{center} \scriptsize
-% \begin{mathpar} \mprset{sep=1em,  vskip =-0.1ex}
-% \inferrule*[]
-% {}
-% {\vdashtheta{c} \{\mathtt{coherent}(Q, rand)\}\, \widetilde{Mac}\,\lis{k,m} \,\{\lambda \_.\mathtt{coherent}(Q, rand)\}}
-% \end{mathpar}
-% \end{center}
-
-\end{proof}
-
-
+\scriptsize{
+\begin{align*}
+&\quad\triangleq\quad
+\begin{aligned}
+    &\letin{k = \widetilde{Gen} \star}{} \\
+    &\mathtt{let}\, \lis{m,t} = Adv \left(
+    \begin{aligned}
+        &\bang(\return \lambda m. \\
+        &\quad \letin{q=\get Q}{} \\
+        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad(\lambda e. \\
+        &\quad\letin{\langle k,m\rangle = e}{} \\
+        &\quad\letin{tab = \mathtt{get}\,rand}{} \\
+        &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+        &\quad\mathtt{if}\, b\, \mathtt{then} \\
+        &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+        &\quad\quad \return x \\
+        &\quad\mathtt{else} \\
+        &\quad\quad \letin{x = \random}{} \\
+        &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+        &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad\quad \return x) \lis{k,m}
+    \end{aligned}
+    \right)\mathtt{in} \\
+    &\letin{queries = \get Q}{} \\
+    &\letin{c=\mathtt{contains}(queries, m)}{} \\
+    &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
+    &\mathtt{else}\,\mathtt{let}\, x=\left(
+    \begin{aligned}
+        &\letin{q=\get Q}{} \\
+        &\letin{t=\mathtt{contains}(q,m)}{} \\
+        &\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\mathtt{else}\,\return \star}{} \\
+        &(\lambda e. \\
+        &\letin{\langle k,m\rangle = e}{} \\
+        &\letin{tab = \mathtt{get}\,rand}{} \\
+        &\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+        &\mathtt{if}\, b\, \mathtt{then} \\
+        &\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+        &\quad \return x \\
+        &\mathtt{else} \\
+        &\quad \letin{x = \random}{} \\
+        &\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+        &\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad \return x) \lis{k,m}  
+    \end{aligned}
+    \right)\mathtt{in} \\
+    &\mathtt{eq}(x,t)
+\end{aligned}
+\\[2ex]
+\quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad&
+\begin{aligned}
+    &\letin{k = \widetilde{Gen} \star}{} \\
+    &\mathtt{let}\, \lis{m,t} = Adv \left(
+    \begin{aligned}
+        &\bang(\return \lambda m. \\
+        &\quad \letin{q=\get Q}{} \\
+        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad\letin{\langle k,m\rangle = \lis{k,m}}{} \\
+        &\quad\letin{tab = \mathtt{get}\,rand}{} \\
+        &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+        &\quad\mathtt{if}\, b\, \mathtt{then} \\
+        &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+        &\quad\quad \return x \\
+        &\quad\mathtt{else} \\
+        &\quad\quad \letin{x = \random}{} \\
+        &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+        &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad\quad \return x) 
+    \end{aligned}
+    \right)\mathtt{in} \\
+    &\letin{queries = \get Q}{} \\
+    &\letin{c=\mathtt{contains}(queries, m)}{} \\
+    &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
+    &\mathtt{else}\,\mathtt{let}\, x=\left(
+    \begin{aligned}
+        &\letin{q=\get Q}{} \\
+        &\letin{t=\mathtt{contains}(q,m)}{} \\
+        &\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\mathtt{else}\,\return \star}{} \\
+        &\letin{\langle k,m\rangle = \lis{k,m}}{} \\
+        &\letin{tab = \mathtt{get}\,rand}{} \\
+        &\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+        &\mathtt{if}\, b\, \mathtt{then} \\
+        &\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+        &\quad \return x \\
+        &\mathtt{else} \\
+        &\quad \letin{x = \random}{} \\
+        &\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+        &\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad \return x
+    \end{aligned}
+    \right)\mathtt{in} \\
+    &\mathtt{eq}(x,t)
+\end{aligned}
+\\[2ex]
+\quad\overset{\text{~\ref{reduc5}}}{\simcontext}\quad&
+\begin{aligned}
+    &\letin{k = \widetilde{Gen} \star}{} \\
+    &\mathtt{let}\, \lis{m,t} = Adv \left(
+    \begin{aligned}
+        &\bang(\return \lambda m. \\
+        &\quad \letin{q=\get Q}{} \\
+        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad\letin{tab = \mathtt{get}\,rand}{} \\
+        &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+        &\quad\mathtt{if}\, b\, \mathtt{then} \\
+        &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+        &\quad\quad \return x \\
+        &\quad\mathtt{else} \\
+        &\quad\quad \letin{x = \random}{} \\
+        &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+        &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad\quad \return x 
+    \end{aligned}
+    \right)\mathtt{in} \\
+    &\letin{queries = \get Q}{} \\
+    &\letin{c=\mathtt{contains}(queries, m)}{} \\
+    &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
+    &\mathtt{else}\,\mathtt{let}\, x=\left(
+    \begin{aligned}
+        &\letin{q=\get Q}{} \\
+        &\letin{t=\mathtt{contains}(q,m)}{} \\
+        &\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\mathtt{else}\,\return \star}{} \\
+        &\letin{tab = \mathtt{get}\,rand}{} \\
+        &\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+        &\mathtt{if}\, b\, \mathtt{then} \\
+        &\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+        &\quad \return x \\
+        &\mathtt{else} \\
+        &\quad \letin{x = \random}{} \\
+        &\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+        &\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad \return x
+    \end{aligned}
+    \right)\mathtt{in} \\
+    &\mathtt{eq}(x,t)
+\end{aligned}
+\end{align*}
+}
 \end{proof}

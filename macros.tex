@@ -48,3 +48,8 @@
 
 \newcommand{\vdashtheta}[1]{\vdash^\Theta_#1}
 
+\makeatletter
+\newcommand{\labelrule}[2]{%
+  #1\def\@currentlabel{#1}\label{#2}%
+}
+\makeatother

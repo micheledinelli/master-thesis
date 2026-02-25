@@ -251,12 +251,7 @@ The second group consists of function symbols used to interact with a ledger, a 
 
 The function symbol $\mathtt{initQ}$ constructs an empty ledger by returning a bitstring initialized entirely with zeros, thus representing a table with no active entries. The symbol $\mathtt{contains}$ checks whether a given input string is already present in the ledger. It scans the ledger to determine whether there exists a row whose first $i$ bits match the input string and whose final bit is set to $1$. If such a row is found, the input string is considered to be defined in the ledger and the function returns $\true$. The function symbol $\mathtt{modifyQ}$ enables the insertion of a new string into the ledger: it searches for the first inactive row, writes the string into the first $i$ positions, and sets the final bit to $1$, thereby marking the row as active. The function symbol $\mathtt{coherent}$ accepts two ledgers of size $q\times(i+1)$ and $p\times(2i+1)$ for $q,p$ polynomials and returns a boolean indicating wether for every string in the first ledger, there exists a corresponding string in the second ledger. Finally, the function symbol $\mathtt{coherent}$ checks whether every active entry in a ledger of size $q \times (i+1)$ also appears as an active entry in a ledger of size $p \times (2i+1)$. More precisely, for every row in the first ledger whose last bit is set to $1$, there exists a corresponding active row in the second ledger such that the last $i$ bits of its $2i$-bit payload coincide with the $i$-bit string stored in the first ledger ensuring that all messages recorded as active in the first ledger are consistently reflected in the second one.
 
-
 These function symbols extend the set introduced in \cite{lago2024computationalindistinguishabilitylogicalrelations}, which also defines a collection of equations involving the original function symbols. For completeness, these equations are recalled in Appendix~\ref{app:1}, Figure~\ref{fig:equations}. They serve as semantic constraints, or rewriting rules, specifying how the function symbols behave under evaluation.
-
-\begin{align}
-\letin{x=\random}{\mathtt{eq}(x,t)}&\sim_{\Theta\subseteq\Xi} \false \tag{$\mathtt{randEq}$}\label{randEq}
-\end{align}
 
 % A computation in $\lamBLL$ can be probabilistic, and read or modify the global reference context. In order to model probabilistic effects with references $\lamBLL$ uses the distribution monad and the state monad. The idea is that the result of a computation is not just a value, it depends on the initial store, it produces a distribution of outcomes, and each outcome comes with an updated store. Computations are interpreted as functions that accepts the initial store and produce outcoomes as probability distribution over (value, store) pairs.
 
@@ -296,29 +291,30 @@ P ::= \phi \mid \exists x.P(x) \mid \forall x.Q(x) \mid P\land Q \mid P \lor Q \
 \end{align*}
 where $\phi$ is an arbitrary meta level proposition e.g., $\true, \false, n < 0$.
 
+
 \begin{figure}[ht]
 \vspace*{-6mm}
 \begin{center} \footnotesize
 \begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
-    \inferrule* [right=\footnotesize h-eta]{\Gamma \vdashtheta{v} V: A}{\Gamma \vdashtheta{c} \{P[V/v]\}\,\return V \,\{\lambda v.P(v)\}: A}
+    \inferrule* [right=\footnotesize \labelrule{h-eta}{rule:h-eta}]{\Gamma \vdashtheta{v} V: A}{\Gamma \vdashtheta{c} \{P[V/v]\}\,\return V \,\{\lambda v.P(v)\}: A}
     \and
-    \inferrule* [right=\footnotesize h-bang]{ \Gamma \vdashtheta{c} \{P\} M \{\lambda v. Q(v)\}: A \\ Q \vdash P}{ p \ast \Gamma \vdashtheta{v} \bang M: \bang_p^{P, Q} A}
+    \inferrule* [right=\footnotesize \labelrule{h-bang}{rule:h-bang}]{ \Gamma \vdashtheta{c} \{P\} M \{\lambda v. Q(v)\}: A \\ Q \vdash P}{ p \ast \Gamma \vdashtheta{v} \bang M: \bang_p^{P, Q} A}
     \and
-    \inferrule* [right=\footnotesize h-app]{ \Gamma \vdashtheta{c} \{P\} M \{\lambda f. Q(f)\} : A \underset{R, S}{\multimap} B \\ \Delta \vdashtheta{v} Z : A \\ \forall f. (Q(f) \Rightarrow R) }{ \Gamma \boxplus \Delta \vdashtheta{c} \{P\} \, MZ \, \{\lambda v. S(v)\} : B }
+    \inferrule* [right=\footnotesize \labelrule{h-app}{rule:h-app}]{ \Gamma \vdashtheta{c} \{P\} M \{\lambda f. Q(f)\} : A \underset{R, S}{\multimap} B \\ \Delta \vdashtheta{v} Z : A \\ \forall f. (Q(f) \implies R) }{ \Gamma \boxplus \Delta \vdashtheta{c} \{P\} \, MZ \, \{\lambda v. S(v)\} : B }
     \and
-    \inferrule* [right=\footnotesize h-lam]{\Gamma, x: A \vdashtheta{c} \{P(x)\}\,M\,\{\lambda v.Q(x, v)\}: B}{\Gamma \vdashtheta{v} \lambda x . M : A \underset{\lambda x.P(x), \lambda x.\lambda v.Q(x,v)}{\multimap} B }
+    \inferrule* [right=\footnotesize \labelrule{h-lam}{rule:h-lam}]{\Gamma, x: A \vdashtheta{c} \{P(x)\}\,M\,\{\lambda v.Q(x, v)\}: B}{\Gamma \vdashtheta{v} \lambda x . M : A \underset{\lambda x.P(x), \lambda x.\lambda v.Q(x,v)}{\multimap} B }
     \and
-    \inferrule* [right=\footnotesize h-get]{r:G\in \Theta}{\Gamma \vdashtheta{c} \{P(r)\}\,\get r \,\{\lambda x.P(x)\}: G}
+    \inferrule* [right=\footnotesize \labelrule{h-get}{rule:h-get}]{r:G\in \Theta}{\Gamma \vdashtheta{c} \{P(r)\}\,\get r \,\{\lambda x.P(x)\}: G}
     \and
-    \inferrule* [right=\footnotesize h-set]{\Gamma \vdashtheta{v} Z: G \\ r:G\in \Theta}{ \Gamma \vdashtheta{c} \{P[Z/r]\}\, \setr{r}{Z} \,\{\lambda\_.P\}: \UU }
+    \inferrule* [right=\footnotesize \labelrule{h-set}{rule:h-set}]{\Gamma \vdashtheta{v} Z: G \\ r:G\in \Theta}{ \Gamma \vdashtheta{c} \{P[Z/r]\}\, \setr{r}{Z} \,\{\lambda\_.P\}: \UU }
     \and
-    \inferrule* [right=\footnotesize h-let]{\Gamma \vdashtheta{c} \{P\}\, M \,\{\lambda v.Q(v)\}:A \\ \Delta, x:A \vdashtheta{c} \forall v.\{Q(v)\}\, N[v/x] \,\{S\}: B}{\Gamma \boxplus \Delta \vdashtheta{c} \{P\}\, \letin{x=M}{N} \,\{S\}: B}
+    \inferrule* [right=\footnotesize \labelrule{h-let}{rule:h-let}]{\Gamma \vdashtheta{c} \{P\}\, M \,\{\lambda v.Q(v)\}:A \\ \Delta, x:A \vdashtheta{c} \forall v.\{Q(v)\}\, N[v/x] \,\{S\}: B}{\Gamma \boxplus \Delta \vdashtheta{c} \{P\}\, \letin{x=M}{N} \,\{S\}: B}
     \and
-    \inferrule* [right=\footnotesize h-case]{\Gamma \vdashtheta{v} Z: \BB \\ \Delta \vdashtheta{c} \{P \land Z=\true\}\, M \,\{R\} : A \\ \Delta \vdashtheta{c} \{P \land Z=\false\}\, N \,\{R\} : A}{\Gamma \boxplus \Delta \vdashtheta{c} \{P\}\, \ifthen{Z}{M}{N} \,\{R\} : A}
+    \inferrule* [right=\footnotesize \labelrule{h-case}{rule:h-case}]{\Gamma \vdashtheta{v} Z: \BB \\ \Delta \vdashtheta{c} \{P \land Z=\true\}\, M \,\{R\} : A \\ \Delta \vdashtheta{c} \{P \land Z=\false\}\, N \,\{R\} : A}{\Gamma \boxplus \Delta \vdashtheta{c} \{P\}\, \ifthen{Z}{M}{N} \,\{R\} : A}
     \and
-    \inferrule* [right=\footnotesize h-cons]{P' \vdash P \quad Q \vdash Q' \\ \Gamma \vdashtheta{c} \{P\}\, M \,\{\lambda v.Q(v)\}: A }{\Gamma \vdashtheta{c} \{P'\}\, M \,\{\lambda v.Q'(v)\} : A}
+    \inferrule* [right=\footnotesize \labelrule{h-cons}{rule:h-cons}]{P' \vdash P \quad Q \vdash Q' \\ \Gamma \vdashtheta{c} \{P\}\, M \,\{\lambda v.Q(v)\}: A }{\Gamma \vdashtheta{c} \{P'\}\, M \,\{\lambda v.Q'(v)\} : A}
     % \and
-    % \inferrule*[right=h-inv]{\Gamma;\Theta \vdash \{P\}\,M\,\{\lambda v.Q(v)\} \\ \forall v.I\land Q(v) \Rightarrow I}{\Gamma;\Theta \vdash \{P \land I\}\,M\,\{\lambda v.Q(v) \land I\}}
+    % \inferrule*[right=h-inv]{\Gamma;\Theta \vdash \{P\}\,M\,\{\lambda v.Q(v)\} \\ \forall v.I\land Q(v) \implies I}{\Gamma;\Theta \vdash \{P \land I\}\,M\,\{\lambda v.Q(v) \land I\}}
 \end{mathpar}
 \end{center}
 \vspace*{-6mm}
@@ -326,4 +322,4 @@ where $\phi$ is an arbitrary meta level proposition e.g., $\true, \false, n < 0$
 \label{fig:hl-typing-rules}
 \end{figure}
 
-Typing rules are defined in Figure~\ref{fig:hl-typing-rules}.
+Given the typing rules, which are defined in Figure~\ref{fig:hl-typing-rules} we introduce 
