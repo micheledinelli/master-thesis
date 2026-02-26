@@ -881,7 +881,7 @@ To complete the overall security proof, it remains to establish the relation $\w
 % Let $s=\mathtt{initQ}$. From Table~\ref{table:new-function-symbols}, $\mathtt{initQ}$ returns a string of length $q\times(i+1)$ for a polynomial $q$, filled with zeros. In the query ledger which is modelled by $s$ a row is active if and only if the $(i+1)$-th bit is set to 1. Since every bit in $s$ is 0, the activation bit for every row $k\in\{1,\dots,q\}$ is 0. Therefore, there are no active rows in $s$. The predicate $\mathtt{coherent}$ requires that for every active string $s$ in the query ledger, there exists a corresponding entry in the random ledger ($rand$). Since the set of active strings in $s$ is empty ($\emptyset$), the universal quantification is true. The same reasoning can be applied to predicate $\mathtt{coherent}(Q, \mathtt{initTable})$.
 % \end{proof}
 
-\begin{lemma}\label{lemma:gen-oracle-coherence}
+\begin{lemma}\label{lemma:gen-coherence}
 The Hoare triple 
 \begin{align*}
 \{\top\}\,\widetilde{Gen}\, \star\,\{\lambda \_.\mathtt{coherent}(Q, rand)\}
@@ -910,6 +910,67 @@ Since we evaluate $\widetilde{Gen}$ at $\star$, we first eliminate the abstracti
 \end{aligned}
 \end{align*}
 }
+
+\begin{lemma}\label{lemma:oracle-coherence}
+Let $M$ be the term 
+\begin{align*}
+M \quad\triangleq\quad
+\begin{aligned}
+    &\letin{q=\get Q}{} \\
+    &\letin{t=\mathtt{contains}(q,m)}{} \\
+    &\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+    &\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+    &\mathtt{else}\ \return \star}{} \\
+    &\letin{tab = \mathtt{get}\,rand}{} \\
+    &\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+    &\mathtt{if}\, b\, \mathtt{then} \\
+    &\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+    &\quad \return x \\
+    &\mathtt{else} \\
+    &\quad \letin{x = \random}{} \\
+    &\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+    &\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+    &\quad \return x 
+\end{aligned}
+\end{align*}
+
+The Hoare triple 
+\begin{align*}
+\{\mathtt{coherent}(Q, rand)\}\,M\,\{\lambda \_.\mathtt{coherent}(Q, rand)\}
+\end{align*}
+is true.
+\end{lemma}
+\begin{proof}
+\small{
+\begin{align*}
+\begin{aligned}
+    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
+    &\letin{q = \get Q}{} \\
+    &\color{blue} \{ \mathtt{coherent}(q, rand) \} \quad \text{\ref{rule:h-get}} \\
+    &\letin{t = \mathtt{contains}(q, m)}{} \\
+    &\color{blue} \{ \mathtt{coherent}(q, rand) \} \quad \text{\ref{rule:h-fun}} \\
+    &\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+    &\quad \color{blue} \{ \mathtt{coherent}(q, rand) \land m \notin Q \} \\
+    &\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+    &\quad \color{blue} \{\mathtt{coherent}(\{ Q \setminus m \}, rand) \land m \notin Q \} \\
+    &\mathtt{else} \\ 
+    &\quad \color{blue} \{ \mathtt{coherent}(q, rand) \land m \in Q \} \\
+    &\quad \return \star}{} \\
+    &\quad \color{blue} \{ \mathtt{coherent}(Q, rand) \land m \in Q \} \\
+    &\letin{tab = \mathtt{get}\,rand}{} \\
+    &\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+    &\mathtt{if}\, b\, \mathtt{then} \\
+    &\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+    &\quad \return x \\
+    &\mathtt{else} \\
+    &\quad \letin{x = \random}{} \\
+    &\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+    &\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+    &\quad \return x 
+\end{aligned}
+\end{align*}
+}
+\end{proof}
 
 % \begin{mathpar} \mprset{sep=1em, vskip =-0.1ex} \scriptsize 
 % \inferrule* [left=\scriptsize $\mathcal{D}_{initQ}$, right=\scriptsize \text{h-cons}]
@@ -1267,7 +1328,7 @@ Since we evaluate $\widetilde{Gen}$ at $\star$, we first eliminate the abstracti
 \end{align*}
 }
 
-At this point the adversary has access to a term that can be evaluated up to a polynomial $q$ and it has to produce a candidate forgery. In the else branch the oracle has been reduced to an expression that performs some operations on the query ledger and returns the result of $\widetilde{Mac}$.
+At this stage, the adversary is given access to a term that can be evaluated for at most a polynomial number of queries $q$, and it is required to output a candidate forgery. In the else branch, the oracle has been simplified to an expression that applies a sequence of operations to the query ledger and returns the output of $\widetilde{Mac}$. We now focus on the lower part of the term, namely the else branch. This branch is first unrolled by expanding the definition of $\widetilde{Mac}$. Through repeated applications of Equation~\ref{letAss}, the resulting term is rearranged. Finally, by applying Equation~\ref{iflet}, the binding of the variable $x$ is pushed inside the if-then-else block. This yields a linear term that is easier to reason about in terms of Hoare assertions.
 
 \scriptsize{
 \begin{align*}
@@ -1293,7 +1354,7 @@ At this point the adversary has access to a term that can be evaluated up to a p
         &\quad\quad \letin{x = \random}{} \\
         &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
         &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
-        &\quad\quad \return x) \lis{k,m}
+        &\quad\quad \return x) \lis{k,m})
     \end{aligned}
     \right)\mathtt{in} \\
     &\letin{queries = \get Q}{} \\
@@ -1393,7 +1454,7 @@ At this point the adversary has access to a term that can be evaluated up to a p
         &\quad\quad \letin{x = \random}{} \\
         &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
         &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
-        &\quad\quad \return x 
+        &\quad\quad \return x)
     \end{aligned}
     \right)\mathtt{in} \\
     &\letin{queries = \get Q}{} \\
@@ -1441,7 +1502,7 @@ At this point the adversary has access to a term that can be evaluated up to a p
         &\quad\quad \letin{x = \random}{} \\
         &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
         &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
-        &\quad\quad \return x 
+        &\quad\quad \return x)
     \end{aligned}
     \right)\mathtt{in} \\
     &\letin{queries = \get Q}{} \\
@@ -1490,7 +1551,7 @@ At this point the adversary has access to a term that can be evaluated up to a p
         &\quad\quad \letin{x = \random}{} \\
         &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
         &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
-        &\quad\quad \return x 
+        &\quad\quad \return x)
     \end{aligned}
     \right)\mathtt{in} \\
     &\letin{queries = \get Q}{} \\
@@ -1515,4 +1576,6 @@ At this point the adversary has access to a term that can be evaluated up to a p
 \end{aligned}
 \end{align*}
 }
+
+
 \end{proof}
