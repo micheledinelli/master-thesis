@@ -281,11 +281,13 @@ These function symbols extend the set introduced in \cite{lago2024computationali
 
 \section{Lambda-BLL Extension for Proving MAC Security}\label{sec:extensions-lambda-bll}
 
-We introduce a Hoare logic \cite{axiomatic-basis-for-computer-programming}, which will be required to establish the existential unforgeability under chosen-message attacks of PRF-induced MACs within the $\lamBLL$ framework. Following Hoare's original formalism, we describe program behavior by means of \emph{partial correctness specifications}, written as triples of the form
+We introduce a Hoare logic \cite{axiomatic-basis-for-computer-programming}, which will be employed to establish the existential unforgeability under chosen-message attacks of PRF-induced MACs within the $\lamBLL$ framework. Following Hoare's original formalism, program behavior is specified by means of \emph{partial correctness assertions}, expressed as triples of the form
 \[
-\{P\}\,e \,\{Q\}.
+\{P\}\, e \,\{Q\}.
 \]
-Here, $e$ denotes a program, and $P$ and $Q$ are propositions representing, respectively, the precondition and postcondition. Hoare Logic is essentially a deductive proof system for reasoning about Hoare triples $\{P\}\,e\,\{Q\}$. The intended semantics of this triple are that, if the execution of $e$ is started in any state that satisfies $P$, then every terminating execution of $e$ will result in a state that satisfies $Q$. Note that $Q$ is a function of a value, which is the value that $e$ reduces to. An expression $\{P\}\,e\,\{\lambda v.Q(v)\}$ is called a partial correctness specification. It is partial because for $\{P\}\,e\,\{\lambda v.Q(v)\}$ to be true, it is not necessary for the execution of $e$ to terminate when stated in a state satisfying $P$ (if it loops forever and doesn't reduce to a value, the Hoare triple doesn't say anything). 
+In this context, $e$ denotes a program, while $P$ and $Q$ are logical propositions representing the precondition and postcondition, respectively. Hoare Logic constitutes a deductive proof system for reasoning about Hoare triples of the form $\{P\}\,e\,\{Q\}$. The intended semantics of such a triple are that, if the execution of $e$ is initiated in any program state satisfying $P$, then every terminating execution of $e$ will produce a program state satisfying $Q$. 
+
+Observe that $Q$ is a predicate on values, specifically on the value to which $e$ evaluates. A Hoare triple of the form $\{P\}\,e\,\{\lambda v.\,Q(v)\}$ is referred to as a *partial correctness specification*. It is termed “partial” because, for $\{P\}\,e\,\{\lambda v.\,Q(v)\}$ to hold, it is not required that the execution of $e$ terminate when started in a state satisfying $P$. If the execution of $e$ diverges (i.e., runs indefinitely without producing a value), then the Hoare triple imposes no additional constraints and makes no claim about such non-terminating behavior.
 
 Propositions are defined by the following grammar:
 \begin{align*}
@@ -324,6 +326,4 @@ where $\phi$ is an arbitrary meta level proposition e.g., $\true, \false, n < 0$
 \caption{Typing rules of $\lamBLL$ extended with Hoare Logic}
 \label{fig:hl-typing-rules}
 \end{figure}
-
-We discuss a Hoare logic with Hoare triples $\{P\}\,e\,\{Q\}$ for terms from $\lamBLL$. The Hoare Logic introduced is presented in Figure \ref{fig:hl-typing-rules} and it extends the typing rules of $\lamBLL$ (Figure~\ref{fig:types}) by adding rules to derive Hoare triples from the typing. It does not specify an explicit rule for function symbols $f_p(Z)$, but it can be derived by treating the function call as an atomic computation that returns a value and the standard lifting of a pure function symbol into Hoare Logic follows the pattern of $\ref{rule:h-eta}$.
 
