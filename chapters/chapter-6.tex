@@ -906,71 +906,92 @@ Since we evaluate $\widetilde{Gen}$ at $\star$, we first eliminate the abstracti
     &\letin{z = \mathtt{zero}}{} \\
     &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-fun}} \\
     &\return z \\
-    &\color{blue} \{ \lambda \_. \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-eta}}
+    &\color{blue} \{ \lambda v. \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-eta}}
 \end{aligned}
 \end{align*}
 }
+\end{proof}
 
 \begin{lemma}\label{lemma:oracle-coherence}
 Let $M$ be the term 
 \begin{align*}
 M \quad\triangleq\quad
 \begin{aligned}
-    &\letin{q=\get Q}{} \\
-    &\letin{t=\mathtt{contains}(q,m)}{} \\
-    &\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-    &\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-    &\mathtt{else}\ \return \star}{} \\
-    &\letin{tab = \mathtt{get}\,rand}{} \\
-    &\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-    &\mathtt{if}\, b\, \mathtt{then} \\
-    &\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
-    &\quad \return x \\
-    &\mathtt{else} \\
-    &\quad \letin{x = \random}{} \\
-    &\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-    &\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
-    &\quad \return x 
+    &\bang (\return \lambda m. \\
+    &\quad \letin{q=\get Q}{} \\
+    &\quad\letin{t=\mathtt{contains}(q,m)}{} \\
+    &\quad\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+    &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+    &\quad\mathtt{else}\ \return \star}{} \\
+    &\quad\letin{tab = \mathtt{get}\,rand}{} \\
+    &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+    &\quad\mathtt{if}\, b\, \mathtt{then} \\
+    &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+    &\quad\quad \return x \\
+    &\quad\mathtt{else} \\
+    &\quad\quad \letin{x = \random}{} \\
+    &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+    &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+    &\quad\quad \return x)
 \end{aligned}
 \end{align*}
 
 The Hoare triple 
 \begin{align*}
-\{\mathtt{coherent}(Q, rand)\}\,M\,\{\lambda \_.\mathtt{coherent}(Q, rand)\}
+\{\mathtt{coherent}(Q, rand)\}\,M\,\{\lambda v.\mathtt{coherent}(Q, rand)\}
 \end{align*}
 is true.
 \end{lemma}
+
 \begin{proof}
-\small{
+The proof follows the same structure as that of Lemma~\ref{lemma:gen-coherence}. We extend the derivation with assertions justified by the rules introduced in Figure~\ref{fig:hl-typing-rules}. Sequential composition is handled by repeated applications of Rule~\ref{rule:h-let}, while Rule~\ref{rule:h-fun} is applied to function symbols. We reason on the body of the term, implicitly applying Rule~\ref{rule:h-bang}, followed by Rule~\ref{rule:h-eta}, and finally Rule~\ref{rule:h-lam} to eliminate the abstraction.
+
+\scriptsize{
 \begin{align*}
 \begin{aligned}
-    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
-    &\letin{q = \get Q}{} \\
-    &\color{blue} \{ \mathtt{coherent}(q, rand) \} \quad \text{\ref{rule:h-get}} \\
-    &\letin{t = \mathtt{contains}(q, m)}{} \\
-    &\color{blue} \{ \mathtt{coherent}(q, rand) \} \quad \text{\ref{rule:h-fun}} \\
-    &\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-    &\quad \color{blue} \{ \mathtt{coherent}(q, rand) \land m \notin Q \} \\
-    &\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-    &\quad \color{blue} \{\mathtt{coherent}(\{ Q \setminus m \}, rand) \land m \notin Q \} \\
-    &\mathtt{else} \\ 
-    &\quad \color{blue} \{ \mathtt{coherent}(q, rand) \land m \in Q \} \\
-    &\quad \return \star}{} \\
-    &\quad \color{blue} \{ \mathtt{coherent}(Q, rand) \land m \in Q \} \\
+    & \color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
+    & \letin{q = \get Q}{} \\
+    & \color{blue} \{ \mathtt{coherent}(Q,rand) \land (q = Q) \} \quad \text{\ref{rule:h-get}} \\
+    & \letin{t = \mathtt{contains}(q, m)}{} \\
+    & \color{blue} \{ \mathtt{coherent}(Q, rand) \land t = (m \in Q) \} \quad \text{\ref{rule:h-fun} and underlying logic of $\mathtt{contains}$} \\
+    & \mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\
+    & \quad \color{blue} \{ \mathtt{coherent}(Q, rand) \land (m \notin Q) \} \quad \text{\ref{rule:h-case}} \\
+    & \quad \letin{q' = \mathtt{modifyQ}(q, m)}{} \\
+    & \quad \color{blue} \{ \mathtt{coherent}(Q, rand) \land (m \notin Q) \land q' = (Q \cup {m}) \} \quad \text{\ref{rule:h-fun}} \\
+    &\qquad \implies \color{blue} \{ \mathtt{coherent}(q' \setminus \{m\}, rand) \land (m \in q') \} \quad \text{\ref{rule:h-cons} and underlying logic of $\mathtt{modifyQ}$} \\
+    & \quad \letin{\_ = \mathtt{set}\ Q\ q'}{} \\
+    & \quad \color{blue} { \mathtt{coherent}(Q \setminus \{m\}, rand) \land (m \in Q) } \quad \text{\ref{rule:h-set}} \\
+    & \mathtt{else} \\
+    & \quad \color{blue} \{ \mathtt{coherent}(Q, rand) \land (m \in Q) \} \quad \text{\ref{rule:h-case}} \\
+    & \quad \return \star \\
+    & \quad \color{blue} \{\mathtt{coherent}(Q, rand) \land (m \in Q) \}  \quad \text{\ref{rule:h-eta}} \\
+    & \color{blue} \{ \mathtt{coherent}(Q, rand) \land (m \in Q) \} \implies  \\
+    & \quad \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, rand) \land (m \in Q) \} \quad \text{\ref{rule:h-cons}} \\
     &\letin{tab = \mathtt{get}\,rand}{} \\
+    & \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab = rand) \} \quad \text{\ref{rule:h-get}} \\
     &\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+    & \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab = rand) \land b = (m \in tab) \} \quad \text{\ref{rule:h-fun} and underlying logic of $\mathtt{isdefined}$} \\
     &\mathtt{if}\, b\, \mathtt{then} \\
-    &\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+    & \quad \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab=rand) \land (m \in tab) \} \quad \text{\ref{rule:h-case}} \\
+    & \quad \implies \color{blue} \{ \mathtt{coherent}(Q, tab) \} \quad \text{\ref{rule:h-cons}} \\
+    & \quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
     &\quad \return x \\
+    & \color{blue} \quad \{ \lambda x.\mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-fun}, \ref{rule:h-eta}} \\
     &\mathtt{else} \\
+    & \quad \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab=rand) \land (m \notin tab) \} \quad \text{\ref{rule:h-case}} \\
     &\quad \letin{x = \random}{} \\
     &\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+    & \quad \color{blue} \{ \mathtt{coherent}(Q, newtab) \} \quad \text{\ref{rule:h-fun}, \ref{rule:h-cons} and underlying logic of $\mathtt{modify}$ } \\
     &\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
-    &\quad \return x 
+    &\quad \color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-set}, \ref{rule:h-cons}} \\
+    &\quad \return x \\
+    &\quad \color{blue} \{ \lambda x.\mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-eta}}
 \end{aligned}
 \end{align*}
 }
 \end{proof}
+
+\normalsize
 
 % \begin{mathpar} \mprset{sep=1em, vskip =-0.1ex} \scriptsize 
 % \inferrule* [left=\scriptsize $\mathcal{D}_{initQ}$, right=\scriptsize \text{h-cons}]
@@ -1029,7 +1050,6 @@ is true.
 % }
 % { \vdashtheta{c} \{ \mathtt{coherent}(Q, rand) \} \, \letin{tab = \mathtt{initTable}}{\setr{rand}{tab}} \, \{ \lambda \_. \mathtt{coherent}(Q, rand) \} : \mathbb{U} }
 % \end{mathpar}
-\end{proof}
 
 % \begin{center} \scriptsize
 % \begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
@@ -1140,19 +1160,6 @@ is true.
 % }
 % \end{mathpar}
 % \end{center}
-
-Now to complete the proof we need to refine the typing of the term $Adv$ with respect of the Hoare logic introduced in Figure~\ref{fig:hl-typing-rules}.
-
-\begin{lemma}
-Let $P$ be a proposition. Suppose $\Gamma \vdashtheta{v} \bang M^{P,P}_q: \SS[i] \underset{P, \lambda \_.P}{\multimap} \SS[i]$ and let $Adv$ be a well-typed adversary for the MAC forgery experiment such that $\mathcal{R}(Adv)\cap \Theta=\emptyset$, where $\Theta$ denotes the set of references occurring in $P$. Then the Hoare triple
-\begin{align*}
-\{P\}\, Adv\,\bang M \,\{\lambda \_.P\}
-\end{align*}
-is valid. The typing judgment for the adversary is given by
-\begin{align*}
-\vdash_{c}^{\varnothing} Adv\,\bang M: \bang^{P,P}_q(\SS[i] \underset{P, \lambda \_.P}{\multimap} \SS[i]) \underset{P, \lambda \_.P}{\multimap} (\SS[i] \otimes \SS[i])\, .
-\end{align*}
-\end{lemma}
 
 \begin{theorem}\label{theorem:tilde-macforge-sim-false}
 \begin{align*}
@@ -1341,7 +1348,9 @@ is valid. The typing judgment for the adversary is given by
 \end{align*}
 }
 
-At this stage, the adversary is given access to a term that can be evaluated for at most a polynomial number of queries $q$, and it is required to output a candidate forgery. In the else branch, the oracle has been simplified to an expression that applies a sequence of operations to the query ledger and returns the output of $\widetilde{Mac}$. We now focus on the lower part of the term, namely the else branch. This branch is first unrolled by expanding the definition of $\widetilde{Mac}$. Through repeated applications of Equation~\ref{letAss}, the resulting term is rearranged. Finally, by applying Equation~\ref{iflet}, the binding of the variable $x$ is pushed inside the if-then-else block. This yields a linear term that is easier to reason about in terms of Hoare assertions.
+\normalsize
+
+At this stage, the adversary is given access to a term that can be evaluated for at most a polynomial number of queries~$q$, and it must output a candidate forgery. In the else branch, the oracle is reduced to an expression that applies a sequence of operations to the query ledger and returns the output of $\widetilde{Mac}$. We focus on the lower part of the term, namely the else branch. This branch is unrolled by expanding the definition of $\widetilde{Mac}$. By repeated applications of Equation~\ref{letAss}, the resulting term is rearranged. Applying Equation~\ref{iflet} pushes the binding of the variable $x$ inside the conditional. The resulting term simplifies reasoning in terms of Hoare assertions.
 
 \scriptsize{
 \begin{align*}
@@ -1568,6 +1577,164 @@ At this stage, the adversary is given access to a term that can be evaluated for
     \end{aligned}
     \right)\mathtt{in} \\
     &\letin{queries = \get Q}{} \\
+    &\letin{c=\mathtt{contains}(queries, m)}{} \\
+    &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
+    &\mathtt{else}\\
+    &\quad\letin{q=\get Q}{} \\
+    &\quad\letin{t=\mathtt{contains}(q,m)}{} \\
+    &\quad\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+    &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+    &\quad\mathtt{else}\,\return \star}{} \\
+    &\quad\letin{tab = \mathtt{get}\,rand}{} \\
+    &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+    &\quad\mathtt{if}\, b\, \mathtt{then} \\
+    &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+    &\quad\quad \mathtt{eq}(x,tag) \\
+    &\quad\mathtt{else} \\
+    &\quad\quad \letin{x = \random}{} \\
+    &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+    &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+    &\quad\quad \mathtt{eq}(x,tag)
+\end{aligned}
+\end{align*}
+}
+
+\normalsize
+
+Now to complete the proof we need to refine the typing of the term $Adv$ with respect of the Hoare logic introduced in Figure~\ref{fig:hl-typing-rules}. The original type for $Adv$ was $\vdash_c^\varnothing Adv: \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap (\SS[i] \otimes \SS[i])$, now we lift the type of $Adv$ in the new typing system introduced in Chapter~\ref{chapter:lambll} using the mapping $\mu$ defined in Equation~\ref{eq:mu}. By fixing a proposition $P$ as $\mathtt{coherent}(Q, rand)$ and by applying Lemma~\ref{lemma:hoare-lifting}, the type of $Adv$ is lifted as follows:
+\begin{align*}
+&\Gamma \vdash_c^\varnothing Adv: \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap (\SS[i] \otimes \SS[i]) \\
+&\mu(\Gamma, P) \vdash^\Xi_{c} Adv: \mu(\bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap (\SS[i] \otimes \SS[i])).
+\end{align*}
+Which expands as
+\begin{align*}
+&\mu\bigl(\bang_{q}(\SS[i] \multimap \SS[i]) \multimap (\SS[i] \otimes \SS[i]), P\bigr) \\
+&= \mu\bigl(\bang_{q}(\SS[i] \multimap \SS[i]), P\bigr) \underset{P, \lambda \_.P}{\multimap} \mu(\SS[i] \otimes \SS[i], P) \\
+&= \bang_{q}^{P,P} \mu(\SS[i] \multimap \SS[i], P) \underset{P, \lambda \_.P}{\multimap} (\SS[i] \otimes \SS[i]) \\
+&= \bang_{q}^{P,P} \Bigl(\SS[i] \underset{P, \lambda \_.P}{\multimap} \SS[i]\Bigr) \underset{P, \lambda \_.P}{\multimap} (\SS[i] \otimes \SS[i]).
+\end{align*}
+The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $Adv$ and by the fact that the typing derivation is performed in the empty context, so that $\mathcal{R}(P) \cap \varnothing = \emptyset$. Moreover, $\Theta = \varnothing$ and $\Xi = \varnothing$. Under these conditions, the type of $Adv$ guarantees that $P$ is preserved as an invariant. By applying the lifted typing judgment for $Adv$ and combining it with Lemma~\ref{lemma:oracle-coherence}, we can propagate the assertion $\mathtt{coherent}(Q, rand)$ down into the term.
+
+\scriptsize{
+\begin{align*}
+\quad\overset{\text{Lemma~\ref{lemma:gen-coherence}}}{\simcontext}\quad&
+\begin{aligned}
+    &\letin{k = \widetilde{Gen} \star}{} \\
+    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
+    &\mathtt{let}\, \lis{m,tag} = Adv \left(
+    \begin{aligned}
+        &\bang(\return \lambda m. \\
+        &\quad \letin{q=\get Q}{} \\
+        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad\letin{tab = \mathtt{get}\,rand}{} \\
+        &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+        &\quad\mathtt{if}\, b\, \mathtt{then} \\
+        &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+        &\quad\quad \return x \\
+        &\quad\mathtt{else} \\
+        &\quad\quad \letin{x = \random}{} \\
+        &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+        &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad\quad \return x)
+    \end{aligned}
+    \right)\mathtt{in} \\
+    &\letin{queries = \get Q}{} \\
+    &\letin{c=\mathtt{contains}(queries, m)}{} \\
+    &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
+    &\mathtt{else}\\
+    &\quad\letin{q=\get Q}{} \\
+    &\quad\letin{t=\mathtt{contains}(q,m)}{} \\
+    &\quad\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+    &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+    &\quad\mathtt{else}\,\return \star}{} \\
+    &\quad\letin{tab = \mathtt{get}\,rand}{} \\
+    &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+    &\quad\mathtt{if}\, b\, \mathtt{then} \\
+    &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+    &\quad\quad \mathtt{eq}(x,tag) \\
+    &\quad\mathtt{else} \\
+    &\quad\quad \letin{x = \random}{} \\
+    &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+    &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+    &\quad\quad \mathtt{eq}(x,tag)
+\end{aligned}
+\\[2ex]
+\quad\triangleq\quad&
+\begin{aligned}
+    &\letin{k = \widetilde{Gen} \star}{} \\
+    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
+    &\mathtt{let}\, \lis{m,tag} = Adv \left(
+    \begin{aligned}
+        &\bang(\return \lambda m. \\
+        &\quad \letin{q=\get Q}{} \\
+        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad\letin{tab = \mathtt{get}\,rand}{} \\
+        &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+        &\quad\mathtt{if}\, b\, \mathtt{then} \\
+        &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+        &\quad\quad \return x \\
+        &\quad\mathtt{else} \\
+        &\quad\quad \letin{x = \random}{} \\
+        &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+        &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad\quad \return x)
+    \end{aligned}
+    \right)\mathtt{in} \\
+    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
+    &\letin{queries = \get Q}{} \\
+    &\letin{c=\mathtt{contains}(queries, m)}{} \\
+    &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
+    &\mathtt{else}\\
+    &\quad\letin{q=\get Q}{} \\
+    &\quad\letin{t=\mathtt{contains}(q,m)}{} \\
+    &\quad\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+    &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+    &\quad\mathtt{else}\,\return \star}{} \\
+    &\quad\letin{tab = \mathtt{get}\,rand}{} \\
+    &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+    &\quad\mathtt{if}\, b\, \mathtt{then} \\
+    &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+    &\quad\quad \mathtt{eq}(x,tag) \\
+    &\quad\mathtt{else} \\
+    &\quad\quad \letin{x = \random}{} \\
+    &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+    &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+    &\quad\quad \mathtt{eq}(x,tag)
+\end{aligned}
+\\[2ex]
+\quad\overset{\text{Lemma~\ref{lemma:hoare-lifting}}}{\simcontext}\quad&
+\begin{aligned}
+    &\letin{k = \widetilde{Gen} \star}{} \\
+    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
+    &\mathtt{let}\, \lis{m,tag} = Adv \left(
+    \begin{aligned}
+        &\bang(\return \lambda m. \\
+        &\quad \letin{q=\get Q}{} \\
+        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad\letin{tab = \mathtt{get}\,rand}{} \\
+        &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+        &\quad\mathtt{if}\, b\, \mathtt{then} \\
+        &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+        &\quad\quad \return x \\
+        &\quad\mathtt{else} \\
+        &\quad\quad \letin{x = \random}{} \\
+        &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+        &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad\quad \return x)
+    \end{aligned}
+    \right)\mathtt{in} \\
+    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
+    &\letin{queries = \get Q}{} \\
+    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-get}} \\
     &\letin{c=\mathtt{contains}(queries, m)}{} \\
     &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
     &\mathtt{else}\\

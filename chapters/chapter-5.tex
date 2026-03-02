@@ -1,4 +1,4 @@
-\chapter{Lambda-BLL}
+\chapter{Lambda-BLL}\label{chapter:lambll}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
 
 This chapter introduces the $\lambda$-BLL calculus~\cite{lago2024computationalindistinguishabilitylogicalrelations}, a typed probabilistic $\lambda$-calculus to model polynomial-time cryptographic computation. Its design principles and language features capture the essential for expressing cryptographic experiments, adversaries, and reductions.
@@ -36,7 +36,7 @@ namely pairs formed with the tensor products $P \otimes P$, and the graded comon
   \label{fig:types}
 \end{figure}
 
-$\lamBLL$ extends the pure lambda-calculus with other features, necessary for modelling cryptographic computation, for example it defines a collection of function symbols $\mathcal{F}$. Each function symbol $f \in \mathcal{F}$ has a type denoted by $\mathsf{typeof}(f)$ of the form $G_1 \times \dots \times G_m \to G$ where $G_1, \dots, G_m$ and $G$ are ground types. Then, for each polynomial $p$, in $\lamBLL$ there is a corresponding constructor $f_p$ representing a resource-bounded invocation of $f$, with the grade $p$ accounting for its computational cost within the type system.
+$\lamBLL$ extends the pure lambda-calculus with other features, necessary for modelling cryptographic computation, in particular it defines a collection of function symbols $\mathcal{F}$. Each function symbol $f \in \mathcal{F}$ has a type denoted by $\mathsf{typeof}(f)$ of the form $G_1 \times \dots \times G_m \to G$ where $G_1, \dots, G_m$ and $G$ are ground types. Then, for each polynomial $p$, in $\lamBLL$ there is a corresponding constructor $f_p$ representing a resource-bounded invocation of $f$, with the grade $p$ accounting for its computational cost within the type system.
 
 Values represent data that can be passed, stored or paired but not directly executed, while computations represent effectful execution. Ground values include $\star$, booleans, and bitstrings. Positive values include variables, pairs, and suspended computations of the form $!M$. Computations follow the CBPV structure so values are injected using $\return$, suspended computations are forced using $\der$, and applications is defined only on positive arguments.
 
@@ -104,6 +104,8 @@ The notion of substitution in $\lamBLL$ is defined with respect to the distingui
 
 The notation $\Gamma \vdashtheta{v} M:A$ and $\Gamma \vdashtheta{c} M:A$ indicates a type derivation witnessing, respectively, the value or computation typing judgment under variable context $\Gamma$ and reference context $\Theta$.
 
+The typing rules for $\lamBLL$ are presented in Figure~\ref{fig:typingRules} and formalize its type system through a set of rules that assign types to terms while respecting linearity and resource constraints.
+
 \newcommand{\subst}[1]{#1}
 \begin{figure}[ht]
 \vspace*{-6mm}
@@ -156,7 +158,7 @@ The notation $\Gamma \vdashtheta{v} M:A$ and $\Gamma \vdashtheta{c} M:A$ indicat
 \label{fig:typingRules}
 \end{figure}
 
-A computation in $\lamBLL$ can be probabilistic and can read or modify the global reference context. In order to model probabilistic effects together with mutable references, $\lamBLL$ combines the distribution monad with the state monad. The key idea is that the result of a computation is not just a value: it depends on the initial store, it produces a distribution of possible outcomes, and each outcome is paired with an updated store. Accordingly, computations are interpreted as functions that take an initial store and return a probability distribution over pairs consisting of a value and a store.
+A computation in $\lamBLL$ can be probabilistic and can read or modify the global reference context. In order to model probabilistic effects together with mutable references, $\lamBLL$ combines the distribution monad with the state monad.
 
 To account for probabilistic effects, $\lamBLL$ models probabilistic computation using finite probability distributions. Given a set $X$, a probability distribution over $X$ is a function $\mu : X \to [0,1]$ with finite support and total mass equal to $1$. Any such distribution can be written as a finite weighted sum of Dirac distributions $\delta_x$, which represent deterministic outcomes. This construction induces a monad $(\D, \eta_{\D}, \bind_{\D})$ on the category $\mathbf{Set}$ of sets and functions. The unit maps a value $x$ to the Dirac distribution $\delta_x$, embedding pure values into probabilistic computations having components $\eta_X : x \mapsto \delta_x$, while the bind operation models sequential probabilistic computation by combining distributions:
 \[
@@ -287,37 +289,39 @@ We introduce a Hoare logic \cite{axiomatic-basis-for-computer-programming}, whic
 \]
 In this context, $e$ denotes a program, while $P$ and $Q$ are logical propositions representing the precondition and postcondition, respectively. Hoare Logic constitutes a deductive proof system for reasoning about Hoare triples of the form $\{P\}\,e\,\{Q\}$. The intended semantics of such a triple are that, if the execution of $e$ is initiated in any program state satisfying $P$, then every terminating execution of $e$ will produce a program state satisfying $Q$. 
 
-Observe that $Q$ is a predicate on values, specifically on the value to which $e$ evaluates. A Hoare triple of the form $\{P\}\,e\,\{\lambda v.\,Q(v)\}$ is referred to as a *partial correctness specification*. It is termed “partial” because, for $\{P\}\,e\,\{\lambda v.\,Q(v)\}$ to hold, it is not required that the execution of $e$ terminate when started in a state satisfying $P$. If the execution of $e$ diverges (i.e., runs indefinitely without producing a value), then the Hoare triple imposes no additional constraints and makes no claim about such non-terminating behavior.
+Observe that $Q$ is a predicate on values, specifically on the value to which $e$ evaluates. A Hoare triple of the form $\{P\}\,e\,\{\lambda v.\,Q(v)\}$ is referred to as a partial correctness specification. It is termed partial because, for $\{P\}\,e\,\{\lambda v.\,Q(v)\}$ to hold, it is not required that the execution of $e$ terminate when started in a state satisfying $P$. If the execution of $e$ diverges (i.e., runs indefinitely without producing a value), then the Hoare triple imposes no additional constraints and makes no claim about non-terminating behavior.
 
 Propositions are defined by the following grammar:
 \begin{align*}
-P ::= \phi \mid \exists x.P(x) \mid \forall x.Q(x) \mid P\land Q \mid P \lor Q \tag{Propositions}
+P ::= \phi \mid \exists x.P(x) \mid \forall x.Q(x) \mid P\land Q \mid P \lor Q
 \end{align*}
 where $\phi$ is an arbitrary meta level proposition e.g., $\true, \false, n < 0$.
 
-\begin{figure}[ht]
+Given the notion of Hoare triples we introduce a new set of typing rules for $\lamBLL$ which are presented in Figure~\ref{fig:hl-typing-rules}. These rules assign types to terms while respecting linearity, resource constraints and a simple Hoare logic for $\lamBLL$. 
+
+\begin{figure}[htpb]
 \vspace*{-6mm}
-\begin{center} \footnotesize
+\begin{center} \scriptsize
 \begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
-    \inferrule* [right=\footnotesize \labelrule{h-eta}{rule:h-eta}]{\Gamma \vdashtheta{v} V: A}{\Gamma \vdashtheta{c} \{P[V/v]\}\,\return V \,\{\lambda v.P(v)\}: A}
+    \inferrule* [right=\scriptsize \labelrule{h-eta}{rule:h-eta}]{\Gamma \vdashtheta{v} V: A}{\Gamma \vdashtheta{c} \{P[V/v]\}\,\return V \,\{\lambda v.P(v)\}: A}
     \and
-    \inferrule* [right=\footnotesize \labelrule{h-bang}{rule:h-bang}]{ \Gamma \vdashtheta{c} \{P\} M \{\lambda v. Q(v)\}: A \\ Q \vdash P}{ p \ast \Gamma \vdashtheta{v} \bang M: \bang_p^{P, Q} A}
+    \inferrule* [right=\scriptsize \labelrule{h-bang}{rule:h-bang}]{ \Gamma \vdashtheta{c} \{P\} M \{\lambda v. Q(v)\}: A \\ Q \vdash P}{ p \ast \Gamma \vdashtheta{v} \bang M: \bang_p^{P, Q} A}
     \and
-    \inferrule* [right=\footnotesize \labelrule{h-app}{rule:h-app}]{ \Gamma \vdashtheta{c} \{P\} M \{\lambda f. Q(f)\} : A \underset{R, S}{\multimap} B \\ \Delta \vdashtheta{v} Z : A \\ \forall f. (Q(f) \implies R) }{ \Gamma \boxplus \Delta \vdashtheta{c} \{P\} \, MZ \, \{\lambda v. S(v)\} : B }
+    \inferrule* [right=\scriptsize \labelrule{h-app}{rule:h-app}]{ \Gamma \vdashtheta{c} \{P\} M \{\lambda f. Q(f)\} : A \underset{R, S}{\multimap} B \\ \Delta \vdashtheta{v} Z : A \\ \forall f. (Q(f) \implies R) }{ \Gamma \boxplus \Delta \vdashtheta{c} \{P\} \, MZ \, \{\lambda v. S(v)\} : B }
     \and
-    \inferrule* [right=\footnotesize \labelrule{h-lam}{rule:h-lam}]{\Gamma, x: A \vdashtheta{c} \{P(x)\}\,M\,\{\lambda v.Q(x, v)\}: B}{\Gamma \vdashtheta{v} \lambda x . M : A \underset{\lambda x.P(x), \lambda x.\lambda v.Q(x,v)}{\multimap} B }
+    \inferrule* [right=\scriptsize \labelrule{H-LAM}{rule:h-lam}]{\Gamma, x: A \vdashtheta{c} \{P(x)\}\,M\,\{\lambda v.Q(x, v)\}: B}{\Gamma \vdashtheta{v} \lambda x . M : A \underset{\lambda x.P(x), \lambda x.\lambda v.Q(x,v)}{\multimap} B }
     \and
-    \inferrule* [right=\footnotesize \labelrule{h-fun}{rule:h-fun}]{\mathsf{typeof}(f)=G_1\times\dots\times G_m \to G \\ (\Gamma_{k}p \vdashtheta{v} Z_k: G_{k}p)_{1\leq k\leq m} \\ p \in \mathbb{N}_{\geq 1}[i]}{\boxplus_k \Gamma_k \vdashtheta{c}\{P[f(Z_1,\dots, Z_m)/v]\}\,f_p(Z_1, \dots, Z_m)\,\{\lambda v.P(v)\}: Gp}
+    \inferrule* [right=\scriptsize \labelrule{h-fun}{rule:h-fun}]{\mathsf{typeof}(f)=G_1\times\dots\times G_m \to G \\ (\Gamma_{k}p \vdashtheta{v} Z_k: G_{k}p)_{1\leq k\leq m} \\ p \in \mathbb{N}_{\geq 1}[i]}{\boxplus_k \Gamma_k \vdashtheta{c}\{P[f(Z_1,\dots, Z_m)/v]\}\,f_p(Z_1, \dots, Z_m)\,\{\lambda v.P(v)\}: Gp}
     \and
-    \inferrule* [right=\footnotesize \labelrule{h-get}{rule:h-get}]{r:G\in \Theta}{\Gamma \vdashtheta{c} \{P(r)\}\,\get r \,\{\lambda x.P(x)\}: G}
+    \inferrule* [right=\scriptsize \labelrule{h-get}{rule:h-get}]{r:G\in \Theta}{\Gamma \vdashtheta{c} \{P(r)\}\,\get r \,\{\lambda x.P(x)\}: G}
     \and
-    \inferrule* [right=\footnotesize \labelrule{h-set}{rule:h-set}]{\Gamma \vdashtheta{v} Z: G \\ r:G\in \Theta}{ \Gamma \vdashtheta{c} \{P[Z/r]\}\, \setr{r}{Z} \,\{\lambda\_.P\}: \UU }
+    \inferrule* [right=\scriptsize \labelrule{h-set}{rule:h-set}]{\Gamma \vdashtheta{v} Z: G \\ r:G\in \Theta}{ \Gamma \vdashtheta{c} \{P[Z/r]\}\, \setr{r}{Z} \,\{\lambda\_.P\}: \UU }
     \and
-    \inferrule* [right=\footnotesize \labelrule{h-let}{rule:h-let}]{\Gamma \vdashtheta{c} \{P\}\, M \,\{\lambda v.Q(v)\}:A \\ \Delta, x:A \vdashtheta{c} \forall v.\{Q(v)\}\, N[v/x] \,\{S\}: B}{\Gamma \boxplus \Delta \vdashtheta{c} \{P\}\, \letin{x=M}{N} \,\{S\}: B}
+    \inferrule* [right=\scriptsize \labelrule{h-let}{rule:h-let}]{\Gamma \vdashtheta{c} \{P\}\, M \,\{\lambda v.Q(v)\}:A \\ \Delta, x:A \vdashtheta{c} \forall v.\{Q(v)\}\, N[v/x] \,\{S\}: B}{\Gamma \boxplus \Delta \vdashtheta{c} \{P\}\, \letin{x=M}{N} \,\{S\}: B}
     \and
-    \inferrule* [right=\footnotesize \labelrule{h-case}{rule:h-case}]{\Gamma \vdashtheta{v} Z: \BB \\ \Delta \vdashtheta{c} \{P \land Z=\true\}\, M \,\{R\} : A \\ \Delta \vdashtheta{c} \{P \land Z=\false\}\, N \,\{R\} : A}{\Gamma \boxplus \Delta \vdashtheta{c} \{P\}\, \ifthen{Z}{M}{N} \,\{R\} : A}
+    \inferrule* [right=\scriptsize \labelrule{h-case}{rule:h-case}]{\Gamma \vdashtheta{v} Z: \BB \\ \Delta \vdashtheta{c} \{P \land Z=\true\}\, M \,\{R\} : A \\ \Delta \vdashtheta{c} \{P \land Z=\false\}\, N \,\{R\} : A}{\Gamma \boxplus \Delta \vdashtheta{c} \{P\}\, \ifthen{Z}{M}{N} \,\{R\} : A}
     \and
-    \inferrule* [right=\footnotesize \labelrule{h-cons}{rule:h-cons}]{P' \vdash P \quad Q \vdash Q' \\ \Gamma \vdashtheta{c} \{P\}\, M \,\{\lambda v.Q(v)\}: A }{\Gamma \vdashtheta{c} \{P'\}\, M \,\{\lambda v.Q'(v)\} : A}
+    \inferrule* [right=\scriptsize \labelrule{h-cons}{rule:h-cons}]{P' \vdash P \quad Q \vdash Q' \\ \Gamma \vdashtheta{c} \{P\}\, M \,\{\lambda v.Q(v)\}: A }{\Gamma \vdashtheta{c} \{P'\}\, M \,\{\lambda v.Q'(v)\} : A}
     % \and
     % \inferrule*[right=h-inv]{\Gamma;\Theta \vdash \{P\}\,M\,\{\lambda v.Q(v)\} \\ \forall v.I\land Q(v) \implies I}{\Gamma;\Theta \vdash \{P \land I\}\,M\,\{\lambda v.Q(v) \land I\}}
 \end{mathpar}
@@ -327,3 +331,85 @@ where $\phi$ is an arbitrary meta level proposition e.g., $\true, \false, n < 0$
 \label{fig:hl-typing-rules}
 \end{figure}
 
+In order to bridge the original definition of $\lamBLL$ and the extended version with Hoare logic we define a map between standard types and types that are decorated with propositions. We define a lifting that takes a standard type $A$ and a invariant $P$, and produces a decorated type where $P$ is passed through every computation and function call. The map $\mu$ is defined inductively as follows:
+\begin{align}
+\begin{split}
+&\mu(\UU, P) = \UU \label{eq:mu} \\
+&\mu(\BB, P) = \BB \\
+&\mu(\SS[p], P) = \SS[p] \\
+&\mu(A \otimes B, P) = \mu(A, P) \otimes \mu(B, P) \\
+&\mu(\bang_q A, P) = \bang_q^{P,P} \mu(A, P) \\
+&\mu(A \multimap B, P) = \mu(A, P) \underset{P, \lambda x.P}{\multimap} \mu(B, P)
+\end{split}    
+\end{align}
+We now introduce the following lemma, which allows us to lift a typing judgment to a Hoare typing judgment.
+\begin{lemma}\label{lemma:hoare-lifting}
+Let $P$ be a proposition over a set of references $\mathcal{R}(P)$.
+If $\Gamma \vdash^{\Theta} M : A$ then $\mu(\Gamma, P) \vdash^{\Xi} M: \mu(A, P)$ whenever $\Xi \supseteq \Theta$ and $\mathcal{R}(P) \cap \Theta = \emptyset$.
+\end{lemma}
+\begin{proof}
+The proof proceeds by induction on the derivation of $\Gamma \vdash^{\Theta} M : A$.
+% \begin{itemize}
+%     \item Rule \textit{VAR}:
+
+%     In the standard system a variable is typed using Rule \textit{VAR}, namely $x: A \vdashtheta{v} x:  A$. Then, to treat this value as a term $M$, we apply the \textit{ETA} rule. In the Hoare system, this is lifted using the mapping $\mu(\Gamma, P)$. Since $x$ is a value, we apply Rule \ref{rule:h-eta}:
+%     \begin{center}
+%     \footnotesize
+%     \begin{mathpar}\mprset{sep=1em, vskip =-0.1ex} 
+%     \inferrule*[right=h-eta]{\Gamma \vdashtheta{v} x:A}{\mu(\Gamma, P) \vdash^{\Xi}_{c} \{P\}\,\return x \,\{\lambda v.P\}: \mu(A, P)}
+%     \end{mathpar}
+%     \end{center}
+%     By the definition of $\mu$, if we have $x:A$ in the standard world, we have $x:\mu(A,P)$ in the decorated world. The Rule~\ref{rule:h-eta} requires the precondition to be $P[x/v]$, since $x$ is a variable and does not involve references in $P$, the substitution $P[x/v]$ is simply $P$. The rule results in $\lambda v.P(v)$. Again, since $P$ is independent of the value returned, this is just $\lambda v.P$.
+    
+%     \item Rule \textit{UNIT}, \textit{TRUE}, \textit{FALSE}:
+    
+%     Follows the same approach of Rule \textit{VAR}. These are all values $V$ in the standard system $\Gamma \vdashtheta{v} V:A$. In the Hoare system, we use rule $\ref{rule:h-eta}$. Since these values do not involve references, the substitution $P[V/v]$ is simply $P$. Thus
+%     \begin{center}
+%     \footnotesize
+%     \begin{mathpar}\mprset{sep=1em, vskip =-0.1ex}
+%     \inferrule*[right=h-eta]{\Gamma \vdashtheta{v} \star:\UU}{\mu(\Gamma, P) \vdash^{\Xi}_{c} \{P\}\, \return \star \,\{\lambda v.P\}: \mu(\UU, P)}
+%     \and
+%     \inferrule*[right=h-eta]{\Gamma \vdashtheta{v} \true: \BB}{\mu(\Gamma, P) \vdash^{\Xi}_{c} \{P\}\, \return \true \,\{\lambda v.P\}: \mu(\BB, P)}
+%     \and
+%     \inferrule*[right=h-eta]{\Gamma \vdashtheta{v} \false: \BB}{\mu(\Gamma, P) \vdash^{\Xi}_{c} \{P\}\, \return \false \,\{\lambda v.P\}: \mu(\BB, P)}
+%     \end{mathpar}
+%     \end{center}
+%     with $\Xi \supseteq \Theta$ and $\Theta = \varnothing$ so $\mathcal{R}(P) \cap \varnothing = \emptyset$.
+
+%     \item Rule \textit{TENSOR}:
+
+%     Similarly to the previous cases, if $\Gamma \vdashtheta{v} Z_1: A$ and $\Delta \vdashtheta{v} Z_2: B$, then the standard system gives $\Gamma \boxplus \Delta \vdashtheta{v} \lis{Z_1, Z_2}: A\otimes B$. We apply Rule \ref{rule:h-eta} to the pair $V = \lis{Z_1, Z_2}$. Since by hypothesis the values $Z_1,Z_2$ do not intersect with $\mathcal{R}(P)$, the substitution $P[\lis{Z_1, Z_2}/v]$ remains $P$.
+%     \begin{center}
+%     \footnotesize
+%     \begin{mathpar}\mprset{sep=1em, vskip =-0.1ex} 
+%     \inferrule*[right=h-eta]{\Gamma \vdashtheta{v} Z_1: A \and \Delta \vdashtheta{v} Z_2: B}{\mu(\Gamma \boxplus \Delta, P) \vdash^{\Xi}_{c} \{P\}\, \return \lis{Z_1, Z_2} \,\{\lambda v.P\}: \mu(A, P) \otimes \mu(B, P)}
+%     \end{mathpar}
+%     \end{center}
+    
+%     \item Rule \textit{STRING}:
+
+%     Similarly to the previous cases, we have a constant string $s$ of length $c$, typed as a value: $\Gamma \vdashtheta{v} s: \SS[p]$. By definition of Equation \ref{eq:mu}, $\mu(\SS[p],P)=\SS[p]$. We apply Rule~\ref{rule:h-eta} to the value s:
+%     \begin{center}
+%     \footnotesize
+%     \begin{mathpar}\mprset{sep=1em, vskip =-0.1ex} 
+%     \inferrule* [right=h-eta]{\Gamma \vdashtheta{v} s : \SS[p]}{\mu(\Gamma, P) \vdashtheta{c} \{ P[s/v] \}\, \return s \,\{ \lambda v. P\} : \SS[p]}
+%     \end{mathpar}
+%     \end{center}
+%     Because $s$ is a constant bitstring, it does not contain any references, therefore, the substitution $P[s/v]$ is equivalent to $P$.
+    
+%     \item Rule \textit{LAM}:
+
+%     In the standard system the premise of the Rule \textit{LAM} is that $\Gamma, x:A\vdashtheta{c} M:B$. By induction, we have $\mu(\Gamma,P), x:\mu(A,P)\vdashtheta{c} \{P\}\, M \,\{\lambda v.P\}: \mu(B,P)$ and we apply Rule~\ref{rule:h-lam}.
+%     \begin{center}
+%     \footnotesize
+%     \begin{mathpar}\mprset{sep=1em, vskip =-0.1ex}
+%     \inferrule* [right=\scriptsize]{\mu(\Gamma,P), x:\mu(A,P)\vdashtheta{c} \{P\}\, M \,\{\lambda v.P\}: \mu(B,P)}{\mu(\Gamma, P) \vdashtheta{v} \lambda x . M : \mu(A, P) \underset{\lambda x.P, \lambda x.\lambda v.P}{\multimap} \mu(B, P) }
+%     \end{mathpar}
+%     \end{center}
+%     Since $P$ is defined on a set of references it does not depend on $x$ or $v$ and we write $P$ instead of $P(x)$ or $P(v)$. 
+    
+%     \item Rule \textit{FUN}:
+
+%     We have arguments $Z_k$ that are values and for each $Z_k$, we have the lifted value judgment in the Hoare system.  
+% \end{itemize}
+\end{proof}

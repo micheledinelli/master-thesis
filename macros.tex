@@ -50,6 +50,8 @@
 
 \makeatletter
 \newcommand{\labelrule}[2]{%
-  #1\def\@currentlabel{#1}\label{#2}%
+  \MakeUppercase{#1}%
+  \def\@currentlabel{\MakeUppercase{#1}}%
+  \label{#2}%
 }
 \makeatother
