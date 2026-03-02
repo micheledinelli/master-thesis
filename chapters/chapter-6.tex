@@ -921,7 +921,8 @@ M \quad\triangleq\quad
     &\quad \letin{q=\get Q}{} \\
     &\quad\letin{t=\mathtt{contains}(q,m)}{} \\
     &\quad\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-    &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+    &\quad\quad \letin{q'=\mathtt{modifyQ}(q,m)}{} \\
+    &\quad\quad \mathtt{set}\,Q\, q' \\
     &\quad\mathtt{else}\ \return \star}{} \\
     &\quad\letin{tab = \mathtt{get}\,rand}{} \\
     &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
@@ -951,39 +952,44 @@ The proof follows the same structure as that of Lemma~\ref{lemma:gen-coherence}.
 \begin{aligned}
     & \color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
     & \letin{q = \get Q}{} \\
-    & \color{blue} \{ \mathtt{coherent}(Q,rand) \land (q = Q) \} \quad \text{\ref{rule:h-get}} \\
+    & \color{blue} \{ \mathtt{coherent}(q,rand) \land (q = Q) \} \quad \text{\ref{rule:h-get}} \\
     & \letin{t = \mathtt{contains}(q, m)}{} \\
-    & \color{blue} \{ \mathtt{coherent}(Q, rand) \land t = (m \in Q) \} \quad \text{\ref{rule:h-fun} and underlying logic of $\mathtt{contains}$} \\
+    & \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land t=(m \in Q) \} \quad \text{\ref{rule:h-fun}, \ref{rule:h-cons} and underlying logic of $\mathtt{contains}$} \\
     & \mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\
-    & \quad \color{blue} \{ \mathtt{coherent}(Q, rand) \land (m \notin Q) \} \quad \text{\ref{rule:h-case}} \\
+    & \quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (q = Q) \land t=(m \in Q) \land (t = \false) \} \quad \text{\ref{rule:h-case}} \\
+    & \qquad \implies \color{blue} \{ \mathtt{coherent}(q, rand) \land (q = Q) \land (m \notin Q) \} \quad \text{\ref{rule:h-cons}} \\
     & \quad \letin{q' = \mathtt{modifyQ}(q, m)}{} \\
-    & \quad \color{blue} \{ \mathtt{coherent}(Q, rand) \land (m \notin Q) \land q' = (Q \cup {m}) \} \quad \text{\ref{rule:h-fun}} \\
-    &\qquad \implies \color{blue} \{ \mathtt{coherent}(q' \setminus \{m\}, rand) \land (m \in q') \} \quad \text{\ref{rule:h-cons} and underlying logic of $\mathtt{modifyQ}$} \\
+    & \quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \notin Q) \land q' = \mathtt{modifyQ}(q, m) \} \quad \text{\ref{rule:h-fun}} \\
+    &\qquad \implies \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \notin Q) \land q' = (q \cup m) \} \quad \text{\ref{rule:h-cons} and underlying logic of $\mathtt{modifyQ}$} \\
+    &\quad\qquad \implies \color{blue} \{ \mathtt{coherent}(q' \setminus \{m\}, rand) \land (q=Q) \land (m \notin Q) \land q' = (q \cup m) \} \quad \text{\ref{rule:h-cons}} \\
     & \quad \letin{\_ = \mathtt{set}\ Q\ q'}{} \\
-    & \quad \color{blue} { \mathtt{coherent}(Q \setminus \{m\}, rand) \land (m \in Q) } \quad \text{\ref{rule:h-set}} \\
+    & \quad \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, rand) \land (m \in Q) \} \quad \text{\ref{rule:h-set}} \\
     & \mathtt{else} \\
-    & \quad \color{blue} \{ \mathtt{coherent}(Q, rand) \land (m \in Q) \} \quad \text{\ref{rule:h-case}} \\
+    & \quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \in Q) \} \quad \text{\ref{rule:h-case}, \ref{rule:h-cons}} \\
     & \quad \return \star \\
-    & \quad \color{blue} \{\mathtt{coherent}(Q, rand) \land (m \in Q) \}  \quad \text{\ref{rule:h-eta}} \\
-    & \color{blue} \{ \mathtt{coherent}(Q, rand) \land (m \in Q) \} \implies  \\
-    & \quad \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, rand) \land (m \in Q) \} \quad \text{\ref{rule:h-cons}} \\
+    & \quad \color{blue} \{\mathtt{coherent}(q, rand) \land (q=Q) \land (m \in Q) \} \quad \text{\ref{rule:h-eta}} \\
+    & \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \in Q) \} \implies \\
+    & \color{blue} \quad \{ \mathtt{coherent}(Q \setminus \{m\}, rand) \land (m \in Q) \} \quad \text{\ref{rule:h-cons} and underlying logic of $\mathtt{coherent}$} \\
     &\letin{tab = \mathtt{get}\,rand}{} \\
     & \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab = rand) \} \quad \text{\ref{rule:h-get}} \\
     &\letin{b = \mathtt{isdefined}(tab, m)}{} \\
     & \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab = rand) \land b = (m \in tab) \} \quad \text{\ref{rule:h-fun} and underlying logic of $\mathtt{isdefined}$} \\
     &\mathtt{if}\, b\, \mathtt{then} \\
-    & \quad \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab=rand) \land (m \in tab) \} \quad \text{\ref{rule:h-case}} \\
-    & \quad \implies \color{blue} \{ \mathtt{coherent}(Q, tab) \} \quad \text{\ref{rule:h-cons}} \\
+    & \quad \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab=rand) \land b=(m \in tab) \land (b=\true) \} \quad \text{\ref{rule:h-case}} \\
+    & \qquad \implies \color{blue} \{ \mathtt{coherent}(Q, tab) \land (tab=rand) \} \quad \text{\ref{rule:h-cons}} \\
     & \quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
     &\quad \return x \\
-    & \color{blue} \quad \{ \lambda x.\mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-fun}, \ref{rule:h-eta}} \\
+    & \color{blue} \quad \{ \lambda x.\mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-cons}, \ref{rule:h-fun}, \ref{rule:h-eta}} \\
     &\mathtt{else} \\
-    & \quad \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab=rand) \land (m \notin tab) \} \quad \text{\ref{rule:h-case}} \\
+    & \quad \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab=rand) \land b=(m \in tab) \land (b=\false) \} \quad \text{\ref{rule:h-case}} \\
+    & \qquad \implies \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab=rand) \land (m \notin tab) \} \quad \text{\ref{rule:h-cons}} \\
     &\quad \letin{x = \random}{} \\
     &\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-    & \quad \color{blue} \{ \mathtt{coherent}(Q, newtab) \} \quad \text{\ref{rule:h-fun}, \ref{rule:h-cons} and underlying logic of $\mathtt{modify}$ } \\
+    & \quad \color{blue}\{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab=rand) \land (m \notin tab) \land newtab = \mathtt{modify}(tab, m, x) \} \quad \text{\ref{rule:h-fun}} \\
+    & \qquad \implies \color{blue}\{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab=rand) \land (m \notin tab) \land newtab = (tab \cup m \otimes x) \} \quad \text{\ref{rule:h-cons}} \\
+    & \quad\qquad \implies \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, tab \cup \{ m \otimes x \}) \land (m \in Q) \land (tab=rand) \land (m \notin tab) \land newtab = (tab \cup \{ m \otimes x \} \} \quad \text{\ref{rule:h-cons}} \\
     &\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
-    &\quad \color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-set}, \ref{rule:h-cons}} \\
+    &\quad \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, rand) \land (m \in Q) \land (m \in rand) \} \implies \color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-set}, \ref{rule:h-cons}} \\
     &\quad \return x \\
     &\quad \color{blue} \{ \lambda x.\mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-eta}}
 \end{aligned}
@@ -1619,6 +1625,7 @@ The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $
 \begin{align*}
 \quad\overset{\text{Lemma~\ref{lemma:gen-coherence}}}{\simcontext}\quad&
 \begin{aligned}
+    &\color{blue} \{ \top \} \\
     &\letin{k = \widetilde{Gen} \star}{} \\
     &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
     &\mathtt{let}\, \lis{m,tag} = Adv \left(
@@ -1641,52 +1648,6 @@ The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $
         &\quad\quad \return x)
     \end{aligned}
     \right)\mathtt{in} \\
-    &\letin{queries = \get Q}{} \\
-    &\letin{c=\mathtt{contains}(queries, m)}{} \\
-    &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
-    &\mathtt{else}\\
-    &\quad\letin{q=\get Q}{} \\
-    &\quad\letin{t=\mathtt{contains}(q,m)}{} \\
-    &\quad\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-    &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-    &\quad\mathtt{else}\,\return \star}{} \\
-    &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-    &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-    &\quad\mathtt{if}\, b\, \mathtt{then} \\
-    &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
-    &\quad\quad \mathtt{eq}(x,tag) \\
-    &\quad\mathtt{else} \\
-    &\quad\quad \letin{x = \random}{} \\
-    &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-    &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
-    &\quad\quad \mathtt{eq}(x,tag)
-\end{aligned}
-\\[2ex]
-\quad\triangleq\quad&
-\begin{aligned}
-    &\letin{k = \widetilde{Gen} \star}{} \\
-    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
-    &\mathtt{let}\, \lis{m,tag} = Adv \left(
-    \begin{aligned}
-        &\bang(\return \lambda m. \\
-        &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad \mathtt{else}\ \return \star}{} \\
-        &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-        &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-        &\quad\mathtt{if}\, b\, \mathtt{then} \\
-        &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
-        &\quad\quad \return x \\
-        &\quad\mathtt{else} \\
-        &\quad\quad \letin{x = \random}{} \\
-        &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
-        &\quad\quad \return x)
-    \end{aligned}
-    \right)\mathtt{in} \\
-    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
     &\letin{queries = \get Q}{} \\
     &\letin{c=\mathtt{contains}(queries, m)}{} \\
     &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
@@ -1732,9 +1693,8 @@ The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $
         &\quad\quad \return x)
     \end{aligned}
     \right)\mathtt{in} \\
-    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
+    & \color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
     &\letin{queries = \get Q}{} \\
-    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-get}} \\
     &\letin{c=\mathtt{contains}(queries, m)}{} \\
     &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
     &\mathtt{else}\\
