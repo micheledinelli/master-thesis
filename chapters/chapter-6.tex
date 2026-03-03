@@ -74,7 +74,7 @@ We have to define a $\lamBLL$ term for the experiment using the encryption schem
             &Gen^F \triangleq \\
             &\quad\lambda u. \\
             &\quad\letin{q=\mathtt{initQ}}{} \\
-            &\quad\letin{\_ = \mathtt{set}\,Q\,q}{} \\
+            &\quad \mathtt{set}\,Q\,q; \\
             &\quad\letin{k=\random}{} \\
             &\quad\return k
         \end{aligned}
@@ -93,9 +93,8 @@ We have to define a $\lamBLL$ term for the experiment using the encryption schem
             &\quad \return(\lambda k.\return \bang(\return \lambda m. \\
             &\quad\quad \letin{q=\get Q}{} \\
             &\quad\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\, \mathtt{then} \\
-            &\quad\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad\quad \mathtt{else}\ \return \star}{} \\
+            &\quad\quad \mathtt{if}\ \mathtt{not}(t)\, \mathtt{then} \,\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\quad\quad \mathtt{else}\ \mathtt{skip}; \\
             &\quad\quad \mathit{Mac}^F\lis{k,m}))
         \end{aligned}
     \end{align*}
@@ -121,9 +120,9 @@ The model for $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, denoted by $\widetilde{\m
             &\widetilde{Gen} \triangleq \\
             &\quad \lambda u. \\
             &\quad\letin{q=\mathtt{initQ}}{} \\
-            &\quad\letin{\_ = \mathtt{set}\,Q\,q}{} \\
+            &\quad \mathtt{set}\,Q\,q; \\
             &\quad \letin{tab=\mathtt{initTable}}{} \\
-            &\quad \letin{\_ = \mathtt{set}\,rand\,tab}{} \\
+            &\quad \mathtt{set}\,rand\,tab; \\
             &\quad \letin{z=\mathtt{zero}}{} \\
             &\quad \return z
         \end{aligned}
@@ -131,7 +130,7 @@ The model for $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, denoted by $\widetilde{\m
         \begin{aligned}
             &\widetilde{\mathit{Mac}} \triangleq \\
             &\quad\lambda e. \\
-            &\quad\letin{\langle k,m\rangle = e}{} \\
+            &\quad\letin{\lis{k,m} = e}{} \\
             &\quad\letin{tab = \mathtt{get}\,rand}{} \\
             &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
             &\quad\mathtt{if}\, b\, \mathtt{then} \\
@@ -140,7 +139,7 @@ The model for $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, denoted by $\widetilde{\m
             &\quad\mathtt{else} \\
             &\quad\quad \letin{x = \random}{} \\
             &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-            &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+            &\quad\quad \mathtt{set}\,rand\,newtab; \\
             &\quad\quad \return x
         \end{aligned}
     \end{align*}
@@ -149,9 +148,8 @@ The model for $\mathtt{MacForge}_{A,\widetilde{\Pi}}$, denoted by $\widetilde{\m
         &\quad \return(\lambda k.\return \bang(\return \lambda m. \\
         &\quad\quad \letin{q=\get Q}{} \\
         &\quad\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-        &\quad\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad\quad \mathtt{else}\ \return \star}{} \\
+        &\quad\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \,\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\quad\quad \mathtt{else}\ \mathtt{skip}; \\
         &\quad\quad \mathit{\widetilde{Mac}}\lis{k,m}))
     \end{align*}
     \caption{Models for subterms of $\widetilde{MacForge}$.}
@@ -210,9 +208,9 @@ where the subterms $M^F$ and $\widetilde{M}$ defined in Figure~\ref{fig:oracles}
             &\return(\lambda k.\return(\bang(\return(\lambda m.\\
             &\quad \letin{q=\get Q}{} \\
             &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
-            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+            &\qquad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\, \mathtt{skip}; \\
             &\quad \return F\lis{k,m}
         \end{aligned}
         \end{align*}
@@ -227,9 +225,8 @@ where the subterms $M^F$ and $\widetilde{M}$ defined in Figure~\ref{fig:oracles}
             &\return(\lambda k.\return(\bang(\return(\lambda r. \\
             &\quad \letin{q=\get Q}{} \\
             &\quad \letin{t=\mathtt{contains}(q, r)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
-            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q, r) \\
-            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \,\mathtt{set}\,Q\;\mathtt{modifyQ}(q, r) \\
+            &\quad \mathtt{else}\ \mathtt{skip}; \\
             &\quad \letin{tab=\mathtt{get}\,rand}{} \\
             &\quad \letin{b=\mathtt{isdefined}(tab, r)}{} \\
             &\quad \mathtt{if}\,b\,\mathtt{then} \\
@@ -238,7 +235,7 @@ where the subterms $M^F$ and $\widetilde{M}$ defined in Figure~\ref{fig:oracles}
             &\quad \mathtt{else} \\
             &\quad\quad \letin{x=\random}{} \\
             &\quad\quad \letin{newtab=\mathtt{modify}(tab, r, x)}{} \\
-            &\quad\quad \letin{\_=\mathtt{set}\,rand\,newtab}{} \\
+            &\quad\quad \mathtt{set}\,rand\,newtab; \\
             &\quad\quad \return x))))
         \end{aligned}
         \end{align*}
@@ -329,12 +326,11 @@ We begin by unfolding the definition of $\widetilde{Oracle}$ and applying Equati
     &\widetilde{Oracle}\,k \quad\triangleq\quad
     \begin{aligned}
         &\quad \return(\lambda k.\return \bang(\return \lambda m. \\
-        &\quad\quad \letin{q=\get Q}{} \\
-        &\quad\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-        &\quad\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad\quad \mathtt{else}\ \return \star}{} \\
-        &\quad\quad \mathit{\widetilde{Mac}}\lis{k,m} \\
+        &\qquad \letin{q=\get Q}{} \\
+        &\qquad \letin{t=\mathtt{contains}(q,m)}{} \\
+        &\qquad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \, \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\qquad \mathtt{else}\ \mathtt{skip}; \\
+        &\qquad \mathit{\widetilde{Mac}}\lis{k,m} \\
         &\quad))\,k
     \end{aligned} \nonumber
     \\[2ex]
@@ -343,9 +339,9 @@ We begin by unfolding the definition of $\widetilde{Oracle}$ and applying Equati
         &\return(\bang(\return(\lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
         &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m)\\
-        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad \mathtt{else}\ \mathtt{skip}; \\
         &\quad \mathit{\widetilde{Mac}}\lis{k,m} \\
         &)))
     \end{aligned} \nonumber
@@ -354,11 +350,11 @@ We begin by unfolding the definition of $\widetilde{Oracle}$ and applying Equati
         &\return(\bang(\return(\lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
-        &\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m)\\
-        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+        &\qquad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m)\\
+        &\quad \mathtt{else}\ \mathtt{skip}; \\
         &\quad (\lambda e. \\
-        &\quad\quad\letin{\langle k,m\rangle = e}{} \\
+        &\quad\quad\letin{\lis{k,m} = e}{} \\
         &\quad\quad\letin{tab = \mathtt{get}\,rand}{} \\
         &\quad\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
         &\quad\quad\mathtt{if}\, b\, \mathtt{then} \\
@@ -367,7 +363,7 @@ We begin by unfolding the definition of $\widetilde{Oracle}$ and applying Equati
         &\quad\quad\mathtt{else} \\
         &\quad\quad\quad \letin{x = \random}{} \\
         &\quad\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad\quad\quad \mathtt{set}\,rand\,newtab; \\
         &\quad\quad\quad \return x \\
         &\quad)\lis{k,m})))
     \end{aligned} \nonumber
@@ -377,9 +373,8 @@ We begin by unfolding the definition of $\widetilde{Oracle}$ and applying Equati
         &\return(\bang(\return(\lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
-        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m)\\
-        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then}\, \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m)\\
+        &\quad \mathtt{else}\ \mathtt{skip}; \\
         &\quad\letin{\lis{k,m} = \lis{k,m}}{} \\
         &\quad\letin{tab = \mathtt{get}\,rand}{} \\
         &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
@@ -389,7 +384,7 @@ We begin by unfolding the definition of $\widetilde{Oracle}$ and applying Equati
         &\quad\mathtt{else} \\
         &\quad\quad \letin{x = \random}{} \\
         &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad\quad \mathtt{set}\,rand\,newtab; \\
         &\quad\quad \return x \\
         &)))
     \end{aligned} \nonumber
@@ -399,9 +394,8 @@ We begin by unfolding the definition of $\widetilde{Oracle}$ and applying Equati
         &\return(\bang(\return(\lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
-        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m)\\
-        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then}\, \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m)\\
+        &\quad \mathtt{else}\ \mathtt{skip}; \\
         &\quad\letin{tab = \mathtt{get}\,rand}{} \\
         &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
         &\quad\mathtt{if}\, b\, \mathtt{then} \\
@@ -410,7 +404,7 @@ We begin by unfolding the definition of $\widetilde{Oracle}$ and applying Equati
         &\quad\mathtt{else} \\
         &\quad\quad \letin{x = \random}{} \\
         &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad\quad \mathtt{set}\,rand\,newtab; \\
         &\quad\quad \return x \\
         &)))
     \end{aligned} \label{eq:reduced-oracle}
@@ -443,9 +437,9 @@ The remaining goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracl
                     &\return(\lambda k.\return(\bang(\return(\lambda r. \\
                     &\quad \letin{q=\get Q}{} \\
                     &\quad \letin{t=\mathtt{contains}(q, r)}{} \\
-                    &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+                    &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
                     &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q, r) \\
-                    &\quad \mathtt{else}\ \return \star}{} \\
+                    &\quad \mathtt{else}\ \mathtt{skip}; \\
                     &\quad \letin{tab=\mathtt{get}\,rand}{} \\
                     &\quad \letin{b=\mathtt{isdefined}(tab, r)}{} \\
                     &\quad \mathtt{if}\,b\,\mathtt{then} \\
@@ -454,7 +448,7 @@ The remaining goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracl
                     &\quad \mathtt{else} \\
                     &\quad\quad \letin{x=\random}{} \\
                     &\quad\quad \letin{newtab=\mathtt{modify}(tab, r, x)}{} \\
-                    &\quad\quad \letin{\_=\mathtt{set}\,rand\,newtab}{} \\
+                    &\quad\quad \mathtt{set}\,rand\,newtab; \\
                     &\quad\quad \return x \\
                     &))))
                 \end{aligned}
@@ -469,9 +463,8 @@ The remaining goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracl
                 &\return(\bang(\return(\lambda r. \\
                 &\quad \letin{q=\get Q}{} \\
                 &\quad \letin{t=\mathtt{contains}(q, r)}{} \\
-                &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
-                &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q, r) \\
-                &\quad \mathtt{else}\ \return \star}{} \\
+                &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \,\mathtt{set}\,Q\;\mathtt{modifyQ}(q, r) \\
+                &\quad \mathtt{else}\ \mathtt{skip}; \\
                 &\quad \letin{tab=\mathtt{get}\,rand}{} \\
                 &\quad \letin{b=\mathtt{isdefined}(tab, r)}{} \\
                 &\quad \mathtt{if}\,b\,\mathtt{then} \\
@@ -480,7 +473,7 @@ The remaining goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracl
                 &\quad \mathtt{else} \\
                 &\quad\quad \letin{x=\random}{} \\
                 &\quad\quad \letin{newtab=\mathtt{modify}(tab, r, x)}{} \\
-                &\quad\quad \letin{\_=\mathtt{set}\,rand\,newtab}{} \\
+                &\quad\quad \mathtt{set}\,rand\,newtab; \\
                 &\quad\quad \return x \\
                 &)))
             \end{aligned}
@@ -496,9 +489,8 @@ The remaining goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracl
                 &\return(\lambda r. \\
                 &\quad \letin{q=\get Q}{} \\
                 &\quad \letin{t=\mathtt{contains}(q, r)}{} \\
-                &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
-                &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q, r) \\
-                &\quad \mathtt{else}\ \return \star}{} \\
+                &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \,\mathtt{set}\,Q\;\mathtt{modifyQ}(q, r) \\
+                &\quad \mathtt{else}\, \mathtt{skip}; \\
                 &\quad \letin{tab=\mathtt{get}\,rand}{} \\
                 &\quad \letin{b=\mathtt{isdefined}(tab, r)}{} \\
                 &\quad \mathtt{if}\,b\,\mathtt{then} \\
@@ -507,7 +499,7 @@ The remaining goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracl
                 &\quad \mathtt{else} \\
                 &\quad\quad \letin{x=\random}{} \\
                 &\quad\quad \letin{newtab=\mathtt{modify}(tab, r, x)}{} \\
-                &\quad\quad \letin{\_=\mathtt{set}\,rand\,newtab}{} \\
+                &\quad\quad \mathtt{set}\,rand\,newtab; \\
                 &\quad\quad \return x)
             \end{aligned}
             \right)\right)\,m\,\right) \\
@@ -522,9 +514,9 @@ The remaining goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracl
                 &\return(\lambda r. \\
                 &\quad \letin{q=\get Q}{} \\
                 &\quad \letin{t=\mathtt{contains}(q, r)}{} \\
-                &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+                &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
                 &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q, r) \\
-                &\quad \mathtt{else}\ \return \star}{} \\
+                &\quad \mathtt{else}\ \mathtt{skip}; \\
                 &\quad \letin{tab=\mathtt{get}\,rand}{} \\
                 &\quad \letin{b=\mathtt{isdefined}(tab, r)}{} \\
                 &\quad \mathtt{if}\,b\,\mathtt{then} \\
@@ -533,7 +525,7 @@ The remaining goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracl
                 &\quad \mathtt{else} \\
                 &\quad\quad \letin{x=\random}{} \\
                 &\quad\quad \letin{newtab=\mathtt{modify}(tab, r, x)}{} \\
-                &\quad\quad \letin{\_=\mathtt{set}\,rand\,newtab}{} \\
+                &\quad\quad \mathtt{set}\,rand\,newtab; \\
                 &\quad\quad \return x)
             \end{aligned}
             \right)\, m \\
@@ -545,9 +537,8 @@ The remaining goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracl
             &\return(\bang(\return(\lambda m. \\ 
             &\quad \letin{q=\get Q}{} \\
             &\quad \letin{t=\mathtt{contains}(q, m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
-            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q, m) \\
-            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \, \mathtt{set}\,Q\;\mathtt{modifyQ}(q, m) \\
+            &\quad \mathtt{else}\ \mathtt{skip}; \\
             &\quad \letin{tab=\mathtt{get}\,rand}{} \\
             &\quad \letin{b=\mathtt{isdefined}(tab, m)}{} \\
             &\quad \mathtt{if}\,b\,\mathtt{then} \\
@@ -556,7 +547,7 @@ The remaining goal is to show that the term $\letin{o=\widetilde{M}\,k}{MacOracl
             &\quad \mathtt{else} \\
             &\quad\quad \letin{x=\random}{} \\
             &\quad\quad \letin{newtab=\mathtt{modify}(tab, m, x)}{} \\
-            &\quad\quad \letin{\_=\mathtt{set}\,rand\,newtab}{} \\
+            &\quad\quad \mathtt{set}\,rand\,newtab; \\
             &\quad\quad \return x \\
             &)))
         \end{aligned}
@@ -617,7 +608,7 @@ We begin with the definition of $\widetilde{D}$ given in Equation~\ref{eq:d-tild
         &\letin{\lis{m,tag} = Adv\, o}{} \\
         &\letin{queries = \get Q}{} \\
         &\letin{c=\mathtt{contains}(queries, m)}{} \\
-        &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
+        &\mathtt{if}\, c \,\mathtt{then}\, \return \false \\
         &\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,tag))}
     \end{aligned}
     \quad=\quad
@@ -641,9 +632,8 @@ The proof follows a similar approach to the proof of Lemma~\ref{lemma:MacOracle-
         &\return(\lambda k.\return \bang(\return(\lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
-        &\quad\quad\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad\mathtt{else}\ \return \star}{} \\
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \, \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\quad\mathtt{else}\ \mathtt{skip}; \\
         &\quad \mathit{Mac}^F\lis{k,m} \\
         &)))\,k
     \end{aligned} \nonumber
@@ -653,9 +643,8 @@ The proof follows a similar approach to the proof of Lemma~\ref{lemma:MacOracle-
         &\return(\bang(\return(\lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
-        &\quad\quad\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad\mathtt{else}\ \return \star}{} \\
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \, \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\quad\mathtt{else}\ \mathtt{skip}; \\
         &\quad \mathit{Mac}^F\lis{k,m} \\
         &)))
     \end{aligned} \nonumber
@@ -664,9 +653,8 @@ The proof follows a similar approach to the proof of Lemma~\ref{lemma:MacOracle-
         &\return(\bang(\return(\lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
-        &\quad\quad\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad\mathtt{else}\ \return \star}{} \\
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \, \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\quad\mathtt{else}\ \mathtt{skip}; \\
         &\quad(\lambda x. \\
         &\quad\quad \letin{\lis{k,m}=x}{} \\
         &\quad\quad \return F\lis{k,m} \\
@@ -679,9 +667,9 @@ The proof follows a similar approach to the proof of Lemma~\ref{lemma:MacOracle-
         &\return(\bang(\return(\lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
-        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\qquad\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\quad\mathtt{else}\ \mathtt{skip}; \\
         &\quad \letin{\lis{k,m}=\lis{k,m}}{} \\
         &\quad \return F\lis{k,m} \\
         &)))
@@ -692,9 +680,9 @@ The proof follows a similar approach to the proof of Lemma~\ref{lemma:MacOracle-
         &\return(\bang(\return(\lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
-        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\qquad\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\quad \mathtt{else}\ \mathtt{skip}; \\
         &\quad \return F\lis{k,m} \\
         &)))
     \end{aligned} \label{eq:oracleF-expansion} 
@@ -729,9 +717,9 @@ Now, the goal is to show that the term $\letin{o=M^F\,k}{MacOracle\,o}$ is $\The
             &\return(\lambda k.\return(\bang(\return(\lambda m.\\
             &\quad \letin{q=\get Q}{} \\
             &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
             &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \mathtt{else}\ \mathtt{skip}; \\
             &\quad \return F\lis{k,m} \\
             &))))
         \end{aligned}
@@ -748,9 +736,9 @@ Now, the goal is to show that the term $\letin{o=M^F\,k}{MacOracle\,o}$ is $\The
             &\return(\bang(\return(\lambda m.\\
             &\quad \letin{q=\get Q}{} \\
             &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
             &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \mathtt{else}\ \mathtt{skip}; \\
             &\quad \return F\lis{k,m} \\
             &)))
         \end{aligned}
@@ -768,9 +756,9 @@ Now, the goal is to show that the term $\letin{o=M^F\,k}{MacOracle\,o}$ is $\The
             &\return(\lambda m.\\
             &\quad \letin{q=\get Q}{} \\
             &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
             &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \mathtt{else}\ \mathtt{skip}; \\
             &\quad \return F\lis{k,m})
         \end{aligned}
         \right)\right)m\right) \\
@@ -785,9 +773,9 @@ Now, the goal is to show that the term $\letin{o=M^F\,k}{MacOracle\,o}$ is $\The
             &\return(\lambda m.\\
             &\quad \letin{q=\get Q}{} \\
             &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
             &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \mathtt{else}\ \mathtt{skip}; \\
             &\quad \return F\lis{k,m}
         \end{aligned}
         \right) m \\
@@ -797,11 +785,11 @@ Now, the goal is to show that the term $\letin{o=M^F\,k}{MacOracle\,o}$ is $\The
     &\quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad
     \begin{aligned}
         &\return(\bang(\return(\lambda m. \\ 
-        &\quad\letin{q=\get Q}{} \\
+        &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\ 
         &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad \mathtt{else}\ \mathtt{skip}; \\
         &\quad \return F\lis{k,m} \\
         &)))
     \end{aligned}
@@ -896,17 +884,17 @@ Since we evaluate $\widetilde{Gen}$ at $\star$, we first eliminate the abstracti
 \begin{aligned}
     &\color{blue} \{\top\} \\
     &\letin{q = \mathtt{initQ}}{} \\
-    &\color{blue} \{ \mathtt{coherent}(q, rand) \} \quad \text{\ref{rule:h-fun}, \ref{rule:h-cons}} \\
-    &\letin{\_ = \mathtt{set}\, Q\, q}{} \\
-    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-set}} \\
+    &\color{blue} \{ q = \mathtt{initQ} \} \implies \{ \mathtt{coherent}(q, rand) \} \quad \text{\ref{rule:h-fun}, \ref{rule:h-cons}, logic of $\mathtt{coherent}$ and $\mathtt{initQ}$} \\
+    &\mathtt{set}\, Q\, q; \\
+    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-set}, \ref{rule:h-cons}} \\
     &\letin{tab = \mathtt{initTable}}{} \\
-    &\color{blue} \{ \mathtt{coherent}(Q, tab) \} \quad \text{\ref{rule:h-fun}, \ref{rule:h-cons}} \\
-    &\letin{\_ = \mathtt{set}\, rand\, tab}{} \\
+    &\color{blue} \{ \mathtt{coherent}(Q, tab)\} \quad \text{\ref{rule:h-fun}, \ref{rule:h-cons} and logic of $\mathtt{coherent}$ and $\mathtt{initTable}$} \\
+    &\mathtt{set}\, rand\, tab; \\
     &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-set}} \\
     &\letin{z = \mathtt{zero}}{} \\
     &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-fun}} \\
     &\return z \\
-    &\color{blue} \{ \lambda v. \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-eta}}
+    &\color{blue} \{ \lambda z. \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-eta}}
 \end{aligned}
 \end{align*}
 }
@@ -920,10 +908,10 @@ M \quad\triangleq\quad
     &\bang (\return \lambda m. \\
     &\quad \letin{q=\get Q}{} \\
     &\quad\letin{t=\mathtt{contains}(q,m)}{} \\
-    &\quad\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+    &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
     &\quad\quad \letin{q'=\mathtt{modifyQ}(q,m)}{} \\
     &\quad\quad \mathtt{set}\,Q\, q' \\
-    &\quad\mathtt{else}\ \return \star}{} \\
+    &\quad\mathtt{else}\ \mathtt{skip}{}; \\
     &\quad\letin{tab = \mathtt{get}\,rand}{} \\
     &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
     &\quad\mathtt{if}\, b\, \mathtt{then} \\
@@ -932,7 +920,7 @@ M \quad\triangleq\quad
     &\quad\mathtt{else} \\
     &\quad\quad \letin{x = \random}{} \\
     &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-    &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+    &\quad\quad \mathtt{set}\,rand\,newtab; \\
     &\quad\quad \return x)
 \end{aligned}
 \end{align*}
@@ -945,7 +933,7 @@ is true.
 \end{lemma}
 
 \begin{proof}
-The proof follows the same structure as that of Lemma~\ref{lemma:gen-coherence}. We extend the derivation with assertions justified by the rules introduced in Figure~\ref{fig:hl-typing-rules}. Sequential composition is handled by repeated applications of Rule~\ref{rule:h-let}, while Rule~\ref{rule:h-fun} is applied to function symbols. We reason on the body of the term, implicitly applying Rule~\ref{rule:h-bang}, followed by Rule~\ref{rule:h-eta}, and finally Rule~\ref{rule:h-lam} to eliminate the abstraction.
+The proof follows the same structure as that of Lemma~\ref{lemma:gen-coherence}. We extend the derivation with assertions justified by the rules introduced in Figure~\ref{fig:hl-typing-rules}. Sequential composition is handled by repeated applications of Rule~\ref{rule:h-let}, while Rule~\ref{rule:h-fun} is applied to function symbols. We reason on the body of the term, implicitly applying Rule~\ref{rule:h-bang}, followed by Rule~\ref{rule:h-eta}, and finally Rule~\ref{rule:h-lam} to eliminate the abstraction. The states of the ledgers $Q$ and $rand$ are described using standard set notation. For instance, $Q \setminus m$ denotes the ledger obtained from $Q$ by removing the element $m$, more formally $Q\setminus\{m\} := \{\, x\in Q \mid x\not= m \,\}$. The ledger $rand$ is specified in assertions as a set of pairs. The notation $rand \cup \{(m,x)\}$ denotes the ledger obtained by adding a new pair $(m,x)$, where $m$ and $x$ are bitstrings of length $\SS[i]$. In the concrete representation, such a pair is modeled as a single entry of type $\SS[2i+1]$, where the additional bit indicates whether the entry is active. The status bit is handled by the underlying logic of the function symbol $\mathtt{modify}$. We use syntactic sugar of Equation~\ref{eq:sugar-letvoid} and ~\ref{eq:sugar-skip} to avoid unnecessary binding and to simplify computations that do not add effects.
 
 \scriptsize{
 \begin{align*}
@@ -962,11 +950,11 @@ The proof follows the same structure as that of Lemma~\ref{lemma:gen-coherence}.
     & \quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \notin Q) \land q' = \mathtt{modifyQ}(q, m) \} \quad \text{\ref{rule:h-fun}} \\
     &\qquad \implies \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \notin Q) \land q' = (q \cup m) \} \quad \text{\ref{rule:h-cons} and underlying logic of $\mathtt{modifyQ}$} \\
     &\quad\qquad \implies \color{blue} \{ \mathtt{coherent}(q' \setminus \{m\}, rand) \land (q=Q) \land (m \notin Q) \land q' = (q \cup m) \} \quad \text{\ref{rule:h-cons}} \\
-    & \quad \letin{\_ = \mathtt{set}\ Q\ q'}{} \\
+    & \quad \mathtt{set}\ Q\ q' \\
     & \quad \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, rand) \land (m \in Q) \} \quad \text{\ref{rule:h-set}} \\
     & \mathtt{else} \\
     & \quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \in Q) \} \quad \text{\ref{rule:h-case}, \ref{rule:h-cons}} \\
-    & \quad \return \star \\
+    & \quad \mathtt{skip}; \\
     & \quad \color{blue} \{\mathtt{coherent}(q, rand) \land (q=Q) \land (m \in Q) \} \quad \text{\ref{rule:h-eta}} \\
     & \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \in Q) \} \implies \\
     & \color{blue} \quad \{ \mathtt{coherent}(Q \setminus \{m\}, rand) \land (m \in Q) \} \quad \text{\ref{rule:h-cons} and underlying logic of $\mathtt{coherent}$} \\
@@ -986,9 +974,9 @@ The proof follows the same structure as that of Lemma~\ref{lemma:gen-coherence}.
     &\quad \letin{x = \random}{} \\
     &\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
     & \quad \color{blue}\{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab=rand) \land (m \notin tab) \land newtab = \mathtt{modify}(tab, m, x) \} \quad \text{\ref{rule:h-fun}} \\
-    & \qquad \implies \color{blue}\{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab=rand) \land (m \notin tab) \land newtab = (tab \cup m \otimes x) \} \quad \text{\ref{rule:h-cons}} \\
-    & \quad\qquad \implies \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, tab \cup \{ m \otimes x \}) \land (m \in Q) \land (tab=rand) \land (m \notin tab) \land newtab = (tab \cup \{ m \otimes x \} \} \quad \text{\ref{rule:h-cons}} \\
-    &\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+    & \qquad \implies \color{blue}\{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab=rand) \land (m \notin tab) \land newtab = (tab \cup \{(m, x)\}) \} \quad \text{\ref{rule:h-cons}} \\
+    & \quad\qquad \implies \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, tab \cup \{ (m, x) \}) \land (m \in Q) \land (tab=rand) \land (m \notin tab) \land newtab = (tab \cup \{ (m, x) \} \} \quad \text{\ref{rule:h-cons}} \\
+    &\quad \mathtt{set}\,rand\,newtab; \\
     &\quad \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, rand) \land (m \in Q) \land (m \in rand) \} \implies \color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-set}, \ref{rule:h-cons}} \\
     &\quad \return x \\
     &\quad \color{blue} \{ \lambda x.\mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-eta}}
@@ -1196,9 +1184,8 @@ The proof follows the same structure as that of Lemma~\ref{lemma:gen-coherence}.
             &\return(\lambda k.\return \bang(\return \lambda m. \\
             &\quad \letin{q=\get Q}{} \\
             &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \,\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\ \mathtt{skip}; \\
             &\quad \mathit{\widetilde{Mac}}\lis{k,m}))
         \end{aligned}
         \right) k \,\mathtt{in}\\
@@ -1217,10 +1204,9 @@ The proof follows the same structure as that of Lemma~\ref{lemma:gen-coherence}.
             &\return \bang(\return \lambda m. \\
             &\quad \letin{q=\get Q}{} \\
             &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \return \star}{} \\
-            &\quad \mathit{\widetilde{Mac}}\lis{k,m}))
+            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \,\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\ \mathtt{skip}; \\
+            &\quad \mathit{\widetilde{Mac}}\lis{k,m})
         \end{aligned}
         \right)\mathtt{in}\\
         &\letin{\lis{m,tag} = Adv\, o}{} \\
@@ -1238,10 +1224,9 @@ The proof follows the same structure as that of Lemma~\ref{lemma:gen-coherence}.
             &\bang(\return \lambda m. \\
             &\quad \letin{q=\get Q}{} \\
             &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \return \star}{} \\
-            &\quad \mathit{\widetilde{Mac}}\lis{k,m}))
+            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \,\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\ \mathtt{skip}; \\
+            &\quad \mathit{\widetilde{Mac}}\lis{k,m})
         \end{aligned}
         \right)\mathtt{in} \\
         &\letin{queries = \get Q}{} \\
@@ -1252,10 +1237,9 @@ The proof follows the same structure as that of Lemma~\ref{lemma:gen-coherence}.
             &\bang(\return \lambda m. \\
             &\quad \letin{q=\get Q}{} \\
             &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \return \star}{} \\
-            &\quad \mathit{\widetilde{Mac}}\lis{k,m}))
+            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \,\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\ \mathtt{skip}; \\
+            &\quad \mathit{\widetilde{Mac}}\lis{k,m})
         \end{aligned}
         \right) m \,\mathtt{in} \\
         &\mathtt{eq}(x,tag)
@@ -1269,10 +1253,9 @@ The proof follows the same structure as that of Lemma~\ref{lemma:gen-coherence}.
             &\bang(\return \lambda m. \\
             &\quad \letin{q=\get Q}{} \\
             &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \return \star}{} \\
-            &\quad \mathit{\widetilde{Mac}}\lis{k,m}))
+            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \,\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\ \mathtt{skip}; \\
+            &\quad \mathit{\widetilde{Mac}}\lis{k,m})
         \end{aligned}
         \right)\,\mathtt{in} \\
         &\letin{queries = \get Q}{} \\
@@ -1283,9 +1266,8 @@ The proof follows the same structure as that of Lemma~\ref{lemma:gen-coherence}.
             &\return(\lambda m. \\
             &\quad \letin{q=\get Q}{} \\
             &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \return \star}{} \\
+            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \,\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\ \mathtt{skip}; \\
             &\quad \mathit{\widetilde{Mac}}\lis{k,m})
         \end{aligned}
         \right) m \,\mathtt{in} \\
@@ -1300,10 +1282,9 @@ The proof follows the same structure as that of Lemma~\ref{lemma:gen-coherence}.
             &\bang(\return \lambda m. \\
             &\quad \letin{q=\get Q}{} \\
             &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \return \star}{} \\
-            &\quad \mathit{\widetilde{Mac}}\lis{k,m}))
+            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \,\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\quad \mathtt{else}\ \mathtt{skip}; \\
+            &\quad \mathit{\widetilde{Mac}}\lis{k,m})
         \end{aligned}
         \right)\mathtt{in} \\
         &\letin{queries = \get Q}{} \\
@@ -1313,40 +1294,9 @@ The proof follows the same structure as that of Lemma~\ref{lemma:gen-coherence}.
         \begin{aligned}
             &\letin{q=\get Q}{} \\
             &\letin{t=\mathtt{contains}(q,m)}{} \\
-            &\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-            &\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\mathtt{else}\ \return \star}{} \\
-            &\mathit{\widetilde{Mac}}\lis{k,m})
-        \end{aligned}
-        \right)\mathtt{in} \\
-        &\mathtt{eq}(x,tag)
-    \end{aligned}
-    \\[2ex]
-    &\quad\overset{\text{~\ref{reduc2}}}{\simcontext}\quad
-    \begin{aligned}
-        &\letin{k = \widetilde{Gen} \star}{} \\
-        &\mathtt{let}\, \lis{m,tag} = Adv \left(
-        \begin{aligned}
-            &\bang(\return \lambda m. \\
-            &\quad \letin{q=\get Q}{} \\
-            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \return \star}{} \\
-            &\quad \mathit{\widetilde{Mac}}\lis{k,m}))
-        \end{aligned}
-        \right)\mathtt{in} \\
-        &\letin{queries = \get Q}{} \\
-        &\letin{c=\mathtt{contains}(queries, m)}{} \\
-        &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
-        &\mathtt{else}\,\mathtt{let}\, x=\left(
-        \begin{aligned}
-            &\letin{q=\get Q}{} \\
-            &\letin{t=\mathtt{contains}(q,m)}{} \\
-            &\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-            &\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\mathtt{else}\ \return \star}{} \\
-            &\mathit{\widetilde{Mac}}\lis{k,m})
+            &\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \,\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+            &\mathtt{else}\ \mathtt{skip}; \\
+            &\mathit{\widetilde{Mac}}\lis{k,m}
         \end{aligned}
         \right)\mathtt{in} \\
         &\mathtt{eq}(x,tag)
@@ -1368,11 +1318,10 @@ At this stage, the adversary is given access to a term that can be evaluated for
         &\bang(\return \lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \, \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\quad \mathtt{else}\ \mathtt{skip}; \\
         &\quad(\lambda e. \\
-        &\quad\letin{\langle k,m\rangle = e}{} \\
+        &\quad\letin{\lis{k,m} = e}{} \\
         &\quad\letin{tab = \mathtt{get}\,rand}{} \\
         &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
         &\quad\mathtt{if}\, b\, \mathtt{then} \\
@@ -1381,7 +1330,7 @@ At this stage, the adversary is given access to a term that can be evaluated for
         &\quad\mathtt{else} \\
         &\quad\quad \letin{x = \random}{} \\
         &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad\quad \mathtt{set}\,rand\,newtab; \\
         &\quad\quad \return x) \lis{k,m})
     \end{aligned}
     \right)\mathtt{in} \\
@@ -1392,11 +1341,10 @@ At this stage, the adversary is given access to a term that can be evaluated for
     \begin{aligned}
         &\letin{q=\get Q}{} \\
         &\letin{t=\mathtt{contains}(q,m)}{} \\
-        &\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-        &\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\mathtt{else}\,\return \star}{} \\
+        &\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \, \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\mathtt{else}\,\mathtt{skip}; \\
         &(\lambda e. \\
-        &\letin{\langle k,m\rangle = e}{} \\
+        &\letin{\lis{k,m} = e}{} \\
         &\letin{tab = \mathtt{get}\,rand}{} \\
         &\letin{b = \mathtt{isdefined}(tab, m)}{} \\
         &\mathtt{if}\, b\, \mathtt{then} \\
@@ -1405,7 +1353,7 @@ At this stage, the adversary is given access to a term that can be evaluated for
         &\mathtt{else} \\
         &\quad \letin{x = \random}{} \\
         &\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad \mathtt{set}\,rand\,newtab; \\
         &\quad \return x) \lis{k,m}  
     \end{aligned}
     \right)\mathtt{in} \\
@@ -1420,10 +1368,9 @@ At this stage, the adversary is given access to a term that can be evaluated for
         &\bang(\return \lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad \mathtt{else}\ \return \star}{} \\
-        &\quad\letin{\langle k,m\rangle = \lis{k,m}}{} \\
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \, \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\quad \mathtt{else}\ \mathtt{skip}; \\
+        &\quad\letin{\lis{k,m} = \lis{k,m}}{} \\
         &\quad\letin{tab = \mathtt{get}\,rand}{} \\
         &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
         &\quad\mathtt{if}\, b\, \mathtt{then} \\
@@ -1432,7 +1379,7 @@ At this stage, the adversary is given access to a term that can be evaluated for
         &\quad\mathtt{else} \\
         &\quad\quad \letin{x = \random}{} \\
         &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad\quad \mathtt{set}\,rand\,newtab; \\
         &\quad\quad \return x) 
     \end{aligned}
     \right)\mathtt{in} \\
@@ -1443,10 +1390,10 @@ At this stage, the adversary is given access to a term that can be evaluated for
     \begin{aligned}
         &\letin{q=\get Q}{} \\
         &\letin{t=\mathtt{contains}(q,m)}{} \\
-        &\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
         &\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\mathtt{else}\,\return \star}{} \\
-        &\letin{\langle k,m\rangle = \lis{k,m}}{} \\
+        &\mathtt{else}\,\mathtt{skip}; \\
+        &\letin{\lis{k,m} = \lis{k,m}}{} \\
         &\letin{tab = \mathtt{get}\,rand}{} \\
         &\letin{b = \mathtt{isdefined}(tab, m)}{} \\
         &\mathtt{if}\, b\, \mathtt{then} \\
@@ -1455,7 +1402,7 @@ At this stage, the adversary is given access to a term that can be evaluated for
         &\mathtt{else} \\
         &\quad \letin{x = \random}{} \\
         &\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad \mathtt{set}\,rand\,newtab; \\
         &\quad \return x
     \end{aligned}
     \right)\mathtt{in} \\
@@ -1470,9 +1417,8 @@ At this stage, the adversary is given access to a term that can be evaluated for
         &\bang(\return \lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \, \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\quad \mathtt{else}\ \mathtt{skip}; \\
         &\quad\letin{tab = \mathtt{get}\,rand}{} \\
         &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
         &\quad\mathtt{if}\, b\, \mathtt{then} \\
@@ -1481,7 +1427,7 @@ At this stage, the adversary is given access to a term that can be evaluated for
         &\quad\mathtt{else} \\
         &\quad\quad \letin{x = \random}{} \\
         &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad\quad \mathtt{set}\,rand\,newtab; \\
         &\quad\quad \return x)
     \end{aligned}
     \right)\mathtt{in} \\
@@ -1492,9 +1438,9 @@ At this stage, the adversary is given access to a term that can be evaluated for
     \begin{aligned}
         &\letin{q=\get Q}{} \\
         &\letin{t=\mathtt{contains}(q,m)}{} \\
-        &\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
         &\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\mathtt{else}\,\return \star}{} \\
+        &\mathtt{else}\,\mathtt{skip}; \\
         &\letin{tab = \mathtt{get}\,rand}{} \\
         &\letin{b = \mathtt{isdefined}(tab, m)}{} \\
         &\mathtt{if}\, b\, \mathtt{then} \\
@@ -1503,7 +1449,7 @@ At this stage, the adversary is given access to a term that can be evaluated for
         &\mathtt{else} \\
         &\quad \letin{x = \random}{} \\
         &\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad \mathtt{set}\,rand\,newtab; \\
         &\quad \return x
     \end{aligned}
     \right)\mathtt{in} \\
@@ -1518,9 +1464,9 @@ At this stage, the adversary is given access to a term that can be evaluated for
         &\bang(\return \lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
         &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad \mathtt{else}\ \mathtt{skip}; \\
         &\quad\letin{tab = \mathtt{get}\,rand}{} \\
         &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
         &\quad\mathtt{if}\, b\, \mathtt{then} \\
@@ -1529,7 +1475,7 @@ At this stage, the adversary is given access to a term that can be evaluated for
         &\quad\mathtt{else} \\
         &\quad\quad \letin{x = \random}{} \\
         &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad\quad \mathtt{set}\,rand\,newtab; \\
         &\quad\quad \return x)
     \end{aligned}
     \right)\mathtt{in} \\
@@ -1539,9 +1485,9 @@ At this stage, the adversary is given access to a term that can be evaluated for
     &\mathtt{else}\\
     &\quad\letin{q=\get Q}{} \\
     &\quad\letin{t=\mathtt{contains}(q,m)}{} \\
-    &\quad\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+    &\quad\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
     &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-    &\quad\mathtt{else}\,\return \star}{} \\
+    &\quad\mathtt{else}\,\mathtt{skip}; \\
     &\quad\letin{tab = \mathtt{get}\,rand}{} \\
     &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
     &\quad\mathtt{let}\, x=\left(
@@ -1552,7 +1498,7 @@ At this stage, the adversary is given access to a term that can be evaluated for
         &\mathtt{else} \\
         &\quad \letin{x = \random}{} \\
         &\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad \mathtt{set}\,rand\,newtab; \\
         &\quad \return x
     \end{aligned}
     \right)\mathtt{in} \\
@@ -1567,9 +1513,9 @@ At this stage, the adversary is given access to a term that can be evaluated for
         &\bang(\return \lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
         &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad \mathtt{else}\ \mathtt{skip}; \\
         &\quad\letin{tab = \mathtt{get}\,rand}{} \\
         &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
         &\quad\mathtt{if}\, b\, \mathtt{then} \\
@@ -1578,7 +1524,7 @@ At this stage, the adversary is given access to a term that can be evaluated for
         &\quad\mathtt{else} \\
         &\quad\quad \letin{x = \random}{} \\
         &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad\quad \mathtt{set}\,rand\,newtab; \\
         &\quad\quad \return x)
     \end{aligned}
     \right)\mathtt{in} \\
@@ -1588,9 +1534,9 @@ At this stage, the adversary is given access to a term that can be evaluated for
     &\mathtt{else}\\
     &\quad\letin{q=\get Q}{} \\
     &\quad\letin{t=\mathtt{contains}(q,m)}{} \\
-    &\quad\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+    &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
     &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-    &\quad\mathtt{else}\,\return \star}{} \\
+    &\quad\mathtt{else}\,\mathtt{skip}; \\
     &\quad\letin{tab = \mathtt{get}\,rand}{} \\
     &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
     &\quad\mathtt{if}\, b\, \mathtt{then} \\
@@ -1599,7 +1545,7 @@ At this stage, the adversary is given access to a term that can be evaluated for
     &\quad\mathtt{else} \\
     &\quad\quad \letin{x = \random}{} \\
     &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-    &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+    &\quad\quad \mathtt{set}\,rand\,newtab; \\
     &\quad\quad \mathtt{eq}(x,tag)
 \end{aligned}
 \end{align*}
@@ -1633,9 +1579,9 @@ The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $
         &\bang(\return \lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
         &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad \mathtt{else}\ \mathtt{skip}; \\
         &\quad\letin{tab = \mathtt{get}\,rand}{} \\
         &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
         &\quad\mathtt{if}\, b\, \mathtt{then} \\
@@ -1644,7 +1590,7 @@ The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $
         &\quad\mathtt{else} \\
         &\quad\quad \letin{x = \random}{} \\
         &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad\quad \mathtt{set}\,rand\,newtab; \\
         &\quad\quad \return x)
     \end{aligned}
     \right)\mathtt{in} \\
@@ -1654,9 +1600,9 @@ The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $
     &\mathtt{else}\\
     &\quad\letin{q=\get Q}{} \\
     &\quad\letin{t=\mathtt{contains}(q,m)}{} \\
-    &\quad\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+    &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
     &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-    &\quad\mathtt{else}\,\return \star}{} \\
+    &\quad\mathtt{else}\,\mathtt{skip}; \\
     &\quad\letin{tab = \mathtt{get}\,rand}{} \\
     &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
     &\quad\mathtt{if}\, b\, \mathtt{then} \\
@@ -1665,12 +1611,13 @@ The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $
     &\quad\mathtt{else} \\
     &\quad\quad \letin{x = \random}{} \\
     &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-    &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+    &\quad\quad \mathtt{set}\,rand\,newtab; \\
     &\quad\quad \mathtt{eq}(x,tag)
 \end{aligned}
 \\[2ex]
-\quad\overset{\text{Lemma~\ref{lemma:hoare-lifting}}}{\simcontext}\quad&
+\quad\overset{\text{Lemmatas~\ref{lemma:hoare-lifting}, \ref{lemma:oracle-coherence}}}{\simcontext}\quad&
 \begin{aligned}
+    &\color{blue} \{ \top \} \\
     &\letin{k = \widetilde{Gen} \star}{} \\
     &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
     &\mathtt{let}\, \lis{m,tag} = Adv \left(
@@ -1678,9 +1625,9 @@ The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $
         &\bang(\return \lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
         &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad \mathtt{else}\ \return \star}{} \\
+        &\quad \mathtt{else}\ \mathtt{skip}; \\
         &\quad\letin{tab = \mathtt{get}\,rand}{} \\
         &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
         &\quad\mathtt{if}\, b\, \mathtt{then} \\
@@ -1689,20 +1636,20 @@ The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $
         &\quad\mathtt{else} \\
         &\quad\quad \letin{x = \random}{} \\
         &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+        &\quad\quad \mathtt{set}\,rand\,newtab; \\
         &\quad\quad \return x)
     \end{aligned}
     \right)\mathtt{in} \\
-    & \color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
+    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
     &\letin{queries = \get Q}{} \\
     &\letin{c=\mathtt{contains}(queries, m)}{} \\
     &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
     &\mathtt{else}\\
     &\quad\letin{q=\get Q}{} \\
     &\quad\letin{t=\mathtt{contains}(q,m)}{} \\
-    &\quad\letin{\_=\mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
+    &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
     &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-    &\quad\mathtt{else}\,\return \star}{} \\
+    &\quad\mathtt{else}\,\mathtt{skip}; \\
     &\quad\letin{tab = \mathtt{get}\,rand}{} \\
     &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
     &\quad\mathtt{if}\, b\, \mathtt{then} \\
@@ -1711,7 +1658,7 @@ The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $
     &\quad\mathtt{else} \\
     &\quad\quad \letin{x = \random}{} \\
     &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-    &\quad\quad \letin{\_ = \mathtt{set}\,rand\,newtab}{} \\
+    &\quad\quad \mathtt{set}\,rand\,newtab; \\
     &\quad\quad \mathtt{eq}(x,tag)
 \end{aligned}
 \end{align*}

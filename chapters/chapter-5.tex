@@ -177,8 +177,7 @@ The full semantics of computations in $\lamBLL$ is obtained by combining probabi
 \[
 \T_{\Theta} := \bigl(\D(X \times \Store_{\Theta})\bigr)^{\Store_{\Theta}}
 \]
-The unit of $\T_\Theta$ has components $\eta_\Theta : X \to \D(X \times \Store_\Theta)^{\Store_\Theta}$, mapping a value $x \in X$ and a store $e \in \Store_\Theta$ to the Dirac distribution
-$\delta_{(x,e)}$, corresponding to a deterministic computation that returns $x$ without
+The unit of $\T_\Theta$ has components $\eta_\Theta : X \to \D(X \times \Store_\Theta)^{\Store_\Theta}$, mapping a value $x \in X$ and a store $e \in \Store_\Theta$ to the Dirac distribution $\delta_{(x,e)}$, corresponding to a deterministic computation that returns $x$ without
 modifying the store. The bind operator
 \[
 \bind_\Theta : \T_\Theta X \times \mathbf{Set}(X, \T_\Theta Y) \to \T_\Theta Y
@@ -187,11 +186,23 @@ maps $\varphi \in \T_\Theta X$ and $f : X \to \T_\Theta Y$ to the function
 $\dlambda e.\, \bigl(\varphi(e) \bind_\D \eval \circ (f \times \id_{\Store_\Theta})\bigr)$,
 where $\dlambda$ denotes currying and $\eval$ is the evaluation map induced by the Cartesian closed structure of $\Set$.
 
-In $\lamBLL$, application is written as $MZ$, and the constructor $\return$ is used to lift values into computations. The syntactic sugar
+In $\lamBLL$, application is written as $MZ$, and the constructor $\return$ lifts values into computations. The syntactic sugar
 \begin{align}
-VZ \triangleq (\return V)\,Z\label{eq:sugar-return}
+VZ \triangleq (\return V)\,Z \label{eq:sugar-return}
 \end{align}
-allows to simplify expressions by implicitly promoting values to computations, thereby reducing the need for nested $\return$ construct.
+simplifies expressions by implicitly promoting values to computations, reducing the need for nested $\return$ constructs.
+
+Moreover, the syntactic sugar
+\begin{align}
+M;N \triangleq \letin{\_ = M}{N} \label{eq:sugar-letvoid}
+\end{align}
+is used to compose effectful computations, such as the $\mathtt{set}$ command, without binding a variable.
+
+Finally, the sugar
+\begin{align}
+\mathtt{skip} \triangleq \return \star \label{eq:sugar-skip}
+\end{align}
+denotes a computation that performs no effect.
 
 \section{Useful Functional Symbols and Equations}\label{sec:useful-functional-symbols-and-equations}
 In this section, we introduce a collection of function symbols for $\lamBLL$. These symbols capture fundamental computational patterns such as randomness, bitstring manipulation, and memory operations and they extend the set of function symbols presented in \cite{lago2024computationalindistinguishabilitylogicalrelations}, which are recalled in Appendix~\ref{app:1}, Table~\ref{table:function-symbols}.
