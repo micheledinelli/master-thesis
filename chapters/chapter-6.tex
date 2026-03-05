@@ -1569,11 +1569,10 @@ The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $
 
 \scriptsize{
 \begin{align*}
-\quad\overset{\text{Lemma~\ref{lemma:gen-coherence}}}{\simcontext}\quad&
-\begin{aligned}
+&\begin{aligned}
     &\color{blue} \{ \top \} \\
     &\letin{k = \widetilde{Gen} \star}{} \\
-    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
+    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{Lemma~\ref{lemma:gen-coherence}} \\
     &\mathtt{let}\, \lis{m,tag} = Adv \left(
     \begin{aligned}
         &\bang(\return \lambda m. \\
@@ -1594,68 +1593,44 @@ The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $
         &\quad\quad \return x)
     \end{aligned}
     \right)\mathtt{in} \\
+    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{Lemmatas~\ref{lemma:hoare-lifting}, \ref{lemma:oracle-coherence}} \\
     &\letin{queries = \get Q}{} \\
+    &\color{blue} \{ \mathtt{coherent}(queries, rand) \land (queries=Q)\} \quad \text{\ref{rule:h-get}} \\
     &\letin{c=\mathtt{contains}(queries, m)}{} \\
-    &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
-    &\mathtt{else}\\
+    &\color{blue} \{ \mathtt{coherent}(queries, rand) \land (queries=Q) \land c=(m\in queries) \} \quad \text{\ref{rule:h-fun}, \ref{rule:h-cons}} \\
+    & \mathtt{if}\, c\, \mathtt{then} \\
+    &\quad \color{blue} \{ \mathtt{coherent}(queries, rand) \land (queries=Q) \land (m\in queries) \} \quad \text{\ref{rule:h-case}, \ref{rule:h-cons}} \\
+    &\quad \return \false \\
+    &\quad \color{blue} \{ \lambda b.\mathtt{coherent}(Q, rand) \land (m\in Q) \} \quad \text{\ref{rule:h-cons}, \ref{rule:h-eta}} \\
+    &\mathtt{else} \\
+    &\quad \color{blue} \{ \mathtt{coherent}(queries, rand) \land (queries=Q) \land (m \not\in queries) \} \quad \text{\ref{rule:h-case}, \ref{rule:h-cons}} \\
     &\quad\letin{q=\get Q}{} \\
-    &\quad\letin{t=\mathtt{contains}(q,m)}{} \\
-    &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-    &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-    &\quad\mathtt{else}\,\mathtt{skip}; \\
-    &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-    &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-    &\quad\mathtt{if}\, b\, \mathtt{then} \\
-    &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
-    &\quad\quad \mathtt{eq}(x,tag) \\
-    &\quad\mathtt{else} \\
-    &\quad\quad \letin{x = \random}{} \\
-    &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-    &\quad\quad \mathtt{set}\,rand\,newtab; \\
-    &\quad\quad \mathtt{eq}(x,tag)
+    &\quad \color{blue} \{ \mathtt{coherent}(queries, rand) \land (queries=Q) \land (m \not\in queries) \land (q = Q) \} \quad \text{\ref{rule:h-get}, \ref{rule:h-cons}} \\
+    &\qquad \implies \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \not\in q) \} \quad \text{\ref{rule:h-cons}}
 \end{aligned}
 \\[2ex]
-\quad\overset{\text{Lemmatas~\ref{lemma:hoare-lifting}, \ref{lemma:oracle-coherence}}}{\simcontext}\quad&
-\begin{aligned}
-    &\color{blue} \{ \top \} \\
-    &\letin{k = \widetilde{Gen} \star}{} \\
-    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
-    &\mathtt{let}\, \lis{m,tag} = Adv \left(
-    \begin{aligned}
-        &\bang(\return \lambda m. \\
-        &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad \mathtt{else}\ \mathtt{skip}; \\
-        &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-        &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-        &\quad\mathtt{if}\, b\, \mathtt{then} \\
-        &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
-        &\quad\quad \return x \\
-        &\quad\mathtt{else} \\
-        &\quad\quad \letin{x = \random}{} \\
-        &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad \mathtt{set}\,rand\,newtab; \\
-        &\quad\quad \return x)
-    \end{aligned}
-    \right)\mathtt{in} \\
-    &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \\
-    &\letin{queries = \get Q}{} \\
-    &\letin{c=\mathtt{contains}(queries, m)}{} \\
-    &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
-    &\mathtt{else}\\
-    &\quad\letin{q=\get Q}{} \\
+&\begin{aligned}
+    &\quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \not\in q) \} \quad \text{\ref{rule:h-cons}} \\
     &\quad\letin{t=\mathtt{contains}(q,m)}{} \\
+    &\quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \not\in q) \land t = (m \in q)\} \quad \text{\ref{rule:h-fun}} \\
+    &\qquad \implies \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \not\in q) \land t = \false \} \quad \text{\ref{rule:h-cons}} \\
     &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-    &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-    &\quad\mathtt{else}\,\mathtt{skip}; \\
+    &\qquad \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \not\in q) \} \quad \text{\ref{rule:h-case}, \ref{rule:h-cons}} \\
+    &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q, m) \\
+    &\qquad \color{blue} \{ \mathtt{coherent}(q, rand) \land (Q = q \cup \{m\}) \land (m \notin q) \} \quad \text{\ref{rule:h-fun}, \ref{rule:h-set}, \ref{rule:h-cons} } \\
+    &\quad \mathtt{else} \\ 
+    &\qquad \mathtt{skip}; \\
+    &\quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (Q = q \cup \{m\}) \land (m \notin q) \} \quad \text{} \\
     &\quad\letin{tab = \mathtt{get}\,rand}{} \\
+    &\quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (Q = q \cup \{m\}) \land (m \notin q) \land (tab=rand) \} \quad \text{\ref{rule:h-get}}\\
     &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+    &\quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (Q = q \cup \{m\}) \land (m \notin q) \land (tab=rand) \land b=(m \in tab) \} \quad \text{\ref{rule:h-fun} and underlying logic of $\mathtt{isdefined}$} \\
+    &\qquad \implies \color{blue} \{ b = \false \} \quad \text{\ref{rule:h-cons}} \\
     &\quad\mathtt{if}\, b\, \mathtt{then} \\
     &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
     &\quad\quad \mathtt{eq}(x,tag) \\
     &\quad\mathtt{else} \\
+    &\qquad \color{blue} \{ b = \false \} \quad \text{\ref{rule:h-case}} \\
     &\quad\quad \letin{x = \random}{} \\
     &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
     &\quad\quad \mathtt{set}\,rand\,newtab; \\
