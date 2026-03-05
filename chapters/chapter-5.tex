@@ -190,21 +190,18 @@ In $\lamBLL$, application is written as $MZ$, and the constructor $\return$ lift
 \begin{align}
 VZ \triangleq (\return V)\,Z \label{eq:sugar-return}
 \end{align}
-simplifies expressions by implicitly promoting values to computations, reducing the need for nested $\return$ constructs.
-
-Moreover, the syntactic sugar
+simplifies expressions by implicitly promoting values to computations, reducing the need for nested $\return$ constructs. Moreover, the syntactic sugar
 \begin{align}
 M;N \triangleq \letin{\_ = M}{N} \label{eq:sugar-letvoid}
 \end{align}
-is used to compose effectful computations, such as the $\mathtt{set}$ command, without binding a variable.
-
-Finally, the sugar
+is used to compose effectful computations, such as the $\mathtt{set}$ command, without binding a variable. Finally, the sugar
 \begin{align}
 \mathtt{skip} \triangleq \return \star \label{eq:sugar-skip}
 \end{align}
 denotes a computation that performs no effect.
 
 \section{Useful Functional Symbols and Equations}\label{sec:useful-functional-symbols-and-equations}
+\subsection{Functional Symbols}
 In this section, we introduce a collection of function symbols for $\lamBLL$. These symbols capture fundamental computational patterns such as randomness, bitstring manipulation, and memory operations and they extend the set of function symbols presented in \cite{lago2024computationalindistinguishabilitylogicalrelations}, which are recalled in Appendix~\ref{app:1}, Table~\ref{table:function-symbols}.
 
 Table~\ref{table:new-function-symbols} presents the new function symbols, for clarity they are organized into two categories according to their intended purpose.
@@ -250,7 +247,24 @@ The second group consists of function symbols used to interact with a ledger, a 
 
 The function symbol $\mathtt{initQ}$ constructs an empty ledger by returning a bitstring initialized entirely with zeros, thus representing a table with no active entries. The symbol $\mathtt{contains}$ checks whether a given input string is already present in the ledger. It scans the ledger to determine whether there exists a row whose first $i$ bits match the input string and whose final bit is set to $1$. If such a row is found, the input string is considered to be defined in the ledger and the function returns $\true$. The function symbol $\mathtt{modifyQ}$ enables the insertion of a new string into the ledger: it searches for the first inactive row, writes the string into the first $i$ positions, and sets the final bit to $1$, thereby marking the row as active. Finally, the function symbol $\mathtt{coherent}$ checks whether every active entry in a ledger of size $q \times (i+1)$ also appears as an active entry in a ledger of size $p \times (2i+1)$. More precisely, for every row in the first ledger whose last bit is set to $1$, there exists a corresponding active row in the second ledger such that the first $i$ bits of its $2i$-bit payload coincide with the $i$-bit string stored in the first ledger ensuring that all bitstrings recorded as active in the first ledger are consistently reflected in the second one.
 
-% These function symbols extend the set introduced in \cite{lago2024computationalindistinguishabilitylogicalrelations}, which also defines a collection of equations involving the original function symbols. For completeness, these equations are recalled in Appendix~\ref{app:1}, Figure~\ref{fig:equations}. They serve as semantic constraints, or rewriting rules, specifying how the function symbols behave under evaluation.
+\subsection{Functional Symbols}
+These function symbols extend the set introduced in \cite{lago2024computationalindistinguishabilitylogicalrelations}, which also defines a collection of equations involving the original function symbols. For completeness, these equations are recalled in Appendix~\ref{app:1}, Figure~\ref{fig:equations}. They serve as semantic constraints specifying how the function symbols behave under evaluation.
+
+\begin{figure}[htpb]
+    \centering
+    \begin{align*}
+        \letin{x=\random}{\mathtt{eq}(x,t)} \simcontext \return \false \tag{randF}\label{randF} 
+        \\[2ex]
+        \left(\begin{aligned}
+            &\mathtt{if}\,b\,\mathtt{then}\,\return v \\
+            &\mathtt{else}\,\return v
+        \end{aligned}\right) \simcontext \return v \tag{ifConst}\label{ifConst}
+    \end{align*}
+\end{figure}
+
+Equation~\ref{randF} formalizes a recurring pattern in which a freshly sampled random value is compared with an independently provided value. In this setting, a fresh random variable $x$ is generated via the primitive $\random$ and is subsequently compared with some value $t$ using the equality predicate $\mathtt{eq}$. Because $x$ is drawn uniformly at random and independently of all values already contained in the program state, the probability that $x$ coincides with the fixed value $t$ is negligible. Consequently, the equality test $\mathtt{eq}(x,t)$ evaluates to $\false$ except with negligible probability. This equation plays a central role in the analysis of cryptographic constructions. For example, when an adversary attempts to guess a randomly generated nonce or challenge, the probability that the adversary's guess equals the freshly sampled value is negligible. Equation~\ref{randF} will therefore be a key ingredient in the security proof of existential unforgeability under chosen-message attacks for PRF-induced MACs.
+
+Equation~\ref{ifConst} formalizes a simple simplification pattern for conditional expressions. In this equation, both branches of the conditional expression evaluate to the same value $v$. Consequently, the overall behavior of the program is invariant with respect to the truth value of the boolean guard $b$: whether $b$ evaluates to $\true$ or $\false$, the result is always $v$. Therefore, within any program context, the conditional expression is observationally equivalent to the expression $v$ itself. This equation is particularly useful in the simplification of programs generated during program transformations, where conditional constructs may be introduced and subsequently found to produce identical results in both branches.
 
 % A computation in $\lamBLL$ can be probabilistic, and read or modify the global reference context. In order to model probabilistic effects with references $\lamBLL$ uses the distribution monad and the state monad. The idea is that the result of a computation is not just a value, it depends on the initial store, it produces a distribution of outcomes, and each outcome comes with an updated store. Computations are interpreted as functions that accepts the initial store and produce outcoomes as probability distribution over (value, store) pairs.
 
@@ -286,18 +300,15 @@ We introduce a Hoare logic~\cite{axiomatic-basis-for-computer-programming}, whic
 \]
 Here, $e$ denotes a program, and $P$ and $Q$ are logical propositions representing the precondition and postcondition, respectively. The intended meaning of such a triple is that, if execution of $e$ starts in a program state satisfying $P$, then every terminating execution of $e$ produces a state satisfying $Q$.
 
-Since $Q$ is a predicate on values, namely, on the value to which $e$ evaluates, we write $\{P\}\, e \,\{\lambda v.\, Q(v)\}$. A Hoare triple of the form $\{P\}\, e \,\{\lambda v.\, Q(v)\}$ is called a partial correctness specification and it is termed partial because termination of $e$ is not required. If execution of $e$ diverges, the triple imposes no further conditions and makes no claim about non-terminating behavior.
+Since $Q$ is a predicate on values, namely, on the value to which $e$ evaluates, we write $\{P\}\, e \,\{\lambda v.\, Q(v)\}$. A Hoare triple of the form $\{P\}\, e \,\{\lambda v.\, Q(v)\}$ is called a partial correctness specification and it is termed partial because if execution of $e$ diverges, the triple imposes no further conditions and makes no claim about non-terminating behavior. When a postcondition does not depend on the value returned by the expression, we write $\{P\}\, e \,\{\lambda v.\, Q\}$ instead of $\{P\}\, e \,\{\lambda v.\, Q(v)\}$. Alternatively, one may write $\{P\}\, e \,\{\lambda \_.\, Q\}$ to indicate that the result of the computation is ignored.
 
-Propositions used in Hoare triples are generated by:
+Propositions used in Hoare triples are generated by the following grammar:
 \begin{align*}
-P ::= \phi \mid P \land Q \mid P \lor Q
+\Phi ::= \phi \mid P \land Q \mid P \lor Q 
 \end{align*}
-where $\phi$ ranges over atomic first-order formulas such as, such as $\true$, $\false$, $t_1 = t_2$, $t_1 \in t_2$ or $\mathtt{coherent}(t_1, t_2$). These form the assertion language of the logic. Semantic implication 
-$P\models Q$ is defined at the meta-level.
+where $\phi$ ranges over atomic first-order formulas such as, such as $\true$, $\false$, $t_1 = t_2$, $t_1 \in t_2$ or $\mathtt{coherent}(t_1, t_2$). These form the assertion language of the logic. Semantic implication $P\models Q$ is defined at the meta-level.
 
-When a postcondition does not depend on the value returned by the expression, we write $\{P\}\, e \,\{\lambda v.\, Q\}$ instead of $\{P\}\, e \,\{\lambda v.\, Q(v)\}$. Alternatively, one may write $\{P\}\, e \,\{\lambda \_.\, Q\}$ to indicate that the result of the computation is ignored.
-
-Given the notion of Hoare triples we introduce a new set of typing rules for $\lamBLL$ which are presented in Figure~\ref{fig:hl-typing-rules}. These rules assign types to terms while respecting linearity, resource constraints and a simple Hoare logic for $\lamBLL$. 
+Given the notion of Hoare triples we introduce a new set of typing rules for $\lamBLL$ which are presented in Figure~\ref{fig:hl-typing-rules}. These rules assign types to terms while respecting linearity, resource constraints and add a simple Hoare logic for $\lamBLL$. 
 
 \begin{figure}[ht]
 \vspace*{-6mm}
@@ -315,7 +326,7 @@ Given the notion of Hoare triples we introduce a new set of typing rules for $\l
     \and
     \inferrule* [right=\scriptsize \labelrule{h-get}{rule:h-get}]{r:G\in \Theta}{\Gamma \vdashtheta{c} \{P(r)\}\,\get r \,\{\lambda x.P(x)\}: G}
     \and
-    \inferrule* [right=\scriptsize \labelrule{h-set}{rule:h-set}]{\Gamma \vdashtheta{v} Z: G \\ r:G\in \Theta}{ \Gamma \vdashtheta{c} \{P[Z/r]\}\, \setr{r}{Z} \,\{\lambda\_.P\}: \UU }
+    \inferrule* [right=\scriptsize \labelrule{h-set}{rule:h-set}]{\Gamma \vdashtheta{v} Z: G \\ r:G\in \Theta}{ \Gamma \vdashtheta{c} \{P[Z/r]\}\, \setr{r}{Z} \,\{P\}: \UU }
     \and
     \inferrule* [right=\scriptsize \labelrule{h-let}{rule:h-let}]{\Gamma \vdashtheta{c} \{P\}\, M \,\{\lambda v.Q(v)\}:A \\ \Delta, x:A \vdashtheta{c} \forall v.\{Q(v)\}\, N[v/x] \,\{S\}: B}{\Gamma \boxplus \Delta \vdashtheta{c} \{P\}\, \letin{x=M}{N} \,\{S\}: B}
     \and
@@ -331,9 +342,7 @@ Given the notion of Hoare triples we introduce a new set of typing rules for $\l
 \label{fig:hl-typing-rules}
 \end{figure}
 
-To relate the original definition of $\lamBLL$ with its extension equipped with Hoare logic, we define a translation from standard types to types decorated with propositions. Given a standard type~$A$ and an invariant~$P$, the lifting produces a decorated type in which~$P$ is threaded through every computation.
-
-The map $\mu$ is defined inductively as follows:
+To relate the original definition of $\lamBLL$ with its extension equipped with Hoare logic, we define a translation from standard types to types decorated with propositions. Given a standard type~$A$ and an invariant~$P$, the lifting produces a decorated type in which~$P$ is threaded through every computation. The map $\mu$ is defined inductively as follows:
 \begin{align}
 \begin{split}
 &\mu(\UU, P) = \UU \label{eq:mu} \\
@@ -349,215 +358,241 @@ We now state a lemma that lifts a typing judgment to a Hoare typing judgment.
 Let $P$ be a proposition over a set of references $\mathcal{R}(P)$.
 If $\Gamma \vdash^{\Theta} M : A$ then $\mu(\Gamma, P) \vdash^{\Xi} M: \mu(A, P)$ whenever $\Xi \supseteq \Theta$ and $\mathcal{R}(P) \cap \Theta = \emptyset$.
 \end{lemma}
-\begin{proof}
-The proof proceeds by induction on the derivation of $\Gamma \vdash^{\Theta} M : A$.
+% \begin{proof}
+% The proof proceeds by induction on the derivation of $\Gamma \vdash^{\Theta} M : A$.
 
-\begin{itemize}
-    \item Rule VAR:
-    \begin{mathpar}
-    \inferrule*[right=var]{ }{x : A \vdash^{\Theta}_{v} x : A}
-    \end{mathpar}
-    By definition of the lifting $\mu$, a variable declaration
-    $x : A$ in the standard system is translated to
-    $x : \mu(A,P)$ in the decorated system. Hence, by a direct
-    application of Rule VAR in the Hoare system, we obtain
-    \[
-        x : \mu(A,P) \vdash^{\Xi}_{v} x : \mu(A,P).
-    \]
+% \begin{itemize}
+%     \item Rule VAR:
+%     \begin{mathpar}
+%     \inferrule*[right=var]{ }{x : A \vdash^{\Theta}_{v} x : A}
+%     \end{mathpar}
+%     By definition of the lifting $\mu$, a variable declaration
+%     $x : A$ in the standard system is translated to
+%     $x : \mu(A,P)$ in the decorated system. Hence, by a direct
+%     application of Rule VAR in the Hoare system, we obtain
+%     \[
+%         x : \mu(A,P) \vdash^{\Xi}_{v} x : \mu(A,P).
+%     \]
 
-    \item Rule TRUE:
-    \begin{mathpar}
-    \inferrule*[right=true]{ }{ \vdash^{\Theta}_{v} \true : \BB }
-    \end{mathpar}
-    Since $\mu(\BB,P)=\BB$, the rule is unchanged by the lifting.
-    Hence, by Rule TRUE in the decorated system,
-    \[
-        \vdash^{\Xi}_{v} \true : \BB .
-    \]
+%     \item Rule TRUE:
+%     \begin{mathpar}
+%     \inferrule*[right=true]{ }{ \vdash^{\Theta}_{v} \true : \BB }
+%     \end{mathpar}
+%     Since $\mu(\BB,P)=\BB$, the rule is unchanged by the lifting.
+%     Hence, by Rule TRUE in the decorated system,
+%     \[
+%         \vdash^{\Xi}_{v} \true : \BB .
+%     \]
 
-    \item Rule FALSE:
-    \begin{mathpar}
-    \inferrule*[right=false]{ }{ \vdash^{\Theta}_{v} \false : \BB }
-    \end{mathpar}
-    Again, $\mu(\BB,P)=\BB$, so the rule is preserved.
-    Thus,
-    \[
-        \vdash^{\Xi}_{v} \false : \BB .
-    \]
+%     \item Rule FALSE:
+%     \begin{mathpar}
+%     \inferrule*[right=false]{ }{ \vdash^{\Theta}_{v} \false : \BB }
+%     \end{mathpar}
+%     Again, $\mu(\BB,P)=\BB$, so the rule is preserved.
+%     Thus,
+%     \[
+%         \vdash^{\Xi}_{v} \false : \BB .
+%     \]
 
-    \item Rule UNIT:
-    \begin{mathpar}
-    \inferrule*[right=unit]{ }{ \vdash^{\Theta}_{v} \star : \UU }
-    \end{mathpar}
-    Since $\mu(\UU,P)=\UU$, we directly obtain
-    \[
-        \vdash^{\Xi}_{v} \star : \UU .
-    \]
+%     \item Rule UNIT:
+%     \begin{mathpar}
+%     \inferrule*[right=unit]{ }{ \vdash^{\Theta}_{v} \star : \UU }
+%     \end{mathpar}
+%     Since $\mu(\UU,P)=\UU$, we directly obtain
+%     \[
+%         \vdash^{\Xi}_{v} \star : \UU .
+%     \]
 
-    \item Rule STRING:
-    \begin{mathpar}
-    \inferrule*[right=string]{s\in\{0,1\}^c \and p:i\mapsto c}{\Gamma \vdashtheta{v} s : \SS[p]}
-    \end{mathpar}
-    Since $\mu(\SS[p],P)=\SS[p]$, the lifting does not affect
-    string types. Therefore, by a direct application of Rule STRING in the decorated system, we obtain
-    \[ \mu(\Gamma,P) \vdashtheta{v} s: \SS[p]. \]
+%     \item Rule STRING:
+%     \begin{mathpar}
+%     \inferrule*[right=string]{s\in\{0,1\}^c \and p:i\mapsto c}{\Gamma \vdashtheta{v} s : \SS[p]}
+%     \end{mathpar}
+%     Since $\mu(\SS[p],P)=\SS[p]$, the lifting does not affect
+%     string types. Therefore, by a direct application of Rule STRING in the decorated system, we obtain
+%     \[ \mu(\Gamma,P) \vdashtheta{v} s: \SS[p]. \]
 
-    \item Rule TENSOR:
-    \begin{mathpar}
-    \inferrule*[right=tensor]
-    {\Gamma \vdash^{\Theta}_{v} Z_1 : A
-     \quad
-     \Delta \vdash^{\Theta}_{v} Z_2 : B}
-    {\Gamma \boxplus \Delta \vdash^{\Theta}_{v} \langle Z_1,Z_2\rangle : A \otimes B}
-    \end{mathpar}
-    By the induction hypothesis,
-    \[
-        \mu(\Gamma,P) \vdash^{\Xi}_{v} Z_1 : \mu(A,P), \qquad
-        \mu(\Delta,P) \vdash^{\Xi}_{v} Z_2 : \mu(B,P).
-    \]
-    Since $\mu(A\otimes B,P)=\mu(A,P)\otimes\mu(B,P)$,
-    an application of Rule TENSOR in the decorated system yields
-    \[
-        \mu(\Gamma,P)\boxplus\mu(\Delta,P) \vdash^{\Xi}_{v} \lis{Z_1, Z_2}:\mu(A,P)\otimes\mu(B,P).
-    \]
+%     \item Rule TENSOR:
+%     \begin{mathpar}
+%     \inferrule*[right=tensor]
+%     {\Gamma \vdash^{\Theta}_{v} Z_1 : A
+%      \quad
+%      \Delta \vdash^{\Theta}_{v} Z_2 : B}
+%     {\Gamma \boxplus \Delta \vdash^{\Theta}_{v} \langle Z_1,Z_2\rangle : A \otimes B}
+%     \end{mathpar}
+%     By the induction hypothesis,
+%     \[
+%         \mu(\Gamma,P) \vdash^{\Xi}_{v} Z_1 : \mu(A,P), \qquad
+%         \mu(\Delta,P) \vdash^{\Xi}_{v} Z_2 : \mu(B,P).
+%     \]
+%     Since $\mu(A\otimes B,P)=\mu(A,P)\otimes\mu(B,P)$,
+%     an application of Rule TENSOR in the decorated system yields
+%     \[
+%         \mu(\Gamma,P)\boxplus\mu(\Delta,P) \vdash^{\Xi}_{v} \lis{Z_1, Z_2}:\mu(A,P)\otimes\mu(B,P).
+%     \]
 
-    \item Rule LAM:
-    \begin{mathpar}
-    \inferrule*[right=lam]
-    {\Gamma,x:A \vdash^{\Theta}_{c} M : B}
-    {\Gamma \vdash^{\Theta}_{v} \lambda x.M : A \multimap B}
-    \end{mathpar}
-    By the induction hypothesis,
-    \[
-        \mu(\Gamma,P),x:\mu(A,P) \vdash^{\Xi}_{c} \{P\}\,M\,\{\lambda v.P\} : \mu(B,P).
-    \]
-    Applying Rule H-LAM yields
-    \[
-        \mu(\Gamma,P) \vdash^{\Xi}_{v} \lambda x.M : \mu(A,P) \underset{P,\lambda x.P}{\multimap} \mu(B,P).
-    \]
-    By definition of $\mu$, this type is $\mu(A\multimap B,P)$.
+%     \item Rule LAM:
+%     \begin{mathpar}
+%     \inferrule*[right=lam]
+%     {\Gamma,x:A \vdash^{\Theta}_{c} M : B}
+%     {\Gamma \vdash^{\Theta}_{v} \lambda x.M : A \multimap B}
+%     \end{mathpar}
+%     By the induction hypothesis,
+%     \[
+%         \mu(\Gamma,P),x:\mu(A,P) \vdash^{\Xi}_{c} \{P\}\,M\,\{\lambda v.P\} : \mu(B,P).
+%     \]
+%     Applying Rule H-LAM yields
+%     \[
+%         \mu(\Gamma,P) \vdash^{\Xi}_{v} \lambda x.M : \mu(A,P) \underset{P,\lambda x.P}{\multimap} \mu(B,P).
+%     \]
+%     By definition of $\mu$, this type is $\mu(A\multimap B,P)$.
 
-    \item Rule APP:
-    \begin{mathpar}
-        \inferrule*[right=app]{\Gamma \vdash^{\Theta}_{c} M : A \multimap B
-         \and \Delta \vdash^{\Theta}_{v} Z : A}{\Gamma\boxplus\Delta \vdash^{\Theta}_{c} MZ : B}
-    \end{mathpar}
-    By the induction hypothesis we have
-    \[ \mu(\Gamma,P) \vdash^{\Xi}_{c} \{P\}\, M \,\{\lambda f.P\} : \mu(A,P)\underset{P,\lambda x.P}{\multimap}\mu(B,P) \]
-    and
-    \[
-        \mu(\Delta,P) \vdash^{\Xi}_{v} Z:\mu(A,P)
-    \]
-    Since $P \vdash P$ holds trivially, Rule H-APP yields
-    \[
-        \mu(\Gamma,P)\boxplus\mu(\Delta,P) \vdash^{\Xi}_{c} \{P\}\, MZ \,\{\lambda v.P\} : \mu(B,P).
-    \]
+%     \item Rule APP:
+%     \begin{mathpar}
+%         \inferrule*[right=app]{\Gamma \vdash^{\Theta}_{c} M : A \multimap B
+%          \and \Delta \vdash^{\Theta}_{v} Z : A}{\Gamma\boxplus\Delta \vdash^{\Theta}_{c} MZ : B}
+%     \end{mathpar}
+%     By the induction hypothesis we have
+%     \[ \mu(\Gamma,P) \vdash^{\Xi}_{c} \{P\}\, M \,\{\lambda f.P\} : \mu(A,P)\underset{P,\lambda x.P}{\multimap}\mu(B,P) \]
+%     and
+%     \[
+%         \mu(\Delta,P) \vdash^{\Xi}_{v} Z:\mu(A,P)
+%     \]
+%     Since $P \vdash P$ holds trivially, Rule H-APP yields
+%     \[
+%         \mu(\Gamma,P)\boxplus\mu(\Delta,P) \vdash^{\Xi}_{c} \{P\}\, MZ \,\{\lambda v.P\} : \mu(B,P).
+%     \]
 
-    \item Rule ETA:
-    \begin{mathpar}
-    \inferrule*[right=eta]{\Gamma \vdash^{\Theta}_{v} V : A}{\Gamma \vdash^{\Theta}_{c} \return V : A}
-    \end{mathpar}
-    By induction hypothesis,
-    \[
-        \mu(\Gamma,P) \vdash^{\Xi}_{v} V : \mu(A,P).
-    \]
-    Applying Rule H-ETA gives
-    \[
-    \mu(\Gamma, P) \vdash^{\Xi}_{c} \{P\}\,\return V\,\{\lambda v.P\}: \mu(A,P).
-    \]
+%     \item Rule ETA:
+%     \begin{mathpar}
+%     \inferrule*[right=eta]{\Gamma \vdash^{\Theta}_{v} V : A}{\Gamma \vdash^{\Theta}_{c} \return V : A}
+%     \end{mathpar}
+%     By induction hypothesis,
+%     \[
+%         \mu(\Gamma,P) \vdash^{\Xi}_{v} V : \mu(A,P).
+%     \]
+%     Applying Rule H-ETA gives
+%     \[
+%     \mu(\Gamma, P) \vdash^{\Xi}_{c} \{P\}\,\return V\,\{\lambda v.P\}: \mu(A,P).
+%     \]
 
-    \item Rule BANG:
-    \begin{mathpar}
-    \inferrule*[right=bang]{\Gamma \vdash^{\Theta}_{c} M : A}{p * \Gamma \vdash^{\Theta}_{v} \bang M : \bang_p A}
-    \end{mathpar}
-    By induction hypothesis,
-    \[
-        \mu(\Gamma,P) \vdash^{\Xi}_{c} \{P\}\, M \,\{\lambda v.P\}: \mu(A,P).
-    \]
-    Since $P \vdash P$, Rule H-BANG yields
-    \[
-    p * \mu(\Gamma,P)
-    \vdash^{\Xi}_{v}
-    \bang M
-    :
-    \bang_p^{P,P}\mu(A,P),
-    \]
-    which equals $\mu(\bang_p A,P)$ by definition.
+%     \item Rule BANG:
+%     \begin{mathpar}
+%     \inferrule*[right=bang]{\Gamma \vdash^{\Theta}_{c} M : A}{p * \Gamma \vdash^{\Theta}_{v} \bang M : \bang_p A}
+%     \end{mathpar}
+%     By induction hypothesis,
+%     \[
+%         \mu(\Gamma,P) \vdash^{\Xi}_{c} \{P\}\, M \,\{\lambda v.P\}: \mu(A,P).
+%     \]
+%     Since $P \vdash P$, Rule H-BANG yields
+%     \[
+%     p * \mu(\Gamma,P)
+%     \vdash^{\Xi}_{v}
+%     \bang M
+%     :
+%     \bang_p^{P,P}\mu(A,P),
+%     \]
+%     which equals $\mu(\bang_p A,P)$ by definition.
 
-    \item Rule LET:
-    \begin{mathpar}
-    \inferrule*[right=let]{\Gamma \vdash^{\Theta}_{c} M : A \and \Delta,x:A \vdash^{\Theta}_{c} N : B}{\Gamma\boxplus\Delta \vdash^{\Theta}_{c} \letin{x=M}{N} : B}
-    \end{mathpar}
-    By induction hypothesis,
-    \[ \mu(\Gamma,P) \vdash^{\Xi}_{c} \{P\}\, M \,\{\lambda v.P\} \]
-    and
-    \[ \mu(\Delta,P),x:\mu(A,P) \vdash^{\Xi}_{c} \{P\}\, N \,\{\lambda v.P\}.\]
-    Rule H-LET yields
-    \[
-        \mu(\Gamma,P)\boxplus\mu(\Delta,P) \vdash^{\Xi}_{c} \{P\}\, \letin{x=M}{N} \,\{\lambda v.P\} : \mu(B,P).
-    \]
+%     \item Rule LET:
+%     \begin{mathpar}
+%     \inferrule*[right=let]{\Gamma \vdash^{\Theta}_{c} M : A \and \Delta,x:A \vdash^{\Theta}_{c} N : B}{\Gamma\boxplus\Delta \vdash^{\Theta}_{c} \letin{x=M}{N} : B}
+%     \end{mathpar}
+%     By induction hypothesis,
+%     \[ \mu(\Gamma,P) \vdash^{\Xi}_{c} \{P\}\, M \,\{\lambda v.P\} \]
+%     and
+%     \[ \mu(\Delta,P),x:\mu(A,P) \vdash^{\Xi}_{c} \{P\}\, N \,\{\lambda v.P\}.\]
+%     Rule H-LET yields
+%     \[
+%         \mu(\Gamma,P)\boxplus\mu(\Delta,P) \vdash^{\Xi}_{c} \{P\}\, \letin{x=M}{N} \,\{\lambda v.P\} : \mu(B,P).
+%     \]
     
-    \item Rule LET\_PAIR:
-    \begin{mathpar}
-    \inferrule*[right=let\_pair]{\Gamma \vdash^{\Theta}_{v} Z : A \otimes B \and \Delta,x:A,y:B \vdash^{\Theta}_{c} M : C}{\Gamma\boxplus\Delta \vdash^{\Theta}_{c} \letin{\lis{x,y}=Z}{N} : C}
-    \end{mathpar}
-    By induction hypothesis,
-    \[ \mu(\Gamma,P) \vdash^{\Xi}_{v} \mu(A, P) \otimes \mu(B, P) \]
-    and
-    \[ \mu(\Delta,P),x:\mu(A,P), y:\mu(B,P) \vdash^{\Xi}_{c} \{P\}\, M \,\{\lambda v.P\}.\]
-    Rule H-LET\_PAIR is not explicitly defined in our system. However, assuming a standard definition, analogous to the usual LET rule but binding a tuple of variables, we obtain the following:
-    \[
-        \mu(\Gamma,P)\boxplus\mu(\Delta,P) \vdash^{\Xi}_{c} \{P\}\, \letin{\lis{x,y}=Z}{M} \,\{\lambda v.P\} : \mu(C,P).
-    \]
+%     \item Rule LET\_PAIR:
+%     \begin{mathpar}
+%     \inferrule*[right=let\_pair]{\Gamma \vdash^{\Theta}_{v} Z : A \otimes B \and \Delta,x:A,y:B \vdash^{\Theta}_{c} M : C}{\Gamma\boxplus\Delta \vdash^{\Theta}_{c} \letin{\lis{x,y}=Z}{N} : C}
+%     \end{mathpar}
+%     By induction hypothesis,
+%     \[ \mu(\Gamma,P) \vdash^{\Xi}_{v} \mu(A, P) \otimes \mu(B, P) \]
+%     and
+%     \[ \mu(\Delta,P),x:\mu(A,P), y:\mu(B,P) \vdash^{\Xi}_{c} \{P\}\, M \,\{\lambda v.P\}.\]
+%     Rule H-LET\_PAIR is not explicitly defined in our system. However, assuming a standard definition, analogous to the usual LET rule but binding a tuple of variables, we obtain the following:
+%     \[
+%         \mu(\Gamma,P)\boxplus\mu(\Delta,P) \vdash^{\Xi}_{c} \{P\}\, \letin{\lis{x,y}=Z}{M} \,\{\lambda v.P\} : \mu(C,P).
+%     \]
 
-    \item Rule GET:
-    \begin{mathpar}
-    \inferrule*[right=get]{r:A \in \Theta}{\vdash^{\Theta}_{c} \get r : A}
-    \end{mathpar}
-    Since $\mathcal R(P)\cap\Theta=\emptyset$, $P$ does not depend on $r$.
-    Hence Rule H-GET yields
-    \[ \vdash^{\Xi}_{c} \{P\}\, \get r \,\{\lambda v.P\} : \mu(A,P). \]
+%     \item Rule GET:
+%     \begin{mathpar}
+%     \inferrule*[right=get]{r:A \in \Theta}{\vdash^{\Theta}_{c} \get r : A}
+%     \end{mathpar}
+%     Since $\mathcal R(P)\cap\Theta=\emptyset$, $P$ does not depend on $r$.
+%     Hence Rule H-GET yields
+%     \[ \vdash^{\Xi}_{c} \{P\}\, \get r \,\{\lambda v.P\} : \mu(A,P). \]
 
-    \item Rule SET:
-    \begin{mathpar}
-    \inferrule*[right=set]{\Gamma \vdash^{\Theta}_{v} Z:A \quad r:A\in\Theta}{\Gamma \vdash^{\Theta}_{c} \mathtt{set}\, r\, Z : \UU}
-    \end{mathpar}
-    By induction hypothesis,
-    \[ \mu(\Gamma,P)\vdash^{\Xi}_{v} Z:\mu(A,P). \]
-    Since $P$ does not mention $r$ by hypothesis ($\mathcal{R}(P) \cap \Theta = \emptyset$), substitution does not affect $P$. Thus Rule H-SET gives
-    \[ 
-        \mu(\Gamma,P) \vdash^{\Xi}_{c} \{P\}\, \mathtt{set}\, r\, Z \,\{\lambda\_.P\} : \UU. 
-    \]
+%     \item Rule SET:
+%     \begin{mathpar}
+%     \inferrule*[right=set]{\Gamma \vdash^{\Theta}_{v} Z:A \quad r:A\in\Theta}{\Gamma \vdash^{\Theta}_{c} \mathtt{set}\, r\, Z : \UU}
+%     \end{mathpar}
+%     By induction hypothesis,
+%     \[ \mu(\Gamma,P)\vdash^{\Xi}_{v} Z:\mu(A,P). \]
+%     Since $P$ does not mention $r$ by hypothesis ($\mathcal{R}(P) \cap \Theta = \emptyset$), substitution does not affect $P$. Thus Rule H-SET gives
+%     \[ 
+%         \mu(\Gamma,P) \vdash^{\Xi}_{c} \{P\}\, \mathtt{set}\, r\, Z \,\{\lambda\_.P\} : \UU. 
+%     \]
 
-    \item Rule CASE:
-    \begin{mathpar}
-    \inferrule*[right=case]{\Gamma \vdash^{\Theta}_{v} Z:\BB \and \Delta \vdash^{\Theta}_{c} M:A \and \Delta \vdash^{\Theta}_{c} N:A}
-    {\Gamma\boxplus\Delta \vdash^{\Theta}_{c} \ifthen{Z}{M}{N}:A}
-    \end{mathpar}
-    By induction hypothesis,
-    \[ \mu(\Gamma,P)\vdash^{\Xi}_{v} Z:\BB \]
-    and
-    \[ 
-        \mu(\Delta,P)\vdash^{\Xi}_{c}\{P\}\, M \,\{\lambda v.P\}, \quad
-        \mu(\Delta,P)\vdash^{\Xi}_{c}\{P\}\, N \,\{\lambda v.P\}.
-    \]
-    Rule H-CASE yields
-    \[ \mu(\Gamma,P)\boxplus\mu(\Delta,P) \vdash^{\Xi}_{c} \{P\}\, \ifthen{Z}{M}{N} \,\{\lambda v.P\} : \mu(A,P).
-    \]
+%     \item Rule CASE:
+%     \begin{mathpar}
+%     \inferrule*[right=case]{\Gamma \vdash^{\Theta}_{v} Z:\BB \and \Delta \vdash^{\Theta}_{c} M:A \and \Delta \vdash^{\Theta}_{c} N:A}
+%     {\Gamma\boxplus\Delta \vdash^{\Theta}_{c} \ifthen{Z}{M}{N}:A}
+%     \end{mathpar}
+%     By induction hypothesis,
+%     \[ \mu(\Gamma,P)\vdash^{\Xi}_{v} Z:\BB \]
+%     and
+%     \[ 
+%         \mu(\Delta,P)\vdash^{\Xi}_{c}\{P\}\, M \,\{\lambda v.P\}, \quad
+%         \mu(\Delta,P)\vdash^{\Xi}_{c}\{P\}\, N \,\{\lambda v.P\}.
+%     \]
+%     Rule H-CASE yields
+%     \[ \mu(\Gamma,P)\boxplus\mu(\Delta,P) \vdash^{\Xi}_{c} \{P\}\, \ifthen{Z}{M}{N} \,\{\lambda v.P\} : \mu(A,P).
+%     \]
 
-    \item Rule FUN:
-    \begin{mathpar}
-    \inferrule*[right=fun]{\mathsf{typeof}(f)=G_1\times\dots\times G_m \to G
-    \quad (\Gamma_k p \vdashtheta{v} Z_k : G_k p)_{1\le k\le m}
-    \quad p \in \mathbb N_{\ge 1}[i]}{\boxplus_k \Gamma_k p \vdashtheta{c}
-    f_p(Z_1,\dots,Z_m): G p}
-    \end{mathpar}
-    By the induction hypothesis, for each $k$ we have
-    \[ \mu(\Gamma_k,P) \vdashtheta{v} Z_k: \mu(G_k p,P). \]
-    Since for every polynomial $p$, $\mu(G p,P)$ maps to $G p$ for ground types, Rule H-FUN yields
-    \[ \boxplus_k \mu(\Gamma_k,P) \vdashtheta{c} \{P\}\, f_p(Z_1,\dots,Z_m) \,\{\lambda v.P\} : \mu(G p,P).
-    \]
-\end{itemize}
+%     \item Rule FUN:
+%     \begin{mathpar}
+%     \inferrule*[right=fun]{\mathsf{typeof}(f)=G_1\times\dots\times G_m \to G
+%     \quad (\Gamma_k p \vdashtheta{v} Z_k : G_k p)_{1\le k\le m}
+%     \quad p \in \mathbb N_{\ge 1}[i]}{\boxplus_k \Gamma_k p \vdashtheta{c}
+%     f_p(Z_1,\dots,Z_m): G p}
+%     \end{mathpar}
+%     By the induction hypothesis, for each $k$ we have
+%     \[ \mu(\Gamma_k,P) \vdashtheta{v} Z_k: \mu(G_k p,P). \]
+%     Since for every polynomial $p$, $\mu(G p,P)$ maps to $G p$ for ground types, Rule H-FUN yields
+%     \[ \boxplus_k \mu(\Gamma_k,P) \vdashtheta{c} \{P\}\, f_p(Z_1,\dots,Z_m) \,\{\lambda v.P\} : \mu(G p,P).
+%     \]
+% \end{itemize}
 
-All typing rules are preserved, except for Rule~\textsf{LOOP}, which is outside the current scope. Therefore, we can conclude.
-\end{proof}
+% All typing rules are preserved, except for Rule~\textsf{LOOP}, which is outside the current scope. Therefore, we can conclude.
+% \end{proof}
+
+In addition to the introduction of Hoare-style reasoning in $\lamBLL$, we also present a set of equivalences between terms in the language $\lamBLL$ extended with Hoare triples. In particular, in Figure~\ref{fig:hl-equations} we define two equations.
+\begin{figure}[htpb]
+    \centering
+    \begin{align*}
+    \{P\}\, \mathtt{if}\, b\, \mathtt{then}\, &M \,\mathtt{else}\, N \,\{Q\} \sim M \tag{ifTrue}\label{ifTrue} \\
+    \text{if} \ \Phi &\models b
+    \\[2ex]
+    \{P\}\, \mathtt{if}\, b\, \mathtt{then}\, &M \,\mathtt{else}\, N \,\{Q\} \sim N \tag{ifFalse}\label{ifFalse} \\
+    \text{if} \ \Phi &\models \neg b
+    \end{align*}
+    % \begin{equation}
+    %     \vcenter{\hbox{$
+    %         \inferrule*[]{\Phi \models b}{\{\Phi\}\, \ifthen{b}{M}{N} \,\{Q\}}
+    %     $}} \sim M \tag{ifTrue}
+    % \end{equation}
+    % \begin{equation}
+    %     \vcenter{\hbox{$
+    %         \inferrule*[]{\Phi \models \neg b}{\{\Phi\}\, \ifthen{b}{M}{N} \,\{Q\}}
+    %     $}} \sim N \tag{ifFalse}
+    % \end{equation}
+    \caption{Equations in $\lamBLL$ with Hoare extension.}
+    \label{fig:hl-equations}
+\end{figure}
+
+The two equations state that, whenever the precondition entails the guard of a conditional, the conditional term collapses to the corresponding branch, since the alternative branch is unreachable under the given precondition. Under the precondition $P$ such that $P \models b$, the behaviour of the conditional term $\ifthen{b}{M}{N}$ is equivalent to that of $M$, since the guard is always true and the branch $N$ is never executed. Symmetrically, if $P \models \neg b$, the effect of the conditional is equivalent to that of $N$, as the guard is always false and the branch $M$ becomes unreachable.
