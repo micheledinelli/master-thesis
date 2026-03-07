@@ -1,6 +1,6 @@
-\chapter{Proving PRF-Induced MAC Security Equationally}
+\chapter{Proving PRF-Induced MAC Security Equationally}\label{chapter:proof}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
-This chapter demonstrates that existential unforgeability under chosen message attacks for pseudorandom function based MACs can be validated within the $\lamBLL$ framework. We formalize the standard reduction from MAC forgery to pseudorandom function indistinguishability by encoding the $\macexp$ experiment, the adversary, and the MAC oracle as $\lamBLL$ terms. By reconstructing the proof described of Theorem~\ref{proof:handwavy} using the equational reasoning principles of the calculus, we show that $\lamBLL$ is sufficiently expressive to internalize classical security proofs while enforcing strict polynomial-time constraints through its graded type system.
+This chapter demonstrates that existential unforgeability under chosen message attacks for pseudorandom function based MACs can be proved within the $\lamBLL$ framework. We formalize the standard reduction from MAC forgery to pseudorandom function indistinguishability by encoding the $\macexp$ experiment, the adversary, and the MAC oracle as $\lamBLL$ terms. By reconstructing the proof described of Theorem~\ref{proof:handwavy} using the equational reasoning principles of the calculus, we show that $\lamBLL$ is sufficiently expressive to internalize classical security proofs while enforcing strict polynomial-time constraints through its graded type system.
 
 We begin by recalling the MAC forgery experiment, $\macexp$, as defined in Figure~\ref{fig:macforge-recall}. To bridge the gap between pseudocode and formalization, we specify the types for each component as they appear in $\lamBLL$. The concrete implementation of the terms modeling the key generation
 algorithm $\mathit{Gen}$ and the MAC oracle $\mathit{Mac}_k(\cdot)$ depends on the specific MAC scheme under consideration. For this reason, these terms are left abstract and will be instantiated only after fixing a scheme $\Pi$. In the following paragraphs, we make this instantiation explicit for the schemes $\Pi^F$ and $\widetilde{\Pi}$ which are used in the proof of Theorem~\ref{theorem:mac-security}. 
@@ -860,7 +860,7 @@ The proof follows a similar approach to the proof of Theorem~\ref{theorem:tildeD
 
 To complete the overall security proof, it remains to establish the relation $\widetilde{MacForge}\simcontext \false$, which corresponds to the right part of the diagram in Figure~\ref{fig:proofscheme}.
 
-We introduce assertions, in the style of standard Hoare proofs, which are indicated in blue. The rules are composed using Rule~\ref{rule:h-let} and correspond to derivation trees that establish the propositions annotated after each line. We state two lemmas, namely, Lemma~\ref{lemma:gen-coherence} and Lemma~\ref{lemma:oracle-coherence}, that are used to decorate the term $\widetilde{MacForge}$ and to show that a given assertion holds at a specific point in the term. Once the assertion is established, we use it to simplify the behavior of part of the term that acts as a source of randomness. Finally, we conclude by equational reasoning, using the results obtained through the Hoare logic arguments.
+We introduce assertions, in the style of standard Hoare proofs, which are indicated in blue. The rules are composed using Rule~\ref{rule:h-let} and correspond to derivation trees that establish the propositions annotated after each line. We state two lemmas, namely, Lemma~\ref{lemma:gen-coherence} and Lemma~\ref{lemma:oracle-coherence}, that are used to decorate the term $\widetilde{MacForge}$ and to show that a given assertion holds at a specific point in the term. Once the assertion is established, we use it to simplify part of the term using equations introduced in Section~\ref{sec:extensions-lambda-bll}. Finally, we conclude by standard equational reasoning of $\lamBLL$, namely $\Theta$-contextual indistinguishability, which is applied to the term obtained after the rewriting through Hoare logic.
 
 % \begin{lemma}\label{lemma:coherent-empty-q}
 % For any ledger $rand$ and for any ledger $Q$ the predicates $\mathtt{coherent}(\mathtt{initQ}, rand)$ and $\mathtt{coherent}(Q, \mathtt{initTable})$ are true.
@@ -1153,7 +1153,7 @@ The proof follows the same structure as that of Lemma~\ref{lemma:gen-coherence}.
 % \end{mathpar}
 % \end{center}
 
-Finally we prove Theorem~\ref{theorem:tilde-macforge-sim-false}.
+Finally we state and prove Theorem~\ref{theorem:tilde-macforge-sim-false} that completes the proof.
 
 \begin{theorem}\label{theorem:tilde-macforge-sim-false}
 \begin{align*}
@@ -1553,9 +1553,12 @@ At this stage, the adversary is given access to a term that can be evaluated for
 
 \normalsize
 
-Now to complete the proof we need to refine the typing of the term $Adv$ with respect of the Hoare logic introduced in Figure~\ref{fig:hl-typing-rules}. The original type for $Adv$ was $\vdash_c^\varnothing Adv: \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap (\SS[i] \otimes \SS[i])$, now we lift the type of $Adv$ in the new typing system introduced in Chapter~\ref{chapter:lambll} using the mapping $\mu$ defined in Equation~\ref{eq:mu}. By fixing a proposition $P$ as $\mathtt{coherent}(Q, rand)$ and by applying Lemma~\ref{lemma:hoare-lifting}, the type of $Adv$ is lifted as follows:
+Now to complete the proof we need to refine the typing of the term $Adv$ with respect of the typing rules introduced in Figure~\ref{fig:hl-typing-rules}. The original type designated for $Adv$ was $\vdash_c^\varnothing Adv: \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap (\SS[i] \otimes \SS[i])$, now we lift the type of $Adv$ in the new Hoare typing system using the map $\mu$ defined in Equation~\ref{eq:mu}. By fixing a proposition $P$ as $\mathtt{coherent}(Q, rand)$ and by applying Lemma~\ref{lemma:hoare-lifting}, the type of $Adv$ is lifted as follows:
 \begin{align*}
-&\Gamma \vdash_c^\varnothing Adv: \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap (\SS[i] \otimes \SS[i]) \\
+&\Gamma \vdash_c^\varnothing Adv: \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap (\SS[i] \otimes \SS[i])
+\end{align*}
+and
+\begin{align*}
 &\mu(\Gamma, P) \vdash^\Xi_{c} Adv: \mu(\bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap (\SS[i] \otimes \SS[i])).
 \end{align*}
 Which expands as
@@ -1640,11 +1643,9 @@ The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $
 
 \normalsize
 
-At this point we do not introduce any further assertions. We observe instead that the last assertion entails that the guard of the conditional is invariably evaluated to false. Specifically, the conditional determines whether the oracle outputs a uniformly random bitstring upon receiving a fresh message generated by $Adv$, or whether it returns a predetermined bitstring.
+At this point we do not introduce any further assertions. We observe instead that two assertion entails that the guard of a conditional is invariably evaluated to false or true. In particular, the conditional determines whether the oracle outputs a uniformly random bitstring upon receiving a fresh message generated by $Adv$, or whether it returns a predetermined bitstring stored in the ledger $rand$. 
 
-The key idea is that, since the message is fresh, it cannot appear in the ledger $rand$, which records all outputs of the random oracle. Moreover, it cannot appear in the set $Q$ at this stage either, because the adversary's objective is precisely to produce a fresh message–tag pair. 
-
-Since the oracle first updates the query ledger and only then invokes $\widetilde{Mac}$ to recompute the tag and verify that the tag provided by the adversary is valid, by tracking the initial query ledger, under the precondition that it is consistent with the $rand$ ledger and that it does not contain the message $m$, we can conclude that $m$ does not appear in the $rand$ ledger as well. Consequently, the conditional collapses to the branch that returns a random bitstring.
+The message produced by the adversary must be fresh hence it cannot appear in the ledger $rand$, which records all outputs of the random oracle. Moreover, it cannot appear in the set $Q$ at this stage either, because the adversary's objective is precisely to produce a fresh message–tag pair. Since the oracle first updates the query ledger and only then invokes $\widetilde{Mac}$ to recompute the tag and verify that the tag provided by the adversary is valid, by tracking the initial query ledger, under the precondition that it is consistent with the $rand$ ledger and that it does not contain the message $m$, we can conclude that $m$ does not appear in the $rand$ ledger as well. Consequently, the conditional collapses to the branch that returns a random bitstring. We apply Equation~\ref{ifFalse} and Equation~\ref{ifTrue} to further rewrite the term.
 
 \scriptsize{
 \begin{align*}
@@ -1737,7 +1738,7 @@ Since the oracle first updates the query ledger and only then invokes $\widetild
 
 \normalsize
 
-At this point, in order to conclude, we leave assertions aside and we start to simplify the term going back to the notion of contextual-indistinguishability of \cite{lago2024computationalindistinguishabilitylogicalrelations}.
+At this point, in order to conclude, we leave assertions aside and we start to simplify the term going back to the notion of $\Theta$-contextual indistinguishability of \cite{lago2024computationalindistinguishabilitylogicalrelations}.
 
 \small{
 \begin{align*}

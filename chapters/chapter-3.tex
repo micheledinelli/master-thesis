@@ -1,4 +1,4 @@
-\chapter{Formal Verification Tools in the Computational Model}
+\chapter{Formal Verification Tools in the Computational Model}\label{chapter:formal-tools}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
 
 Automated proof systems are machine-checked frameworks that enable cryptographers to reason directly within the computational model or the symbolic model while providing a formal and machine-verifiable environment for proving the security of cryptographic protocols. While many such frameworks exist for the symbolic model of cryptography, comparatively little work has been done in the computational model, largely due to the complexity of probabilistic reasoning and reduction-based proofs. Over the last two decades, however, several tools have been developed to address this gap, including EasyCrypt \cite{easy-crypy-a-tutorial}, Squirrel \cite{the-squirrel-prover-and-its-logic} and CryptoVerif \cite{a-computationally-sound-automatic-prover-for-cryptographic-protocols}. EasyCrypt
@@ -167,20 +167,21 @@ which outputs $0$ if the adversary correctly guesses the secret key $k$ and $1$ 
 The inference rules over $\sim$ in Squirrel represented in Figure \ref{fig:inference-rules-over-sim-squirrel}. The key rule is the second one that states that if given $u$ indistinguishable from $v$, then $u$ can be replaced with $v$ inside any context $C$ without changing the overall indistinguishability from $w$. 
 
 One can verify that it is true that $(\mathtt{if}\,\,(\mathtt{att_0}(\cdot) = k) \,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1$ as follows
-\begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
-    \inferrule*[right=rew]
+\footnotesize{
+\begin{mathpar}
+    \inferrule*[right=\footnotesize rew]
     {
-        \inferrule*[right=simpl$_\equiv$]
+        \inferrule*[right=\footnotesize  simpl$_\equiv$]
         {
-            \inferrule*[right=fresh]
+            \inferrule*[right=\footnotesize fresh]
             {\ }
             {(\mathtt{att}_0(\cdot) \neq k)\sim \mathtt{true}}
         }
         {((\mathtt{att_0}(\cdot) = k) = \mathtt{false}) \sim \mathtt{true}}
         \and
-        \inferrule*[right=simpl$_\equiv$]
+        \inferrule*[right=\footnotesize simpl$_\equiv$]
         {
-            \inferrule*[right=ref]
+            \inferrule*[right=\footnotesize ref]
             {\ }
             {1\sim 1}
         }
@@ -188,6 +189,10 @@ One can verify that it is true that $(\mathtt{if}\,\,(\mathtt{att_0}(\cdot) = k)
     }
     {(\mathtt{if}\,\,(\mathtt{att_0}(\cdot) = k) \,\,\mathtt{then}\,\,0\,\,\mathtt{else}\,\,1)\sim 1}
 \end{mathpar}
+}
+
+\normalsize
+
 Here it is assumed an additional proof rule $\mathrm{SIMPL}_\equiv$ that allows to replace a term with another one equal to it with probability one.
 
 \section{CryptoVerif}

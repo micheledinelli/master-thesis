@@ -61,7 +61,7 @@ To model cryptographic experiments involving shared state, $\lamBLL$ includes gl
 
 Since variables in $\lamBLL$ are classified according to their types, a variable is said to be ground if its type contains no function arrows, preventing ground terms from encoding higher-order behavior thus being dangerous as global references. To track higher-order dependencies, the calculus distinguishes the set of free higher-order variables of a term $M$, denoted $\mathit{HOFV}(M)$. This set contains exactly those free variables whose types include at least one occurrence of the function type constructor $(\multimap)$.
 
-$\lamBLL$ considers two different typing contexts
+The typing rules for $\lamBLL$ are presented in Figure~\ref{fig:typingRules} and formalize its type system through a set of rules that assign types to terms while respecting linearity and resource constraints. $\lamBLL$ considers two different typing contexts
 \begin{align*}
 \Gamma &::= \emptyset \mid \Gamma, x: P \tag{Variable context} \\
 \Theta &::= \emptyset \mid \Theta, r: P \tag{Reference context}
@@ -71,7 +71,7 @@ The context $\Gamma$ contains term variables with positive types only, which are
 \Gamma &\vdash_v^\Theta V: A \tag{Value typing} \\
 \Gamma &\vdash_c^\Theta M: A \tag{Computation typing}
 \end{align*}
-Computations may access references, but references never contain computations.
+Computations may access references, but references never contain computations. The notation $\pi \triangleright \Gamma \vdashtheta{v} M:A$ and $\pi \triangleright \Gamma \vdashtheta{c} M:A$ indicates that $\pi$ is a type derivation witnessing, respectively, the value or computation typing judgment under variable context $\Gamma$ and reference context $\Theta$. Type derivations are preserved under the substitution of the security parameter with a polynomial which is crucial for modelling polynomial-time computations and for reasoning about families of terms that are indexed by the security parameter.
 
 The polynomial addition induces a binary partial operation $\boxplus$ on positive types defined by induction
 \begin{align*}
@@ -81,7 +81,7 @@ The polynomial addition induces a binary partial operation $\boxplus$ on positiv
 \end{align*}
 The partial operation $\boxplus$ can be extended as a total operation on contexts
 \begin{align*}
-	\emptyset \boxplus \emptyset&:= \emptyset \\
+	\varnothing \boxplus \varnothing&:= \varnothing \\
 	(\Gamma, x:P) \boxplus \Delta & := \begin{cases}
 		\Gamma, x: P \boxplus \Delta & \text{ if } x \text{ does not occur in } \Delta \\
 		x : P \boxplus Q, \Gamma \boxplus \Sigma & \text{ if } \Delta = \Sigma, x: Q
@@ -95,17 +95,13 @@ And to account for polynomial multiplication, for every polynomial $p \in \mathb
 	p * (\bang_q^{\Theta}  A) &:= \bang_{p\times q}^{ \Theta}  A
 \end{align*}
 
-The operation $(p\,*)$ on positive types can also be extended to a total operation on term variables contexts:
+The operation $p * (-)$ on positive types can also be extended to a total operation on term variables contexts:
 \[\begin{aligned}
 	p \ast \varnothing &:= \varnothing\\
 	p \ast  (x : P,\Gamma )&:= (x : p \ast P),  p\ast \Gamma 
 \end{aligned}\]
 
-The notion of substitution in $\lamBLL$ is defined with respect to the security parameter $i$. Given a polynomial $p \in \mathbb{N}_{\geq 1}[i]$ and a type $A$, the type $Ap$ is the type obtained by substituting every occurrence of the parameter $i$ in $A$ with the polynomial $p$, that is, $A[p/i]$. Similarly, for a term $M$, the type $Mp$ to denote the term obtained by substituting $p$ for $i$ in all polynomial annotations occurring in $M$, namely $M[p/i]$. The substitution acts only on polynomial indices appearing in types and terms, and does not affect term variables or computational structure.
-
-The notation $\Gamma \vdashtheta{v} M:A$ and $\Gamma \vdashtheta{c} M:A$ indicates a type derivation witnessing, respectively, the value or computation typing judgment under variable context $\Gamma$ and reference context $\Theta$.
-
-The typing rules for $\lamBLL$ are presented in Figure~\ref{fig:typingRules} and formalize its type system through a set of rules that assign types to terms while respecting linearity and resource constraints.
+The notion of substitution in $\lamBLL$ is defined with respect to the security parameter $i$. Given a polynomial $p \in \mathbb{N}_{\geq 1}[i]$ and a type $A$, the type $Ap$ is the type obtained by substituting every occurrence of the parameter $i$ in $A$ with the polynomial $p$, that is, $A[p/i]$. Similarly, for a term $M$, the type $Mp$ to denote the term obtained by substituting $p$ for $i$ in all polynomial annotations occurring in $M$, namely $M[p/i]$. 
 
 \newcommand{\subst}[1]{#1}
 \begin{figure}[ht]
@@ -201,7 +197,7 @@ is used to compose effectful computations, such as the $\mathtt{set}$ command, w
 denotes a computation that performs no effect.
 
 \section{Useful Functional Symbols and Equations}\label{sec:useful-functional-symbols-and-equations}
-\subsection{Functional Symbols}
+\paragraph{Functional Symbols}
 In this section, we introduce a collection of function symbols for $\lamBLL$. These symbols capture fundamental computational patterns such as randomness, bitstring manipulation, and memory operations and they extend the set of function symbols presented in \cite{lago2024computationalindistinguishabilitylogicalrelations}, which are recalled in Appendix~\ref{app:1}, Table~\ref{table:function-symbols}.
 
 Table~\ref{table:new-function-symbols} presents the new function symbols, for clarity they are organized into two categories according to their intended purpose.
@@ -247,7 +243,7 @@ The second group consists of function symbols used to interact with a ledger, a 
 
 The function symbol $\mathtt{initQ}$ constructs an empty ledger by returning a bitstring initialized entirely with zeros, thus representing a table with no active entries. The symbol $\mathtt{contains}$ checks whether a given input string is already present in the ledger. It scans the ledger to determine whether there exists a row whose first $i$ bits match the input string and whose final bit is set to $1$. If such a row is found, the input string is considered to be defined in the ledger and the function returns $\true$. The function symbol $\mathtt{modifyQ}$ enables the insertion of a new string into the ledger: it searches for the first inactive row, writes the string into the first $i$ positions, and sets the final bit to $1$, thereby marking the row as active. Finally, the function symbol $\mathtt{coherent}$ checks whether every active entry in a ledger of size $q \times (i+1)$ also appears as an active entry in a ledger of size $p \times (2i+1)$. More precisely, for every row in the first ledger whose last bit is set to $1$, there exists a corresponding active row in the second ledger such that the first $i$ bits of its $2i$-bit payload coincide with the $i$-bit string stored in the first ledger ensuring that all bitstrings recorded as active in the first ledger are consistently reflected in the second one.
 
-\subsection{Functional Symbols}
+\paragraph{Equations}
 These function symbols extend the set introduced in \cite{lago2024computationalindistinguishabilitylogicalrelations}, which also defines a collection of equations involving the original function symbols. For completeness, these equations are recalled in Appendix~\ref{app:1}, Figure~\ref{fig:equations}. They serve as semantic constraints specifying how the function symbols behave under evaluation.
 
 \begin{figure}[htpb]
@@ -294,25 +290,29 @@ Equation~\ref{ifConst} formalizes a simple simplification pattern for conditiona
 
 \section{Hoare Logic}\label{sec:extensions-lambda-bll}
 
-We introduce a Hoare logic~\cite{axiomatic-basis-for-computer-programming}, which we use to establish existential unforgeability under chosen-message attacks for PRF-induced MACs in the $\lamBLL$ framework. Following Hoare's original formalism, program behavior is specified by \emph{partial correctness specifications}, written as triples of the form
+We introduce a Hoare logic~\cite{axiomatic-basis-for-computer-programming}, which will be fundamental to formalize the proof in Chapter~\ref{chapter:proof} of  existential unforgeability under chosen-message attacks for PRF-induced MACs in the $\lamBLL$ framework. 
+
+Following Hoare's original formalism, program behavior is specified by \emph{partial correctness specifications}, written as triples of the form
 \[
-\{P\}\, e \,\{Q\}.
+\{P\}\, e \,\{Q\} \footnote{Actually in the original paper the notation is $P\,\{Q\}\, R$ and has to be interpreted as \enquote{if the assertion $P$ is true before
+initiation of a program $Q$, then the assertion $R$ will be
+true on its completion}}.
 \]
 Here, $e$ denotes a program, and $P$ and $Q$ are logical propositions representing the precondition and postcondition, respectively. The intended meaning of such a triple is that, if execution of $e$ starts in a program state satisfying $P$, then every terminating execution of $e$ produces a state satisfying $Q$.
 
-Since $Q$ is a predicate on values, namely, on the value to which $e$ evaluates, we write $\{P\}\, e \,\{\lambda v.\, Q(v)\}$. A Hoare triple of the form $\{P\}\, e \,\{\lambda v.\, Q(v)\}$ is called a partial correctness specification and it is termed partial because if execution of $e$ diverges, the triple imposes no further conditions and makes no claim about non-terminating behavior. When a postcondition does not depend on the value returned by the expression, we write $\{P\}\, e \,\{\lambda v.\, Q\}$ instead of $\{P\}\, e \,\{\lambda v.\, Q(v)\}$. Alternatively, one may write $\{P\}\, e \,\{\lambda \_.\, Q\}$ to indicate that the result of the computation is ignored.
+Since $Q$ is a predicate on values, namely, on the value to which $e$ evaluates, we write $\{P\}\, e \,\{\lambda v.\, Q(v)\}$ where $v$ is the result of $e$. A Hoare triple of the form $\{P\}\, e \,\{\lambda v.\, Q(v)\}$ is called a partial correctness specification and it is termed partial because if execution of $e$ diverges, the triple imposes no further conditions and makes no claim about non-terminating behavior. When a postcondition does not depend on the value returned by the expression, we write $\{P\}\, e \,\{\lambda v.\, Q\}$ instead of $\{P\}\, e \,\{\lambda v.\, Q(v)\}$. Alternatively, one may write $\{P\}\, e \,\{\lambda \_.\, Q\}$ to denote that the result of the computation is ignored.
 
 Propositions used in Hoare triples are generated by the following grammar:
 \begin{align*}
 \Phi ::= \phi \mid P \land Q \mid P \lor Q 
 \end{align*}
-where $\phi$ ranges over atomic first-order formulas such as, such as $\true$, $\false$, $t_1 = t_2$, $t_1 \in t_2$ or $\mathtt{coherent}(t_1, t_2$). These form the assertion language of the logic. Semantic implication $P\models Q$ is defined at the meta-level.
+where $\phi$ ranges over atomic first-order formulas such as, such as $\true$, $\false$, $t_1 = t_2$, $t_1 \in t_2$ or $\mathtt{coherent}(t_1, t_2$). These form the assertion language of the logic while semantic implication $P\models Q$ is defined at the meta-level.
 
 Given the notion of Hoare triples we introduce a new set of typing rules for $\lamBLL$ which are presented in Figure~\ref{fig:hl-typing-rules}. These rules assign types to terms while respecting linearity, resource constraints and add a simple Hoare logic for $\lamBLL$. 
 
-\begin{figure}[ht]
+\begin{figure}[htpb]
 \vspace*{-6mm}
-\begin{center} \scriptsize
+\begin{center} \footnotesize
 \begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
     \inferrule* [right=\scriptsize \labelrule{h-eta}{rule:h-eta}]{\Gamma \vdashtheta{v} V: A}{\Gamma \vdashtheta{c} \{P[V/v]\}\,\return V \,\{\lambda v.P(v)\}: A}
     \and
@@ -342,7 +342,7 @@ Given the notion of Hoare triples we introduce a new set of typing rules for $\l
 \label{fig:hl-typing-rules}
 \end{figure}
 
-To relate the original definition of $\lamBLL$ with its extension equipped with Hoare logic, we define a translation from standard types to types decorated with propositions. Given a standard type~$A$ and an invariant~$P$, the lifting produces a decorated type in which~$P$ is threaded through every computation. The map $\mu$ is defined inductively as follows:
+To relate the original definition of $\lamBLL$ with its extension equipped with Hoare logic, we define a translation from standard types to types decorated with propositions. Given a standard type~$A$ and an invariant~$P$, the lifting $\mu$ produces a decorated type in which~$P$ is threaded through every computation. The map $\mu$ is defined inductively as follows:
 \begin{align}
 \begin{split}
 &\mu(\UU, P) = \UU \label{eq:mu} \\
@@ -358,6 +358,9 @@ We now state a lemma that lifts a typing judgment to a Hoare typing judgment.
 Let $P$ be a proposition over a set of references $\mathcal{R}(P)$.
 If $\Gamma \vdash^{\Theta} M : A$ then $\mu(\Gamma, P) \vdash^{\Xi} M: \mu(A, P)$ whenever $\Xi \supseteq \Theta$ and $\mathcal{R}(P) \cap \Theta = \emptyset$.
 \end{lemma}
+\begin{proof}
+The proof proceeds by induction on the derivation of $\Gamma \vdash^{\Theta} M : A$.  
+\end{proof}
 % \begin{proof}
 % The proof proceeds by induction on the derivation of $\Gamma \vdash^{\Theta} M : A$.
 
