@@ -64,7 +64,7 @@ The intuition behind this definition is that observing the ciphertext reveals ab
     &Enc_k(m) = \mathtt{return}\,\, m \oplus k
     &Dec_k(c) = \mathtt{return}\,\, c \oplus k
     \end{align*}
-    \caption{Definition of the OTP encryption scheme}
+    \caption{Definition of the OTP encryption scheme.}
     \label{fig:otp}
 \end{figure}
 
@@ -84,7 +84,7 @@ Encryption schemes can be studied in terms of perfect secrecy, but also in terms
     &\quad b^* \gets A(c) \\
     &\quad \mathtt{return}\,\, \neg(b \oplus b^*)
     \end{align*}
-    \caption{Pseudocode for the $\mathtt{PrivK}^{eav}$ experiment}
+    \caption{Pseudocode for the $\mathtt{PrivK}^{eav}$ experiment.}
     \label{fig:privk-eav-perfect-secrecy}
 \end{figure}
 
@@ -144,7 +144,7 @@ In order to define security for such an encryption scheme let's introduce a modi
     &\quad b^* \gets A(c) \\
     &\quad \mathtt{return}\,\, \neg(b \oplus b^*)
     \end{align*}
-    \caption{Pseudocode for the modified $\mathtt{PrivK}^{eav}$ experiment}
+    \caption{Pseudocode for the modified $\mathtt{PrivK}^{eav}$ experiment.}
     \label{fig:privk-eav}
 \end{figure}
 
@@ -202,7 +202,7 @@ In the context of the experiment $\privkeav$, the considered attacks are \emph{p
     &\quad b^* \gets A(c) \\
     &\quad \mathtt{return}\,\, \neg(b \oplus b^*)
     \end{align*}
-    \caption{Pseudocode for the $\mathtt{PrivK}^{mult}$ experiment}
+    \caption{Pseudocode for the $\mathtt{PrivK}^{mult}$ experiment.}
     \label{fig:privk-mult}
 \end{figure}
 In the experiment $\privkmult$, the adversary is allowed to output two vectors of messages of length $t$, namely $\vec{M_0} = (m_{0,0}, \dots , m_{0,t-1})$ and $\vec{M_1} = (m_{1,0}, \dots , m_{1,t-1})$. A random bit $b$ is chosen, and the challenger encrypts the entire vector $\vec{M}_b$ under the same key $k$, producing a ciphertext vector $\vec{C} = (c_0, \dots, c_{t-1})$ which is then given to the adversary.
@@ -237,7 +237,7 @@ Another important class of attacks consists of \emph{active} attacks, in which a
     &\quad g \gets A(c, Enc_k(\cdot)) \\
     &\quad \mathtt{return}\,\,(b=g)
     \end{align*}
-    \caption{Pseudocode for $\mathtt{PrivK}^{cpa}$ experiment}
+    \caption{Pseudocode for $\mathtt{PrivK}^{cpa}$ experiment.}
     \label{fig:privk-cpa}
 \end{figure}
 In the experiment $\privkcpa$, the adversary first obtains access to the encryption oracle and outputs two messages $m_0$ and $m_1$ of equal length. A random bit $b$ is then sampled, and the challenge ciphertext $c = Enc_k(m_b)$ is returned to the adversary. The adversary continues to have access to the encryption oracle and must output a guess $g$ for the value of $b$. When the algorithm $Enc$ is randomized, the
@@ -325,7 +325,7 @@ The security goal for message authentication codes (MACs) can be stated informal
     &\quad \mathbb{Q} \gets \{m \ | \ A \ \text{queries} \ Mac_k(m) \} \\
     &\quad \mathtt{return}\,\,(m \notin \mathbb{Q} \land \vrfy_k(m,t) = 1)
     \end{align*}
-    \caption{Pseudocode for $\mathtt{MacForge}$ experiment}
+    \caption{Pseudocode for $\mathtt{MacForge}$ experiment.}
     \label{fig:macforge}
 \end{figure}
 
