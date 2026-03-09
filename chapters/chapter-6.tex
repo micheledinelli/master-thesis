@@ -1,6 +1,6 @@
 \chapter{Proving PRF-Induced MAC Security Equationally}\label{chapter:proof}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
-This chapter demonstrates that existential unforgeability under chosen message attacks for pseudorandom function based MACs can be proved within the $\lamBLL$ framework. We formalize the standard reduction from MAC forgery to pseudorandom function indistinguishability by encoding the $\macexp$ experiment, the adversary, and the MAC oracle as $\lamBLL$ terms. By reconstructing the proof described of Theorem~\ref{proof:handwavy} using the equational reasoning principles of the calculus, we show that $\lamBLL$ is sufficiently expressive to internalize classical security proofs while enforcing strict polynomial-time constraints through its graded type system.
+This chapter demonstrates that existential unforgeability under chosen message attacks for pseudorandom function based MACs can be proved within the $\lamBLL$ framework. We formalize the standard reduction from MAC forgery to pseudorandom function indistinguishability by encoding the $\macexp$ experiment, the adversary, and the MAC oracle as $\lamBLL$ terms. By reconstructing the proof of Theorem~\ref{proof:handwavy} using the equational reasoning principles of the calculus, and by exploiting its extension with Hoare logic and assertion-typed terms, we demonstrate that $\lamBLL$ is sufficiently expressive to internalize classical security proofs while simultaneously enforcing strict polynomial-time constraints via its graded type system.
 
 We begin by recalling the MAC forgery experiment, $\macexp$, as defined in Figure~\ref{fig:macforge-recall}. To bridge the gap between pseudocode and formalization, we specify the types for each component as they appear in $\lamBLL$. The concrete implementation of the terms modeling the key generation
 algorithm $\mathit{Gen}$ and the MAC oracle $\mathit{Mac}_k(\cdot)$ depends on the specific MAC scheme under consideration. For this reason, these terms are left abstract and will be instantiated only after fixing a scheme $\Pi$. In the following paragraphs, we make this instantiation explicit for the schemes $\Pi^F$ and $\widetilde{\Pi}$ which are used in the proof of Theorem~\ref{theorem:mac-security}. 
@@ -34,12 +34,12 @@ given the security parameter, produces a secret key whose length is polynomial i
 % \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap \bigl((\SS[i] \otimes \SS[i]) \otimes \SS[r]\bigr) && \tag{Type for $Adv$}
 \end{align*}
 
-The typing judgments for the main components of the experiment are given above. Here, $i$ and $q$ denote polynomials in the security parameter. The oracle type $\SS[i] \multimap \bang_{q}(\SS[i] \multimap \SS[i])$ models a MAC oracle which,
+The typing judgments for the main components of the experiment are given above. Here, $i$ is a polynomial variable and $q$ denote a polynomial in the security parameter. The oracle type $\SS[i] \multimap \bang_{q}(\SS[i] \multimap \SS[i])$ models a MAC oracle which,
 once instantiated with a key, provides a function mapping messages of length $i$ to tags of the same length. The graded modality $\bang_{q}$ enforces a polynomial upper bound on the number of oracle queries that the adversary may perform. In addition to answering MAC queries, the oracle maintains a record of all messages queried by the adversary. This information encodes the set
 \[
-\mathbb{Q} \gets \{\, m \mid A \text{ queries } Mac_k(m) \,\}.
+\mathbb{Q} \gets \{\, m \mid A \text{ queries } Mac_k(m) \,\}
 \]
-To model this behavior in $\lamBLL$, we rely on the notion of a \emph{ledger}, which allows mutable storage with a statically bounded size. The reference $Q$ has type $Q : \SS[q \times (i+1)]$ and can be viewed as a table with $q$ rows, where each row consists of a message of length $i$ together with a final bit indicating whether the row is active. The size of the ledger reflects the fact that the oracle can be queried at most $q$ times. At each oracle invocation on a message $m$, the oracle updates the ledger stored in $Q$ as follows: it scans the ledger for an active row containing $m$; if none exists, it writes $m$ into the first inactive row and marks that row as active. In this way, the reference $Q$ always encodes exactly the set $\mathbb{Q}$ of messages previously queried by the adversary. To inspect the adversary's query history, we introduced in Section~\ref{sec:useful-functional-symbols-and-equations} some useful functions symbols. In particular in Table~\ref{table:new-function-symbols} we defined the function $\mathtt{contains}$, whose purpose is to determine whether a given message occurs in the encoding of the set $\mathbb{Q}$ stored in the reference context. More precisely, $\mathtt{contains}$ checks whether a bitstring of type $\SS[i]$ appears in a \textit{query ledger} of type $\SS[q\times(i+1)]$. It takes as input the stored query history together with a message and returns a boolean value.
+as presented in Figure~\ref{fig:macforge-recall}. To model this behavior in $\lamBLL$, we rely on the notion of a \emph{ledger}, which allows mutable storage with a statically bounded size. The reference $Q$ has type $Q : \SS[q \times (i+1)]$ and can be viewed as a table with $q$ rows, where each row consists of a message of length $i$ together with a final bit indicating whether the row is active. The size of the ledger reflects the fact that the oracle can be queried at most $q$ times. At each oracle invocation on a message $m$, the oracle updates the ledger stored in $Q$ as follows: it scans the ledger for an active row containing $m$; if none exists, it writes $m$ into the first inactive row and marks that row as active. In this way, the reference $Q$ always encodes exactly the set $\mathbb{Q}$ of messages previously queried by the adversary. To inspect the adversary's query history, we introduced in Section~\ref{sec:useful-functional-symbols-and-equations} some useful functions symbols. In particular in Table~\ref{table:new-function-symbols} we defined the function $\mathtt{contains}$, whose purpose is to determine whether a given message occurs in the encoding of the set $\mathbb{Q}$ stored in the reference context. More precisely, $\mathtt{contains}$ checks whether a bitstring of type $\SS[i]$ appears in a \textit{query ledger} of type $\SS[q\times(i+1)]$. It takes as input the stored query history together with a message and returns a boolean value.
 
 The adversary $Adv$ takes as input the closure obtained by currying and encapsulating the key within the $Oracle$ term. Based on its interaction with the oracle, it produces a candidate forgery $(m,t)$ of type $(\SS[i] \otimes \SS[i])$. 
 
@@ -196,7 +196,7 @@ D^F &\triangleq \letin{k=Gen^F \star} \letin{o=M^F k} \letin{e=\mathit{MacOracle
 \widetilde{D} &\triangleq \letin{k=\widetilde{Gen} \star} \letin{o=\widetilde{M} k} \letin{e=\mathit{MacOracle}\,o}{D\,e} \label{eq:d-tilde}
 \end{align}
 
-where the subterms $M^F$ and $\widetilde{M}$ defined in Figure~\ref{fig:oracles} model the pseudorandom function $F$ and the random function $f$.
+where the subterms $M^F$ and $\widetilde{M}$ defined in Figure~\ref{fig:oracles} model the pseudorandom function $F$ and the random function $f$, respectively.
 
 \begin{figure}[htpb]
 \small{
@@ -276,13 +276,13 @@ The oracle $\mathit{MacOracle}$, defined in Equation~\ref{eq:mac-oracle}, return
 \section{Formalization of the Proof}
 The security of $\Pi^F$ is established via a proof by reduction (Theorem~\ref{theorem:mac-security}), proceeding contrapositively: from any hypothetical adversary $Adv$ against $\Pi^F$ we obtain a distinguisher $D$ for $F$ which is designed to distinguish the pseudorandom function $F$ from a truly random function $f$. If $D$ is shown to be successful whenever $Adv$ succeeds, we conclude that $\Pi^F$ is secure provided $F$ is a pseudorandom function where security is characterized by the non existence of efficient adversaries of the appropriate kind.
 
-In the context of ${\lamBLL}$, the distinguisher $D$ is represented as the term defined in Figure~\ref{fig:d-term}, having type $\bang_{q+1}(\mathbb{S}[i] \multimap \mathbb{S}[i]) \multimap \mathbb{B}$. We consider two specific instances of this distinguisher: $D^F$, which interacts with the pseudorandom function $F$, and $\widetilde{D}$, which interacts with a truly random function $f$. Both $F$ and $f$ are modeled using stateful computations. Specifically, a ledger $Q$ records the query history, and in the case of the truly random function, an additional ledger $tab$ is used to provide consistent random outputs. To complete the formalization, we defined an ideal MAC scheme $\widetilde{\Pi}$ that is structurally identical to $\Pi^F$ but uses a truly random function. The components of $\Pi^F$ are specified in Figure~\ref{fig:macforgeF-subterms}, while those of $\widetilde{\Pi}$ are detailed in Figure~\ref{fig:macforgef-subterms}. 
+In the context of ${\lamBLL}$, the distinguisher $D$ is represented as the term defined in Figure~\ref{fig:d-term}, having type $\bang_{q+1}(\mathbb{S}[i] \multimap \mathbb{S}[i]) \multimap \mathbb{B}$. We consider two specific instances of this distinguisher: $D^F$, which interacts with the pseudorandom function $F$, and $\widetilde{D}$, which interacts with a truly random function $f$. Both $F$ and $f$ are modeled using stateful computations. Specifically, a ledger $Q$ records the query history, and in the case of the truly random function, an additional ledger $rand$ is used to provide consistent random outputs. To complete the formalization, we defined an ideal MAC scheme $\widetilde{\Pi}$ that is structurally identical to $\Pi^F$ but uses a truly random function. The components of $\Pi^F$ are specified in Figure~\ref{fig:macforgeF-subterms}, while those of $\widetilde{\Pi}$ are detailed in Figure~\ref{fig:macforgef-subterms}. 
 
 By defining the reference contexts $\Xi=\{Q: \mathbb{S}[q\times(i+1)]\}$ and $\Upsilon = \{rand: \mathbb{S}[(q+1)\times(2i+1)], Q: \mathbb{S}[q\times(i+1)]\}$, the security of $\mathit{MacForge}^F$ is expressed by the equation:
 \begin{equation}\label{eq:macforgeF-sim-false}
     \mathit{MacForge}^F \sim_{\Xi\subseteq\Upsilon} \false
 \end{equation}
-where $\sim_{\Xi\subseteq\Upsilon}$ denotes the $\Theta$-contextual indistinguishability relation as defined in \cite{lago2024computationalindistinguishabilitylogicalrelations}. This equation asserts that the experiment $\mathit{MacForge}^F$ reveals nothing to the adversary, even when accounting for the stateful references stored in the context $\Upsilon$. While this seems a strong requirement, and indeed it is, we show that within the framework of $\lamBLL$ we can structure a proof by reduction by equational reasoning and conclude a proof of the Equation~\ref{eq:macforgeF-sim-false} hence obtaining a formal version of the proof of Theorem~\ref{theorem:mac-security}. The diagram shows that the left component ($\mathit{MacForge}^F$) can be proved insecure only if the lower relation in the diagram is also violated. Since we assume that the pseudorandom function hypothesis holds (see Definition~\ref{def:prf}), it follows that the corresponding MAC is secure.
+where $\sim_{\Xi\subseteq\Upsilon}$ denotes the $\Theta$-contextual indistinguishability relation as defined in \cite{lago2024computationalindistinguishabilitylogicalrelations}. This equation asserts that the experiment $\mathit{MacForge}^F$ reveals nothing to the adversary, even when accounting for the stateful references stored in the context $\Upsilon$. While this seems a strong requirement, and indeed it is, we show that it is possible to structure a reduction proof by combining equational reasoning with reasoning via Hoare logic and assertion-typed terms. This allows us to derive a proof of Equation~\ref{eq:macforgeF-sim-false} hence obtaining a formal version of the proof of Theorem~\ref{theorem:mac-security}. The diagram shows that the left component ($\mathit{MacForge}^F$) can be proved insecure only if the lower relation in the diagram is also violated. Since we assume that the pseudorandom function hypothesis holds (see Definition~\ref{def:prf}), it follows that the corresponding MAC is secure.
 
 \begin{figure}[htpb]
 	\centering
@@ -311,6 +311,7 @@ where $\sim_{\Xi\subseteq\Upsilon}$ denotes the $\Theta$-contextual indistinguis
 
 Consider the diagram in Figure~\ref{fig:proofscheme}. Our objective is to demonstrate that, on both the left-hand and right-hand sides of the diagram, the relation $\sim_{\Xi \subseteq \Upsilon}$ can be used to relate the corresponding terms. On the left-hand side, we must establish that the contextual equivalence  $D^F \simcontext MacForge^F$ holds. Similarly, on the right-hand side, we must show that $\widetilde{D} \simcontext \widetilde{MacForge}$ holds. These two equivalences correspond respectively to Equation~\ref{eq:macforgeF-to-DF} and Equation~\ref{eq:macforgef-to-Df} in Proof~\ref{proof:handwavy}.
 
+\subsection{From \texorpdfstring{$\widetilde{D}$}{MacOracle} to \texorpdfstring{$\widetilde{MacForge}$}{MacForge}}
 We begin by focusing on the bottom-right side of the diagram. The first step is to establish the relation $\letin{o=\widetilde{M}\,k}{MacOracle\,o} \simcontext \widetilde{Oracle}\,k$, which is stated as Lemma~\ref{lemma:MacOracle-to-tilde-oracle} and proved immediately after. Once this equivalence is established, the relation $\widetilde{D} \simcontext \widetilde{MacForge}$ follows by an application of Equation~\ref{letAss} and Lemma~\ref{lemma:MacOracle-to-tilde-oracle}, and by concluding with a reduction using Equation~\ref{reduc2}.
 
 \begin{lemma}\label{lemma:MacOracle-to-tilde-oracle}
@@ -615,6 +616,8 @@ We begin with the definition of $\widetilde{D}$ given in Equation~\ref{eq:d-tild
 }
 \end{proof}
 
+\subsection{From \texorpdfstring{$D^F$}{D} to \texorpdfstring{$MacForge^F$}{MacForge}}
+
 For the left side of the diagram, we first establish the relation $M^F \simcontext Oracle^F$ in Lemma~\ref{lemma:MacOracle-to-oracleF}. Then, we prove the desired relation $D^F \simcontext MacForge^F$ in Theorem~\ref{theorem:DF-sim-MacForgeF}. The proofs of these statements follow the same structure and reasoning as those presented for the right side of the diagram.
 
 \begin{lemma}\label{lemma:MacOracle-to-oracleF}
@@ -858,6 +861,8 @@ The proof follows a similar approach to the proof of Theorem~\ref{theorem:tildeD
 }
 \end{proof}
 
+\subsection{From \texorpdfstring{$\widetilde{MacForge}$}{MacForge} to \texorpdfstring{$\false$}{false}}
+
 To complete the overall security proof, it remains to establish the relation $\widetilde{MacForge}\simcontext \false$, which corresponds to the right part of the diagram in Figure~\ref{fig:proofscheme}.
 
 We introduce assertions, in the style of standard Hoare proofs, which are indicated in blue. The rules are composed using Rule~\ref{rule:h-let} and correspond to derivation trees that establish the propositions annotated after each line. We state two lemmas, namely, Lemma~\ref{lemma:gen-coherence} and Lemma~\ref{lemma:oracle-coherence}, that are used to decorate the term $\widetilde{MacForge}$ and to show that a given assertion holds at a specific point in the term. Once the assertion is established, we use it to simplify part of the term using equations introduced in Section~\ref{sec:extensions-lambda-bll}. Finally, we conclude by standard equational reasoning of $\lamBLL$, namely $\Theta$-contextual indistinguishability, which is applied to the term obtained after the rewriting through Hoare logic.
@@ -883,11 +888,11 @@ Since we evaluate $\widetilde{Gen}$ at $\star$, we first eliminate the abstracti
 \begin{aligned}
     &\color{blue} \{\top\} \\
     &\letin{q = \mathtt{initQ}}{} \\
-    &\color{blue} \{ q = \mathtt{initQ} \} \implies \{ \mathtt{coherent}(q, rand) \} \quad \text{\ref{rule:h-fun}, \ref{rule:h-cons}, logic of $\mathtt{coherent}$ and $\mathtt{initQ}$} \\
+    &\color{blue} \{ \mathtt{coherent}(q, rand) \} \quad \text{\ref{rule:h-fun}, \ref{rule:h-cons}} \\
     &\mathtt{set}\, Q\, q; \\
     &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-set}, \ref{rule:h-cons}} \\
     &\letin{tab = \mathtt{initTable}}{} \\
-    &\color{blue} \{ \mathtt{coherent}(Q, tab)\} \quad \text{\ref{rule:h-fun}, \ref{rule:h-cons} and logic of $\mathtt{coherent}$ and $\mathtt{initTable}$} \\
+    &\color{blue} \{ \mathtt{coherent}(Q, tab)\} \quad \text{\ref{rule:h-fun}, \ref{rule:h-cons}} \\
     &\mathtt{set}\, rand\, tab; \\
     &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{\ref{rule:h-set}} \\
     &\letin{z = \mathtt{zero}}{} \\
@@ -940,13 +945,13 @@ The proof follows the same structure as that of Lemma~\ref{lemma:gen-coherence}.
     & \letin{q = \get Q}{} \\
     & \color{blue} \{ \mathtt{coherent}(q,rand) \land (q = Q) \} \quad \text{\ref{rule:h-get}} \\
     & \letin{t = \mathtt{contains}(q, m)}{} \\
-    & \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land t=(m \in Q) \} \quad \text{\ref{rule:h-fun}, \ref{rule:h-cons} and underlying logic of $\mathtt{contains}$} \\
+    & \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land t=(m \in Q) \} \quad \text{\ref{rule:h-fun}, \ref{rule:h-cons}} \\
     & \mathtt{if}\ \mathtt{not}(t)\ \mathtt{then} \\
     & \quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (q = Q) \land t=(m \in Q) \land (t = \false) \} \quad \text{\ref{rule:h-case}} \\
     & \qquad \implies \color{blue} \{ \mathtt{coherent}(q, rand) \land (q = Q) \land (m \notin Q) \} \quad \text{\ref{rule:h-cons}} \\
     & \quad \letin{q' = \mathtt{modifyQ}(q, m)}{} \\
     & \quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \notin Q) \land q' = \mathtt{modifyQ}(q, m) \} \quad \text{\ref{rule:h-fun}} \\
-    &\qquad \implies \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \notin Q) \land q' = (q \cup m) \} \quad \text{\ref{rule:h-cons} and underlying logic of $\mathtt{modifyQ}$} \\
+    &\qquad \implies \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \notin Q) \land q' = (q \cup m) \} \quad \text{\ref{rule:h-cons}} \\
     &\quad\qquad \implies \color{blue} \{ \mathtt{coherent}(q' \setminus \{m\}, rand) \land (q=Q) \land (m \notin Q) \land q' = (q \cup m) \} \quad \text{\ref{rule:h-cons}} \\
     & \quad \mathtt{set}\ Q\ q' \\
     & \quad \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, rand) \land (m \in Q) \} \quad \text{\ref{rule:h-set}} \\
@@ -955,11 +960,11 @@ The proof follows the same structure as that of Lemma~\ref{lemma:gen-coherence}.
     & \quad \mathtt{skip}; \\
     & \quad \color{blue} \{\mathtt{coherent}(q, rand) \land (q=Q) \land (m \in Q) \} \quad \text{\ref{rule:h-eta}} \\
     & \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \in Q) \} \implies \\
-    & \color{blue} \quad \{ \mathtt{coherent}(Q \setminus \{m\}, rand) \land (m \in Q) \} \quad \text{\ref{rule:h-cons} and underlying logic of $\mathtt{coherent}$} \\
+    & \color{blue} \quad \{ \mathtt{coherent}(Q \setminus \{m\}, rand) \land (m \in Q) \} \quad \text{\ref{rule:h-cons}} \\
     &\letin{tab = \mathtt{get}\,rand}{} \\
     & \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab = rand) \} \quad \text{\ref{rule:h-get}} \\
     &\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-    & \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab = rand) \land b = (m \in tab) \} \quad \text{\ref{rule:h-fun} and underlying logic of $\mathtt{isdefined}$} \\
+    & \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab = rand) \land b = (m \in tab) \} \quad \text{\ref{rule:h-fun}} \\
     &\mathtt{if}\, b\, \mathtt{then} \\
     & \quad \color{blue} \{ \mathtt{coherent}(Q \setminus \{m\}, tab) \land (m \in Q) \land (tab=rand) \land b=(m \in tab) \land (b=\true) \} \quad \text{\ref{rule:h-case}} \\
     & \qquad \implies \color{blue} \{ \mathtt{coherent}(Q, tab) \land (tab=rand) \} \quad \text{\ref{rule:h-cons}} \\
@@ -1627,7 +1632,7 @@ The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $
     &\quad\letin{tab = \mathtt{get}\,rand}{} \\
     &\quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (Q = q \cup \{m\}) \land (m \notin q) \land (tab=rand) \} \quad \text{\ref{rule:h-get}}\\
     &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-    &\quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (Q = q \cup \{m\}) \land (m \notin q) \land (tab=rand) \land (b=(m \in tab)) \} \quad \text{\ref{rule:h-fun} and underlying logic of $\mathtt{isdefined}$} \\
+    &\quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (Q = q \cup \{m\}) \land (m \notin q) \land (tab=rand) \land (b=(m \in tab)) \} \quad \text{\ref{rule:h-fun}} \\
     &\qquad \implies \color{blue} \{ b = \false \} \quad \text{\ref{rule:h-cons}} \\
     &\quad\mathtt{if}\, b\, \mathtt{then} \\
     &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
