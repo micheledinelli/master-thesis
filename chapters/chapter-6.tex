@@ -1460,17 +1460,21 @@ At this stage, the adversary is given access to a term that can be evaluated for
     \right)\mathtt{in} \\
     &\mathtt{eq}(x,tag)
 \end{aligned}
-\\[2ex]
-\quad\overset{\text{~\ref{letAss}}}{\simcontext}\quad&
-\begin{aligned}
-    &\letin{k = \widetilde{Gen} \star}{} \\
-    &\mathtt{let}\, \lis{m,tag} = Adv \left(
+\end{align*}
+}
+
+\normalsize
+
+At this point in the equational reasoning, the term passed as argument to $Adv$ cannot be reduced further. From that point on, we denote this argument by a term $O$ (for oracle) in order to keep the full experiment term more compact.
+
+\small{
+\begin{align}
+    O \quad\triangleq\quad \left( 
     \begin{aligned}
         &\bang(\return \lambda m. \\
         &\quad \letin{q=\get Q}{} \\
         &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \, \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
         &\quad \mathtt{else}\ \mathtt{skip}; \\
         &\quad\letin{tab = \mathtt{get}\,rand}{} \\
         &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
@@ -1483,7 +1487,16 @@ At this stage, the adversary is given access to a term that can be evaluated for
         &\quad\quad \mathtt{set}\,rand\,newtab; \\
         &\quad\quad \return x)
     \end{aligned}
-    \right)\mathtt{in} \\
+    \right) \label{eq:oracle-compacted}  
+\end{align}
+}
+
+\footnotesize{
+\begin{align*}
+\quad\overset{\text{~\ref{letAss}}}{\simcontext}\quad&
+\begin{aligned}
+    &\letin{k = \widetilde{Gen} \star}{} \\
+    &\letin{\lis{m,tag} = Adv\,O}{} \\
     &\letin{queries = \get Q}{} \\
     &\letin{c=\mathtt{contains}(queries, m)}{} \\
     &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
@@ -1513,26 +1526,7 @@ At this stage, the adversary is given access to a term that can be evaluated for
 \quad\overset{\text{~\ref{iflet}}}{\simcontext}\quad&
 \begin{aligned}
     &\letin{k = \widetilde{Gen} \star}{} \\
-    &\mathtt{let}\, \lis{m,tag} = Adv \left(
-    \begin{aligned}
-        &\bang(\return \lambda m. \\
-        &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad \mathtt{else}\ \mathtt{skip}; \\
-        &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-        &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-        &\quad\mathtt{if}\, b\, \mathtt{then} \\
-        &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
-        &\quad\quad \return x \\
-        &\quad\mathtt{else} \\
-        &\quad\quad \letin{x = \random}{} \\
-        &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad \mathtt{set}\,rand\,newtab; \\
-        &\quad\quad \return x)
-    \end{aligned}
-    \right)\mathtt{in} \\
+    &\letin{\lis{m,tag} = Adv\,O}{} \\
     &\letin{queries = \get Q}{} \\
     &\letin{c=\mathtt{contains}(queries, m)}{} \\
     &\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
@@ -1558,7 +1552,7 @@ At this stage, the adversary is given access to a term that can be evaluated for
 
 \normalsize
 
-Now to complete the proof we need to refine the typing of the term $Adv$ with respect of the typing rules introduced in Figure~\ref{fig:hl-typing-rules}. The original type designated for $Adv$ was $\vdash_c^\varnothing Adv: \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap (\SS[i] \otimes \SS[i])$, now we lift the type of $Adv$ in the new Hoare typing system using the map $\mu$ defined in Equation~\ref{eq:mu}. By fixing a proposition $P$ as $\mathtt{coherent}(Q, rand)$ and by applying Lemma~\ref{lemma:hoare-lifting}, the type of $Adv$ is lifted as follows:
+Now we need to refine the typing of the term $Adv$ with respect of the typing rules introduced in Figure~\ref{fig:hl-typing-rules}. The original type designated for $Adv$ was $\vdash_c^\varnothing Adv: \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap (\SS[i] \otimes \SS[i])$, now we lift the type of $Adv$ in the new Hoare typing system using the map $\mu$ defined in Equation~\ref{eq:mu}. By fixing a proposition $P$ as $\mathtt{coherent}(Q, rand)$ and by applying Lemma~\ref{lemma:hoare-lifting}, the type of $Adv$ is lifted as follows:
 \begin{align*}
 &\Gamma \vdash_c^\varnothing Adv: \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap (\SS[i] \otimes \SS[i])
 \end{align*}
@@ -1573,7 +1567,7 @@ Which expands as
 &= \bang_{q}^{P,P} \mu(\SS[i] \multimap \SS[i], P) \underset{P, \lambda \_.P}{\multimap} (\SS[i] \otimes \SS[i]) \\
 &= \bang_{q}^{P,P} \Bigl(\SS[i] \underset{P, \lambda \_.P}{\multimap} \SS[i]\Bigr) \underset{P, \lambda \_.P}{\multimap} (\SS[i] \otimes \SS[i]).
 \end{align*}
-The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $Adv$ and by the fact that the typing derivation is performed in the empty context, so that $\mathcal{R}(P) \cap \varnothing = \emptyset$. Moreover, $\Theta = \varnothing$ and $\Xi = \varnothing$. Under these conditions, the type of $Adv$ guarantees that $P$ is preserved as an invariant. By applying the lifted typing judgment for $Adv$ and combining it with Lemma~\ref{lemma:oracle-coherence}, we can propagate the assertion $\mathtt{coherent}(Q, rand)$ down into the term.
+The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $Adv$ and by the fact that the typing derivation is performed in the empty context, so that $\mathcal{R}(P) \cap \varnothing = \emptyset$. Moreover, $\Theta = \varnothing$ and $\Xi = \varnothing$. Under these conditions, the type of $Adv$ guarantees that $P$ is preserved as an invariant. By applying the lifted typing judgment for $Adv$ and combining it with Lemma~\ref{lemma:oracle-coherence}, we can propagate the assertion $\mathtt{coherent}(Q, rand)$ down into the term. Note that the term $O$, defined in Equation~\ref{eq:oracle-compacted} is exactly the same as term $M$ in Lemma~\ref{lemma:oracle-coherence}.
 
 \scriptsize{
 \begin{align*}
@@ -1581,26 +1575,7 @@ The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $
     &\color{blue} \{ \top \} \\
     &\letin{k = \widetilde{Gen} \star}{} \\
     &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{Lemma~\ref{lemma:gen-coherence}} \\
-    &\mathtt{let}\, \lis{m,tag} = Adv \left(
-    \begin{aligned}
-        &\bang(\return \lambda m. \\
-        &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad \mathtt{else}\ \mathtt{skip}; \\
-        &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-        &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-        &\quad\mathtt{if}\, b\, \mathtt{then} \\
-        &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
-        &\quad\quad \return x \\
-        &\quad\mathtt{else} \\
-        &\quad\quad \letin{x = \random}{} \\
-        &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad \mathtt{set}\,rand\,newtab; \\
-        &\quad\quad \return x)
-    \end{aligned}
-    \right)\mathtt{in} \\
+    &\letin{\lis{m,tag} = Adv\,O}{} \\
     &\color{blue} \{ \mathtt{coherent}(Q, rand) \} \quad \text{Lemmatas~\ref{lemma:hoare-lifting}, \ref{lemma:oracle-coherence}} \\
     &\letin{queries = \get Q}{} \\
     &\color{blue} \{ \mathtt{coherent}(queries, rand) \land (queries=Q)\} \quad \text{\ref{rule:h-get}} \\
@@ -1614,10 +1589,7 @@ The application of Lemma~\ref{lemma:hoare-lifting} is justified by the type of $
     &\quad \color{blue} \{ \mathtt{coherent}(queries, rand) \land (queries=Q) \land (m \not\in queries) \} \quad \text{\ref{rule:h-case}, \ref{rule:h-cons}} \\
     &\quad\letin{q=\get Q}{} \\
     &\quad \color{blue} \{ \mathtt{coherent}(queries, rand) \land (queries=Q) \land (m \not\in queries) \land (q = Q) \} \quad \text{\ref{rule:h-get}, \ref{rule:h-cons}} \\
-    &\qquad \implies \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \not\in q) \} \quad \text{\ref{rule:h-cons}}
-\end{aligned}
-\\[2ex]
-&\begin{aligned}
+    &\qquad \implies \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \not\in q) \} \quad \text{\ref{rule:h-cons}} \\
     &\quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \not\in q) \} \quad \text{\ref{rule:h-cons}} \\
     &\quad\letin{t=\mathtt{contains}(q,m)}{} \\
     &\quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \not\in q) \land t = (m \in q)\} \quad \text{\ref{rule:h-fun}} \\
@@ -1652,30 +1624,11 @@ At this point we do not introduce any further assertions. We observe instead tha
 
 The message produced by the adversary must be fresh hence it cannot appear in the ledger $rand$, which records all outputs of the random oracle. Moreover, it cannot appear in the set $Q$ at this stage either, because the adversary's objective is precisely to produce a fresh message–tag pair. Since the oracle first updates the query ledger and only then invokes $\widetilde{Mac}$ to recompute the tag and verify that the tag provided by the adversary is valid, by tracking the initial query ledger, under the precondition that it is consistent with the $rand$ ledger and that it does not contain the message $m$, we can conclude that $m$ does not appear in the $rand$ ledger as well. Consequently, the conditional collapses to the branch that returns a random bitstring. We apply Equation~\ref{ifFalse} and Equation~\ref{ifTrue} to further rewrite the term.
 
-\scriptsize{
+\footnotesize{
 \begin{align*}
 &\begin{aligned}
     &\letin{k = \widetilde{Gen} \star}{} \\
-    &\mathtt{let}\, \lis{m,tag} = Adv \left(
-    \begin{aligned}
-        &\bang(\return \lambda m. \\
-        &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad \mathtt{else}\ \mathtt{skip}; \\
-        &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-        &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-        &\quad\mathtt{if}\, b\, \mathtt{then} \\
-        &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
-        &\quad\quad \return x \\
-        &\quad\mathtt{else} \\
-        &\quad\quad \letin{x = \random}{} \\
-        &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad \mathtt{set}\,rand\,newtab; \\
-        &\quad\quad \return x)
-    \end{aligned}
-    \right)\mathtt{in} \\
+    &\letin{\lis{m,tag} = Adv\,O}{} \\
     &\letin{queries = \get Q}{} \\
     &\letin{c=\mathtt{contains}(queries, m)}{} \\
     & \mathtt{if}\, c\, \mathtt{then} \\
@@ -1704,26 +1657,7 @@ The message produced by the adversary must be fresh hence it cannot appear in th
 &\quad\overset{\text{~\ref{ifFalse}~\ref{ifTrue}}}{\sim}\quad
 \begin{aligned}
     &\letin{k = \widetilde{Gen} \star}{} \\
-    &\mathtt{let}\, \lis{m,tag} = Adv \left(
-    \begin{aligned}
-        &\bang(\return \lambda m. \\
-        &\quad \letin{q=\get Q}{} \\
-        &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-        &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-        &\quad \mathtt{else}\ \mathtt{skip}; \\
-        &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-        &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-        &\quad\mathtt{if}\, b\, \mathtt{then} \\
-        &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
-        &\quad\quad \return x \\
-        &\quad\mathtt{else} \\
-        &\quad\quad \letin{x = \random}{} \\
-        &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-        &\quad\quad \mathtt{set}\,rand\,newtab; \\
-        &\quad\quad \return x)
-    \end{aligned}
-    \right)\mathtt{in} \\
+    &\letin{\lis{m,tag} = Adv\,O}{} \\
     &\letin{queries = \get Q}{} \\
     &\letin{c=\mathtt{contains}(queries, m)}{} \\
     & \mathtt{if}\, c\, \mathtt{then} \, \return \false \\
@@ -1743,32 +1677,13 @@ The message produced by the adversary must be fresh hence it cannot appear in th
 
 \normalsize
 
-At this point, in order to conclude, we leave assertions aside and we start to simplify the term going back to the notion of $\Theta$-contextual indistinguishability of \cite{lago2024computationalindistinguishabilitylogicalrelations}.
+In order to conclude, we leave assertions aside and we start to simplify the term going back to the notion of $\Theta$-contextual indistinguishability of \cite{lago2024computationalindistinguishabilitylogicalrelations}. Recall that $O$ is not a free variable but it is the term defined in Equation~\ref{eq:oracle-compacted}
 
 \small{
 \begin{align*}
     &\begin{aligned}
         &\letin{k = \widetilde{Gen} \star}{} \\
-        &\mathtt{let}\, \lis{m,tag} = Adv \left(
-        \begin{aligned}
-            &\bang(\return \lambda m. \\
-            &\quad \letin{q=\get Q}{} \\
-            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \mathtt{skip}; \\
-            &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-            &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-            &\quad\mathtt{if}\, b\, \mathtt{then} \\
-            &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
-            &\quad\quad \return x \\
-            &\quad\mathtt{else} \\
-            &\quad\quad \letin{x = \random}{} \\
-            &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-            &\quad\quad \mathtt{set}\,rand\,newtab; \\
-            &\quad\quad \return x)
-        \end{aligned}
-        \right)\mathtt{in} \\
+        &\letin{\lis{m,tag} = Adv\,O}{} \\
         &\letin{queries = \get Q}{} \\
         &\letin{c=\mathtt{contains}(queries, m)}{} \\
         & \mathtt{if}\, c\, \mathtt{then} \, \return \false \\
@@ -1783,30 +1698,12 @@ At this point, in order to conclude, we leave assertions aside and we start to s
         &\quad \mathtt{set}\,rand\,newtab; \\
         &\quad \mathtt{eq}(x,tag)
     \end{aligned}
-    \\[2ex]
-    &\quad\underset{\text{\ref{letCom}}}{\simcontext}\quad
+    % \\[2ex]
+    % &\quad\underset{\text{\ref{letCom}}}{\simcontext}\quad
+    \quad\underset{\text{\ref{letCom}}}{\simcontext}\quad
     \begin{aligned}
         &\letin{k = \widetilde{Gen} \star}{} \\
-        &\mathtt{let}\, \lis{m,tag} = Adv \left(
-        \begin{aligned}
-            &\bang(\return \lambda m. \\
-            &\quad \letin{q=\get Q}{} \\
-            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \mathtt{skip}; \\
-            &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-            &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-            &\quad\mathtt{if}\, b\, \mathtt{then} \\
-            &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
-            &\quad\quad \return x \\
-            &\quad\mathtt{else} \\
-            &\quad\quad \letin{x = \random}{} \\
-            &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-            &\quad\quad \mathtt{set}\,rand\,newtab; \\
-            &\quad\quad \return x)
-        \end{aligned}
-        \right)\mathtt{in} \\
+        &\letin{\lis{m,tag} = Adv\,O}{} \\
         &\letin{queries = \get Q}{} \\
         &\letin{c=\mathtt{contains}(queries, m)}{} \\
         & \mathtt{if}\, c\, \mathtt{then} \, \return \false \\
@@ -1825,26 +1722,7 @@ At this point, in order to conclude, we leave assertions aside and we start to s
     &\quad\underset{\text{\ref{letAss}}}{\simcontext}\quad
     \begin{aligned}
         &\letin{k = \widetilde{Gen} \star}{} \\
-        &\mathtt{let}\, \lis{m,tag} = Adv \left(
-        \begin{aligned}
-            &\bang(\return \lambda m. \\
-            &\quad \letin{q=\get Q}{} \\
-            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \mathtt{skip}; \\
-            &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-            &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-            &\quad\mathtt{if}\, b\, \mathtt{then} \\
-            &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
-            &\quad\quad \return x \\
-            &\quad\mathtt{else} \\
-            &\quad\quad \letin{x = \random}{} \\
-            &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-            &\quad\quad \mathtt{set}\,rand\,newtab; \\
-            &\quad\quad \return x)
-        \end{aligned}
-        \right)\mathtt{in} \\
+        &\letin{\lis{m,tag} = Adv\,O}{} \\
         &\letin{queries = \get Q}{} \\
         &\letin{c=\mathtt{contains}(queries, m)}{} \\
         & \mathtt{if}\, c\, \mathtt{then} \, \return \false \\
@@ -1867,26 +1745,7 @@ At this point, in order to conclude, we leave assertions aside and we start to s
     &\quad\underset{\text{\ref{safeDisc1}}}{\simcontext}\quad
     \begin{aligned}
         &\letin{k = \widetilde{Gen} \star}{} \\
-        &\mathtt{let}\, \lis{m,tag} = Adv \left(
-        \begin{aligned}
-            &\bang(\return \lambda m. \\
-            &\quad \letin{q=\get Q}{} \\
-            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \mathtt{skip}; \\
-            &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-            &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-            &\quad\mathtt{if}\, b\, \mathtt{then} \\
-            &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
-            &\quad\quad \return x \\
-            &\quad\mathtt{else} \\
-            &\quad\quad \letin{x = \random}{} \\
-            &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-            &\quad\quad \mathtt{set}\,rand\,newtab; \\
-            &\quad\quad \return x)
-        \end{aligned}
-        \right)\mathtt{in} \\
+        &\letin{\lis{m,tag} = Adv\,O}{} \\
         &\letin{queries = \get Q}{} \\
         &\letin{c=\mathtt{contains}(queries, m)}{} \\
         & \mathtt{if}\, c\, \mathtt{then} \, \return \false \\
@@ -1897,26 +1756,7 @@ At this point, in order to conclude, we leave assertions aside and we start to s
     \\[2ex]
     &\quad\underset{\text{\ref{safeDisc1}}}{\simcontext}\quad
     \begin{aligned}
-        &\mathtt{let}\, \lis{m,tag} = Adv \left(
-        \begin{aligned}
-            &\bang(\return \lambda m. \\
-            &\quad \letin{q=\get Q}{} \\
-            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \mathtt{skip}; \\
-            &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-            &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-            &\quad\mathtt{if}\, b\, \mathtt{then} \\
-            &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
-            &\quad\quad \return x \\
-            &\quad\mathtt{else} \\
-            &\quad\quad \letin{x = \random}{} \\
-            &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-            &\quad\quad \mathtt{set}\,rand\,newtab; \\
-            &\quad\quad \return x)
-        \end{aligned}
-        \right)\mathtt{in} \\ 
+        &\letin{\lis{m,tag} = Adv\,O}{} \\
         &\letin{queries = \get Q}{} \\
         &\letin{c=\mathtt{contains}(queries, m)}{} \\
         & \mathtt{if}\, c\, \mathtt{then} \, \return \false \\
@@ -1924,29 +1764,9 @@ At this point, in order to conclude, we leave assertions aside and we start to s
         &\quad \letin{x = \random}{} \\
         &\quad \mathtt{eq}(x,tag)
     \end{aligned}
-    \\[2ex]
-    &\quad\underset{\text{\ref{randF}}}{\simcontext}\quad
+    \quad\underset{\text{\ref{randF}}}{\simcontext}\quad
     \begin{aligned}
-        &\mathtt{let}\, \lis{m,tag} = Adv \left(
-        \begin{aligned}
-            &\bang(\return \lambda m. \\
-            &\quad \letin{q=\get Q}{} \\
-            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \mathtt{skip}; \\
-            &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-            &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-            &\quad\mathtt{if}\, b\, \mathtt{then} \\
-            &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
-            &\quad\quad \return x \\
-            &\quad\mathtt{else} \\
-            &\quad\quad \letin{x = \random}{} \\
-            &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-            &\quad\quad \mathtt{set}\,rand\,newtab; \\
-            &\quad\quad \return x)
-        \end{aligned}
-        \right)\mathtt{in} \\
+        &\letin{\lis{m,tag} = Adv\,O}{} \\
         &\letin{queries = \get Q}{} \\
         &\letin{c=\mathtt{contains}(queries, m)}{} \\
         & \mathtt{if}\, c\, \mathtt{then} \, \return \false \\
@@ -1955,34 +1775,14 @@ At this point, in order to conclude, we leave assertions aside and we start to s
     \\[2ex]
     &\quad\underset{\text{\ref{ifConst}}}{\simcontext}\quad
     \begin{aligned}
-        &\mathtt{let}\, \lis{m,tag} = Adv \left(
-        \begin{aligned}
-            &\bang(\return \lambda m. \\
-            &\quad \letin{q=\get Q}{} \\
-            &\quad \letin{t=\mathtt{contains}(q,m)}{} \\
-            &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \\
-            &\quad\quad \mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
-            &\quad \mathtt{else}\ \mathtt{skip}; \\
-            &\quad\letin{tab = \mathtt{get}\,rand}{} \\
-            &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-            &\quad\mathtt{if}\, b\, \mathtt{then} \\
-            &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
-            &\quad\quad \return x \\
-            &\quad\mathtt{else} \\
-            &\quad\quad \letin{x = \random}{} \\
-            &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
-            &\quad\quad \mathtt{set}\,rand\,newtab; \\
-            &\quad\quad \return x)
-        \end{aligned}
-        \right)\mathtt{in} \\
+        &\letin{\lis{m,tag} = Adv\,O}{} \\
         &\letin{queries = \get Q}{} \\
         &\letin{c=\mathtt{contains}(queries, m)}{} \\
         & \return \false
     \end{aligned}
-    \\[2ex]
-    &\quad\underset{\text{\ref{safeDisc1}}}{\simcontext}\quad
+    \quad\underset{\text{\ref{safeDisc1}}}{\simcontext}\quad
     \begin{aligned}
-        & \return \false
+        &\return \false
     \end{aligned}
 \end{align*}
 }
