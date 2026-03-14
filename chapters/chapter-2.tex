@@ -339,8 +339,10 @@ A MAC $\Pi$ is secure if and only if for every PPT adversary $A$ there exists a 
 \end{definition}
 This definition of MAC security is simultaneously strong and weak. On the one hand, it is strong because it considers the scheme broken even if the adversary forges a valid tag for a message that is meaningless. Any successful forgery, regardless of the message content, translates to a violation of security. On the other hand, the definition is weak in that it does not protect against replay attacks. An adversary who records a previously transmitted and authenticated pair $(m,t)$ can resend the same pair at a later time, and it will still be accepted as valid by the receiver. Since replayed messages are not considered new forgeries under the standard definition, preventing such attacks requires additional mechanisms, such as nonces, timestamps, or sequence numbers, which go beyond basic MAC security.
 
-\subsection{MAC Security From Pseudorandom Function}\label{subsec:mac-security}
-A well-known result in cryptography states that pseudorandom functions can be used to construct secure MAC. Given a pseudorandom function $F$, the construction $\mathrm{MAC}^F$ yields a secure MAC. Formally, let $\Pi_F = (Gen, Mac, \vrfy)$ be the triple of algorithms defined as follows:
+\subsection{MAC Security From Pseudorandom Functions}\label{subsec:mac-security}
+A well-known result in cryptography states that pseudorandom functions can be used to construct secure MACs. In this section we present the standard proof that a MAC constructed from a pseudorandom function is secure, as typically given in cryptography textbooks. In Chapter~\ref{chapter:proof} we formalize this result within a more formal framework, revisiting this proof and using it as the basis for the formalization.
+
+Given a pseudorandom function $F$, the construction $\mathrm{MAC}^F$ yields a secure MAC. Formally, let $\Pi_F = (Gen, Mac, \vrfy)$ be the triple of algorithms defined as follows:
 \begin{itemize}
 \item The key-generation algorithm $Gen$ takes as input the security parameter $1^n$ and outputs a uniformly random bitstring $k \in {0,1}^n$, each with probability $1/2^n$;
 \item The tag generation algorithm is defined as $Mac_k(m) = F_k(m)$;

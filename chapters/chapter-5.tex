@@ -1,4 +1,4 @@
-\chapter{Lambda-BLL}\label{chapter:lambll}
+\chapter{\texorpdfstring{$\lamBLL$}{Lambda-BLL}}\label{chapter:lambll}
 \lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
 This chapter introduces the $\lamBLL$ calculus~\cite{lago2024computationalindistinguishabilitylogicalrelations}, a typed probabilistic lambda calculus for modeling polynomial-time cryptographic computation. Its design and language features capture the essentials for expressing cryptographic experiments, adversaries, and reductions.
 
@@ -51,7 +51,7 @@ Values represent data that can be passed, stored or paired but not directly exec
     &\mid \letin{x=N}{M} | \letin{\lis{x,y}=Z}{M} \\
     &\mid \ifthen{Z}{M}{N} \mid \loopp{V}{p}{M} \\
     &\mid \setr{r}{Z} \mid \get r \\
-    &\mid f_p(Z_1, \dots, Z,m) \\
+    &\mid f_p(Z_1, \dots, Z_m) \\
   \end{align*}
   \caption{Syntax of $\lamBLL$.}
   \label{fig:syntax}
@@ -135,7 +135,7 @@ The notion of substitution in $\lamBLL$ is defined with respect to the security 
         \and
 		\inferrule* [right=\scriptsize eta]{\Gamma \vdashtheta{v} V: A}{\Gamma \vdashtheta{c} \return V: A}
         \and
-		\inferrule* [right=\scriptsize let]{\Gamma \vdashtheta{v} Z :  P \otimes Q \\ \Delta, x : P, y : Q \vdashtheta{c} M : A}{\Gamma \boxplus \Delta \vdashtheta{c} \letin{ \lis{x,y} = Z}{M} : A }
+		\inferrule* [right=\scriptsize let]{\Gamma \vdashtheta{v} N :  P \\ \Delta, x : P \vdashtheta{c} M : A}{\Gamma \boxplus \Delta \vdashtheta{c} \letin{ x = N}{M} : A }
 		\and
 		\inferrule* [right=\scriptsize loop]{\Gamma \vdashtheta{v} V: P \multimap P \\ \Delta \vdashtheta{c} M : P }{(p \ast \Gamma)\boxplus \Delta \vdashtheta{c} \loopp{V}{p}{M} : P }	
 		\and
@@ -601,3 +601,16 @@ In addition to the introduction of Hoare-style reasoning in $\lamBLL$, we also p
 \end{figure}
 
 The two equations state that, whenever the precondition entails the guard of a conditional, the conditional term collapses to the corresponding branch, since the alternative branch is unreachable under the given precondition. Under the precondition $P$ such that $P \models b$, the behaviour of the conditional term $\ifthen{b}{M}{N}$ is equivalent to that of $M$, since the guard is always true and the branch $N$ is never executed. Symmetrically, if $P \models \neg b$, the effect of the conditional is equivalent to that of $N$, as the guard is always false and the branch $M$ becomes unreachable.
+
+\section{Discussion on Soundness and Correctness}
+% The extensions of $\lamBLL$ introduced in this chapter namely, the Hoare-style typing discipline and the additional equations on conditional terms, are intended to be sound with respect to the semantic framework developed for the original calculus in Computational Indistinguishability via Logical Relations by ()Lago et al. In that work, the semantics of $\lamBLL$ is given by a denotational interpretation in terms of probabilistic computations with mutable state, together with a logical metric from which a notion of computational indistinguishability is derived.
+
+% The $\lamBLL$ extensions introduced in this chapter are are intended to be sound with respect to the semantic framework developed for the original calculus developed in \cite{lago2024computationalindistinguishabilitylogicalrelations}. The semantics of $\lamBLL$ is given by a denotational interpretation in terms of probabilistic computations with mutable state, together with a logical metric from which a notion of computational indistinguishability is derived. 
+
+% Although a full formal proof of soundness for the present extensions is beyond the scope of this thesis, we briefly outline why the additional constructs introduced here are expected to be semantically valid.
+
+% First, consider the Equation~\ref{ifTrue} and Equation~\ref{ifFalse}. These equations express that, whenever the precondition $P$ logically entails the guard of a conditional, the conditional expression is equivalent to the corresponding branch. Intuitively, if $P \models b$, then in every program state satisfying $P$ the boolean guard $b$ evaluates to $\true$. Consequently, the conditional expression
+% \[
+% \ifthen{b}{M}{N}
+% \]
+% always reduces to the branch $M$, while the branch $N$ is never executed. From the perspective of the denotational semantics, both terms therefore denote the same computation. An analogous argument applies when $P \models \neg b$, in which case the conditional always evaluates to $N$. Hence the equations capture a semantically valid simplification of conditional terms under known logical assumptions.
