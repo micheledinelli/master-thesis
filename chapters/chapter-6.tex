@@ -5,8 +5,6 @@ This chapter demonstrates that existential unforgeability under chosen message a
 We begin by recalling the MAC forgery experiment, $\macexp$, as defined in Figure~\ref{fig:macforge-recall}. To bridge the gap between pseudocode and formalization, we specify the types for each component as they appear in $\lamBLL$. The concrete implementation of the terms modeling the key generation
 algorithm $\mathit{Gen}$ and the MAC oracle $\mathit{Mac}_k(\cdot)$ depends on the specific MAC scheme under consideration. For this reason, these terms are left abstract and will be instantiated only after fixing a scheme $\Pi$. In the following paragraphs, we make this instantiation explicit for the schemes $\Pi^F$ and $\widetilde{\Pi}$ which are used in the proof of Theorem~\ref{theorem:mac-security}. 
 
-In $\lamBLL$ typing discipline, the key generation algorithm $Gen$ is a probabilistic computation that yields a secret key of polynomial length. The adversary, $Adv$, is a higher-order computation having access to an oracle. The oracle itself is controlled by the graded modality $\bang_q$, which enforces a polynomial bound on the number of queries.
-
 \begin{figure}[htpb]
     \centering
     \begin{align*}
@@ -20,7 +18,7 @@ In $\lamBLL$ typing discipline, the key generation algorithm $Gen$ is a probabil
     \label{fig:macforge-recall}
 \end{figure}
 
-We now describe how the components of the experiment are typed in $\lamBLL$.
+We now describe how the components of the experiment are typed in $\lamBLL$. The key generation algorithm $Gen$ is a probabilistic computation that yields a secret key of polynomial length. The adversary, $Adv$, is a higher-order computation having access to an oracle. The oracle itself is controlled by the graded modality $\bang_q$, which enforces a polynomial bound on the number of queries.
 The key generation algorithm $Gen$ is modeled as a probabilistic computation that,
 given the security parameter, produces a secret key whose length is polynomial in $i$. The adversary is modeled as a higher-order computation that receives oracle access to the MAC function and outputs a candidate forgery. The MAC oracle itself is represented as a term whose use is controlled by a graded modality, enforcing a polynomial bound on the number of queries.
 
@@ -34,7 +32,7 @@ given the security parameter, produces a secret key whose length is polynomial i
 % \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap \bigl((\SS[i] \otimes \SS[i]) \otimes \SS[r]\bigr) && \tag{Type for $Adv$}
 \end{align*}
 
-The typing judgments for the main components of the experiment are given above. Here, $i$ is a polynomial variable and $q$ denote a polynomial in the security parameter. The oracle type $\SS[i] \multimap \bang_{q}(\SS[i] \multimap \SS[i])$ models a MAC oracle which,
+The typing judgments for the main components of the experiment are given above. Here, $i$ is a polynomial variable and $q$ denotes a polynomial in the security parameter. The oracle type $\SS[i] \multimap \bang_{q}(\SS[i] \multimap \SS[i])$ models a MAC oracle which,
 once instantiated with a key, provides a function mapping messages of length $i$ to tags of the same length. The graded modality $\bang_{q}$ enforces a polynomial upper bound on the number of oracle queries that the adversary may perform. In addition to answering MAC queries, the oracle maintains a record of all messages queried by the adversary. This information encodes the set
 \[
 \mathbb{Q} \gets \{\, m \mid A \text{ queries } Mac_k(m) \,\}
@@ -45,7 +43,7 @@ The adversary $Adv$ takes as input the closure obtained by currying and encapsul
 
 The verification function $\vrfy$ is not introduced since the validity of a proposed tag can be checked just by recomputing the MAC on the message and comparing it with the supplied tag.
 
-It is worth noting that the type derivations of the terms introduced so far are parameterized by a reference context $\Theta$, which varies depending on the cryptographic experiment considered. In the model for the scheme $\Pi_F$, the context $\Theta$ contains the reference $Q$ used to record oracle queries so the types of the terms in Figure~\ref{fig:macforgeF-subterms} must be adapted by defining a reference context $\Xi=\{\,Q: \SS[(q\times(i+1)]\,\}$ and setting $\Theta$ accordingly. In contrast, in the model for the scheme $\widetilde{\Pi}$, the context $\Theta$ is instantiated with a reference context containing also the ledger used to model the random function $f$, namely $\Upsilon=\{\,rand : \SS[(q+1)\times(2i+1)], Q: \SS[(q\times(i+1)]\,\}$.
+It is worth noting that the type derivations of the terms introduced so far are parameterized by a reference context $\Theta$, which varies depending on the cryptographic experiment considered. In the model for the scheme $\Pi_F$, the context $\Theta$ contains the reference $Q$ used to record oracle queries so the types of the terms in Figure~\ref{fig:macforgeF-subterms} must be adapted by defining a reference context $\Xi=\{\,Q: \SS[q\times(i+1)]\,\}$ and setting $\Theta$ accordingly. In contrast, in the model for the scheme $\widetilde{\Pi}$, the context $\Theta$ is instantiated with a reference context containing also the ledger used to model the random function $f$, namely $\Upsilon=\{\,rand : \SS[(q+1)\times(2i+1)], Q: \SS[(q\times(i+1)]\,\}$.
 
 We define the $\lamBLL$ term corresponding to the forgery experiment, shown in Figure~\ref{fig:macforge-term}. The experiment begins by generating a fresh key $k$ and constructing the corresponding oracle $o$. The adversary $Adv$ is then given access to $o$ and returns an attempted forgery $(m,t)$. The experiment first checks  whether the message $m$ appears in the query set $\mathbb{Q}$ by reading the reference $Q$ containing the query ledger and applying the predicate $\mathtt{contains}$. If verification succeeds the experiment immediately returns $\mathtt{false}$, otherwise if it succeeds, the experiment tests if the tag provided by the adversary is equal to the recomputed tag on the same message obtained through the oracle. The experiment returns $\true$ if $m$ was not previously queried, and $\false$ otherwise. If verification fails, the experiment immediately returns $\false$.
 
@@ -865,7 +863,7 @@ The proof follows a similar approach to the proof of Theorem~\ref{theorem:tildeD
 
 \subsection{From \texorpdfstring{$\widetilde{MacForge}$}{MacForge} to \texorpdfstring{$\false$}{false}}
 
-To complete the overall security proof, it remains to establish the relation $\widetilde{MacForge}\simcontext \false$, which corresponds to the right part of the diagram in Figure~\ref{fig:proofscheme}.
+To complete the overall security proof, it remains to establish the relation $\widetilde{MacForge}\simcontext \false$, which corresponds to the right side of the diagram in Figure~\ref{fig:proofscheme}.
 
 We introduce assertions, in the style of standard Hoare proofs, which are indicated in blue. The rules are composed using Rule~\ref{rule:h-let} and correspond to derivation trees that establish the propositions annotated after each line. We state two lemmas, namely, Lemma~\ref{lemma:gen-coherence} and Lemma~\ref{lemma:oracle-coherence}, that are used to decorate the term $\widetilde{MacForge}$ and to show that a given assertion holds at a specific point in the term. Once the assertion is established, we use it to simplify part of the term using equations introduced in Section~\ref{sec:extensions-lambda-bll}. Finally, we conclude by standard equational reasoning of $\lamBLL$, namely $\Theta$-contextual indistinguishability, which is applied to the term obtained after the rewriting through Hoare logic.
 
