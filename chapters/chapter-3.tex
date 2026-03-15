@@ -276,9 +276,7 @@ The encrypt-then-MAC scheme is IND-CPA.
 \end{theorem}
 
 \begin{proof}
-We formalize the IND-CPA experiment for the encrypt-then-MAC scheme in CryptoVerif. 
-We begin by defining an initialization oracle $Ostart$ that is invoked by the adversary. 
-The oracle samples a random bit $b$ and generates fresh keys for both the encryption scheme and the MAC scheme.
+We formalize the IND-CPA experiment for the encrypt-then-MAC scheme in CryptoVerif.\footnote{A full example of the proof is available at \href{http://proverif24.paris.inria.fr/cryptoverif.php}{http://proverif24.paris.inria.fr/cryptoverif.php}.} We begin by defining an initialization oracle $Ostart$ that is invoked by the adversary. The oracle samples a random bit $b$ and generates fresh keys for both the encryption scheme and the MAC scheme.
 
 \begin{align*}
 Ostart() := b \xleftarrow{R} bool; k \xleftarrow{R} key; mk \xleftarrow{R} mkey; \mathbf{\mathtt{return}}.
@@ -306,7 +304,7 @@ Finally, we consider the following process:
 \end{align*}
 
 CryptoVerif proves secrecy of the bit $b$ in this process under the assumptions that the encryption scheme is IND-CPA secure and the MAC is SUF-CMA secure. 
-Secrecy of $b$ is equivalent to stating that no polynomial-time adversary can distinguish whether encryptions correspond to the left or the right messages with non-negligible advantage. Therefore, the encrypt-then-MAC construction is IND-CPA secure. A full example of this proof is available online at \href{http://proverif24.paris.inria.fr/cryptoverif.php}{proverif24.paris.inria.fr/cryptoverif.php}.
+Secrecy of $b$ is equivalent to stating that no polynomial-time adversary can distinguish whether encryptions correspond to the left or the right messages with non-negligible advantage. Therefore, the encrypt-then-MAC construction is IND-CPA secure. 
 \end{proof}
 
 

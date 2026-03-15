@@ -162,7 +162,7 @@ Once again, adversaries are restricted to probabilistic polynomial time algorith
 
 To construct an encryption scheme satisfying this notion of security, one must address the requirement that $|\mathcal{K}| < |\mathcal{M}|$. As seen in the case of perfect secrecy, this condition renders schemes impractical in real-world settings. There is therefore a need for algorithms that use relatively short keys while still inducing a cryptographic scheme that is secure according to Definition~\ref{def:sec-eav}. A fundamental tool for achieving this goal is the pseudorandom generator.
 
-\subsection{Pseudorandom Generators}
+\section{Pseudorandom Generators}
 A pseudorandom generator is an efficient, deterministic algorithm that transforms a short, uniformly random string, called a \emph{seed}, into a longer string that appears uniform to any efficient adversary. In other words, a pseudorandom generator uses a small amount of true randomness to generate a large amount of pseudorandomness. Let $\ell : \mathbb{N} \to \mathbb{N}$ be a polynomial, called the \emph{expansion factor}, and let $G$ be a deterministic algorithm that, for every input $s \in \{0,1\}^*$, outputs a string $G(s)\in\{0,1\}^{\ell(|s|)}$. Then $G$ is a \emph{pseudorandom generator (PRG)} if and only if the following conditions hold:
 \begin{itemize}
 \item For every $n \in \mathbb{N}$, $\ell(n) > n$.
