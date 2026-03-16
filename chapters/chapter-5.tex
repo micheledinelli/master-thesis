@@ -198,7 +198,7 @@ denotes a computation that performs no effect.
 
 \section{Useful Functional Symbols and Equations}\label{sec:useful-functional-symbols-and-equations}
 \paragraph{Functional Symbols}
-We introduce a collection of function symbols for $\lamBLL$. These symbols capture fundamental computational patterns such as randomness, bitstring manipulation, and memory operations and they extend the set of function symbols presented in \cite{lago2024computationalindistinguishabilitylogicalrelations}, which are recalled in Appendix~\ref{app:1}, Table~\ref{table:function-symbols}.
+We introduce a collection of function symbols for $\lamBLL$. These symbols capture fundamental computational patterns such as randomness, bitstring manipulation, and memory operations and they extend the set of function symbols presented in \cite{lago2024-extended}, which are recalled in Appendix~\ref{app:1}, Table~\ref{table:function-symbols}.
 
 Table~\ref{table:new-function-symbols} presents the new function symbols, for clarity they are organized into two categories according to their intended purpose.
 
@@ -244,7 +244,7 @@ The second group consists of function symbols used to interact with a ledger, a 
 The function symbol $\mathtt{initQ}$ constructs an empty ledger by returning a bitstring initialized entirely with zeros, thus representing a table with no active entries. The symbol $\mathtt{contains}$ checks whether a given input string is already present in the ledger. It scans the ledger to determine whether there exists a row whose first $i$ bits match the input string and whose final bit is set to $1$. If such a row is found, the input string is considered to be defined in the ledger and the function returns $\true$. The function symbol $\mathtt{modifyQ}$ enables the insertion of a new string into the ledger: it searches for the first inactive row, writes the string into the first $i$ positions, and sets the final bit to $1$, thereby marking the row as active. Finally, the function symbol $\mathtt{coherent}$ checks whether every active entry in a ledger of size $q \times (i+1)$ also appears as an active entry in a ledger of size $p \times (2i+1)$. More precisely, for every row in the first ledger whose last bit is set to $1$, there exists a corresponding active row in the second ledger such that the first $i$ bits of its $2i$-bit payload coincide with the $i$-bit string stored in the first ledger ensuring that all bitstrings recorded as active in the first ledger are consistently reflected in the second one.
 
 \paragraph{Equations}
-These equations extend the set introduced in \cite{lago2024computationalindistinguishabilitylogicalrelations}. For completeness, these equations are recalled in Appendix~\ref{app:1}, Figure~\ref{fig:equations}. They serve as semantic constraints specifying how the function symbols behave under evaluation.
+These equations extend the set introduced in \cite{lago2024-extended}. For completeness, these equations are recalled in Appendix~\ref{app:1}, Figure~\ref{fig:equations}. They serve as semantic constraints specifying how the function symbols behave under evaluation.
 
 \begin{figure}[htpb]
     \centering
@@ -258,7 +258,7 @@ These equations extend the set introduced in \cite{lago2024computationalindistin
     \end{align*}
 \end{figure}
 
-Equation~\ref{randF} formalizes a recurring pattern in which a freshly sampled random value is compared with an independently provided value. In this setting, a fresh random variable $x$ is generated via the primitive $\random$ and is subsequently compared with some value $t$ using the equality predicate $\mathtt{eq}$. Because $x$ is drawn uniformly at random and independently of all values already contained in the program state, the probability that $x$ coincides with the fixed value $t$ is negligible. Consequently, the equality test $\mathtt{eq}(x,t)$ evaluates to $\false$ except with negligible probability. This equation plays a central role in the analysis of cryptographic constructions. For example, when an adversary attempts to guess a randomly generated nonce or challenge, the probability that the adversary's guess equals the freshly sampled value is negligible. Equation~\ref{randF} will therefore be a key ingredient in the security proof of existential unforgeability under chosen-message attacks for PRF-induced MACs.
+Equation~\ref{randF} is a slightly modified version of the equation described in \cite{lago2024computationalindistinguishabilitylogicalrelations}. It formalizes a recurring pattern in which a freshly sampled random value is compared with an independently provided value. In this setting, a fresh random variable $x$ is generated via the primitive $\random$ and is subsequently compared with some value $t:\SS[i]$ using the equality predicate $\mathtt{eq}$. Because $x$ is drawn uniformly at random the probability that $x$ coincides with the fixed value $t$ is $2^{-i}$, which is negligible in the security parameter $i$. Consequently, the equality test $\mathtt{eq}(x,t)$ evaluates to $\false$ except with negligible probability. This equation plays a central role in the analysis of cryptographic constructions. For example, when an adversary attempts to guess a randomly generated nonce or challenge, the probability that the adversary's guess equals the freshly sampled value is negligible. Equation~\ref{randF} will therefore be a key ingredient in the security proof of existential unforgeability under chosen-message attacks for PRF-induced MACs.
 
 Equation~\ref{ifConst} formalizes a simple simplification pattern for conditional expressions. In this equation, both branches of the conditional expression evaluate to the same value $v$. Consequently, the overall behavior of the program is invariant with respect to the truth value of the boolean guard $b$: whether $b$ evaluates to $\true$ or $\false$, the result is always $v$. Therefore, within any program context, the conditional expression is observationally equivalent to the expression $v$ itself. This equation is particularly useful in the simplification of programs generated during program transformations, where conditional constructs may be introduced and subsequently found to produce identical results in both branches.
 
@@ -300,9 +300,22 @@ true on its completion}}.
 \]
 Here, $e$ denotes a program, and $P$ and $Q$ are logical propositions representing the precondition and postcondition, respectively. The intended meaning of such a triple is that, if execution of $e$ starts in a program state satisfying $P$, then every terminating execution of $e$ produces a state satisfying $Q$.
 
+A Hoare triple of the form \(\{P\}\, e \,\{\lambda v.\, Q(v)\}\) is referred to as a partial correctness specification. It is termed partial because, if the execution of \(e\) diverges, the triple imposes no additional constraints and does not assert any property about the non-terminating behavior. A stronger form is called a \textit{total correctness specification}, which asserts that whenever \(e\) is executed in a state satisfying \(P\), the execution of \(e\) is guaranteed to terminate and, upon termination, the postcondition \(Q\) holds. Since \(\lamBLL\) is a strongly normalizing calculus, we adopt the standard notation for partial correctness Hoare triples using curly braces. 
+
+Since \(Q\) is a predicate on values namely, on the value to which \(e\) evaluates, we write the Hoare triple \(\{P\}\, e \,\{\lambda v.\, Q(v)\}\), where \(v\) denotes the result of evaluating \(e\). When a postcondition does not depend on the value returned by the expression, we write $ \{P\}\, e \,\{\lambda \_.\, Q\}$ denoting that the result of the computation $e$ is ignored.
+
+Propositions used in Hoare triples are generated by the following grammar:
+\begin{align*}
+\Phi ::= \phi \mid \Phi \land \Phi \mid \Phi \lor \Phi
+\end{align*}
+where $\phi$ ranges over atomic first-order formulas such as $\true$, $\false$, $t_1 = t_2$, $t_1 \in t_2$, or $\mathtt{coherent}(t_1, t_2)$. These formulas constitute the assertion language of the logic, while semantic implication $\Phi \models \Psi$ is defined at the meta-level.
+
+Given a typing judgment of the form $\vdashtheta{c}\, e$, propositions are restricted to ground values that appear in $e$ or in $\Theta$, and possibly to the result of the computation $e$ when it has ground type.
+
 \begin{figure}[htpb]
 % \vspace*{-6mm}
 \begin{center} \footnotesize
+\scalebox{0.95}{
 \begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
     \inferrule* [right=\scriptsize \labelrule{h-eta}{rule:h-eta}]{\Gamma \vdashtheta{v} V: A}{\Gamma \vdashtheta{c} \{P[V/v]\}\,\return V \,\{\lambda v.P(v)\}: A}
     \and
@@ -324,25 +337,34 @@ Here, $e$ denotes a program, and $P$ and $Q$ are logical propositions representi
     \and
     \inferrule* [right=\scriptsize \labelrule{h-cons}{rule:h-cons}]{P' \models P \quad Q \models Q' \\ \Gamma \vdashtheta{c} \{P\}\, M \,\{\lambda v.Q(v)\}: A }{\Gamma \vdashtheta{c} \{P'\}\, M \,\{\lambda v.Q'(v)\} : A}
 \end{mathpar}
+}
 \end{center}
 % \vspace*{-6mm}
 \caption{Typing rules of $\lamBLL$ extended with Hoare Logic.}
 \label{fig:hl-typing-rules}
 \end{figure}
 
-A Hoare triple of the form \(\{P\}\, e \,\{\lambda v.\, Q(v)\}\) is referred to as a partial correctness specification. It is termed partial because, if the execution of \(e\) diverges, the triple imposes no additional constraints and does not assert any property about the non-terminating behavior. A stronger form is called a \textit{total correctness specification}, which asserts that whenever \(e\) is executed in a state satisfying \(P\), the execution of \(e\) is guaranteed to terminate and, upon termination, the postcondition \(Q\) holds. Since \(\lamBLL\) is a strongly normalizing calculus, we adopt the standard notation for partial correctness Hoare triples using curly braces. 
+Using the notion of Hoare triples, we introduce a new set of typing rules for $\lamBLL$, 
+presented in Figure~\ref{fig:hl-typing-rules}. These rules assign types to terms 
+while respecting linearity and resource constraints, and they extend $\lamBLL$ 
+with a simple Hoare logic. 
 
-Since \(Q\) is a predicate on values namely, on the value to which \(e\) evaluates, we write the Hoare triple \(\{P\}\, e \,\{\lambda v.\, Q(v)\}\), where \(v\) denotes the result of evaluating \(e\). When a postcondition does not depend on the value returned by the expression, we write $ \{P\}\, e \,\{\lambda \_.\, Q\}$ denoting that the result of the computation $e$ is ignored.
+Rules H-BANG, H-LAM, and H-APP introduce a notation that embeds logical assertions directly into types. In particular, rule H-BANG assigns the type $\bang_p^{P,Q} A$ to a term $M$ whenever $M$ satisfies the Hoare triple $\{P\}\, M \,\{\lambda v. Q(v)\}$. The typing context is scaled by the polynomial $p$, reflecting that $M$ may be reused a bounded number of times. Moreover, the entailment condition $Q \models P$ is required to ensure that the triple behaves as an invariant. After each execution of $M$, the resulting state still satisfies the precondition needed for subsequent executions. Thus, the type $\bang_p^{P,Q} A$ internalizes the fact that both the precondition $P$ and the postcondition $Q$ are preserved across the bounded replication of $M$.
 
-Propositions used in Hoare triples are generated by the following grammar:
-\begin{align*}
-\Phi ::= \phi \mid \Phi \land \Phi \mid \Phi \lor \Phi
-\end{align*}
-where $\phi$ ranges over atomic first-order formulas such as $\true$, $\false$, $t_1 = t_2$, $t_1 \in t_2$, or $\mathtt{coherent}(t_1, t_2)$. These formulas constitute the assertion language of the logic, while semantic implication $\Phi \models \Psi$ is defined at the meta-level.
+The abstraction rule H-LAM similarly embeds Hoare-style specifications into the function type $A \underset{P,Q}{\multimap} B$, where $P$ and $Q$ describe, respectively, the precondition required before the function is invoked and the postcondition guaranteed after its execution. This is complemented by the application rule H-APP, which checks that the calling context satisfies the required precondition. More precisely, the rule requires that the postcondition obtained from typing the function expression entails the precondition of the arrow type, expressed by the condition $Q \models R$.
 
-Given a typing judgment of the form $\vdashtheta{c}\, e$, propositions are restricted to ground values that appear in $e$ or in $\Theta$, and possibly to the result of the computation $e$ when it has ground type.
+The remaining rules correspond to standard constructs of the language, adapted to the Hoare-style typing discipline. 
 
-Using the notion of Hoare triples, we introduce a new set of typing rules for $\lamBLL$, presented in Figure~\ref{fig:hl-typing-rules}. These rules assign types to terms while respecting linearity and resource constraints, and they extend $\lamBLL$ with a simple Hoare logic.
+Rule H-ETA types the return of a value by constructing a trivial Hoare triple whose postcondition simply exposes the returned value. 
+
+Rules H-GET and H-SET handle interaction with the store. The rule H-GET reads the value of a reference $r$ from the store $\Theta$, producing a value that satisfies the postcondition specified by the assertion $P$. Similarly, H-SET updates the reference $r$ with a value $Z$, requiring the precondition to reflect the new value stored in $r$ and preserving the assertion $P$ after the update.
+
+Rule H-LET sequences two computations. The first computation $M$ is executed under precondition $P$ and produces a value satisfying $Q$. The value is then bound to $x$ and used in the second computation $N$, which proceeds under the corresponding precondition $Q(x)$.
+
+Rule H-CASE types conditional branching over boolean values. Depending on whether $Z$ evaluates to $\true$ or $\false$, the corresponding branch is executed, and both branches must establish the same postcondition.
+
+Rule H-CONS corresponds to the standard rule of consequence from Hoare logic.
+It allows weakening the precondition and strengthening the postcondition via logical entailment, ensuring that specifications can be adapted when typing a program.
 
 To relate the original definition of $\lamBLL$ with its extension equipped with Hoare logic, we define a translation from standard types to types decorated with propositions. Given a standard type~$A$ and an invariant~$P$, the lifting $\mu$ produces a decorated type in which~$P$ is threaded through every computation. The map $\mu$ is defined inductively as follows:
 \begin{align}
@@ -609,10 +631,10 @@ Although a full formal proof of soundness for the extensions is beyond the scope
 
 First, consider the equations for conditionals (Equations~\ref{ifTrue} and \ref{ifFalse}). These equations formalize the intuition that if a precondition $P$ logically entails the guard $b$ ($P\models b$), then the conditional expression is semantically equivalent to its $\mathtt{then}$ branch. From the perspective of denotational semantics, a program $\{P\}\, M \,\{Q\}$ denotes a function that maps an initial state satisfying $P$ to a distribution of final states satisfying $Q$. If $P\models b$, it means that for every possible state in the function's domain, the guard $b$ is guaranteed to evaluate to $\true$. Consequently, the meaning of the entire conditional coincides with the meaning of the branch $M$. The $\mathtt{else}$ branch $N$ becomes irrelevant because there is no state in $P$ that could ever trigger its execution. Similarly the same reasoning holds if $P \models \neg b$. By including the postcondition $Q$, the equation further asserts that this simplification preserves the program's postcondition, namely, if the original conditional was guaranteed to produce a result satisfying $Q$, the simplified branch $M$ must fulfill that same guarantee. 
 
-Equations~\ref{randF} and~\ref{ifConst} can be seen as more natural extensions of the equational theory developed in~\cite{lago2024computationalindistinguishabilitylogicalrelations} and summarized in Figure~\ref{fig:equations}.
+Equations~\ref{randF} and~\ref{ifConst} can be seen as more natural extensions of the equational theory developed in~\cite{lago2024-extended} and summarized in Figure~\ref{fig:equations}.
 
-In $\lamBLL$, the function symbol $\mathtt{random}$ is interpreted as sampling a bitstring $s \in \{0,1\}^i$ according to the uniform distribution. From the perspective of the distribution monad, the left-hand side of the equation denotes a distribution that produces $\true$ with probability $2^{-i}$, corresponding to the event that the sampled value $x$ coincides with the term $t$, and $\false$ with probability $1-2^{-i}$. Computational indistinguishability does not require programs to be identical, but only indistinguishable up to a negligible function. Since $2^{-i}$ is negligible in the security parameter $i$, no PPT adversary can distinguish this distribution from the constant computation $\return \false$ with more than negligible advantage. Within the logical metric framework of~\cite{lago2024computationalindistinguishabilitylogicalrelations}, the distance between these two terms is exactly $2^{-i}$, which is treated as zero in the asymptotic interpretation of the logic.
+In the semantic model of $\lamBLL$, computations denote functions from memory states to probability distributions over values and resulting states. The term $\random$ is interpreted as sampling uniformly from the set $\{0,1\}^i$. Consequently, the computation $\letin{x=\random}{\mathtt{eq}(x,t)}$ produces the value $\true$ exactly when the sampled bitstring coincides with $t$, which occurs with probability $2^{-i}$, and produces $\false$ otherwise. Its denotation is therefore the distribution assigning probability $2^{-i}$ to $\true$ and $1-2^{-i}$ to $\false$. On the other hand, the computation $\return \false$ denotes the Dirac distribution centered at $\false$. The logical metric underlying the indistinguishability relation measures the statistical distance between such distributions; in this case, the distance between the two denotations is exactly $2^{-i}$. Since $2^{-i}$ is negligible in the security parameter $i$, the two computations are related by the indistinguishability logical relation defined in~\cite{lago2024computationalindistinguishabilitylogicalrelations}. By the soundness of this relation with respect to contextual equivalence up to negligible distance, the two terms are contextually indistinguishable, which validates Equation~\ref{randF}.
 
-Correctness of Equation~\ref{ifConst} relies on the fact that in $\lamBLL$, the denotation of a computation is a function from memory states to distributions over results. If the boolean guard $b$ evaluates to $\true$, the term denotes $\return v$; if $b$ evaluates to $\false$, it again denotes $\return v$. Since both branches denote the same mathematical object, namely the Dirac distribution $\delta(v,e)$ centered on the value $v$ and the current state $e$, the entire conditional expression denotes that distribution regardless of the value of $b$. Unlike Equation~\ref{randF}, this is an exact equivalence, and the logical metric assigns distance $0$.
+A similar argument justifies Equation~\ref{ifConst}. In the denotational semantics of $\lamBLL$, a conditional computation $\ifthen{b}{M}{N}$ evaluates the guard $b$ and selects the denotation of either branch accordingly. In the case of Equation~\ref{ifConst}, both branches denote the same computation, namely $\return v$. The denotation of $\return v$ is the Dirac distribution centered at $v$ and the current memory state. Since both branches correspond to the same distribution, the conditional expression denotes that same distribution regardless of the value of the guard $b$. Consequently, the denotation of the entire conditional coincides exactly with the denotation of $\return v$. In contrast to Equation~\ref{randF}, this equivalence holds extensionally at the level of the denotational semantics, hence the two terms denote the same mathematical object. Therefore the logical metric assigns distance $0$ between them, and the equivalence follows directly from the soundness of the semantic interpretation.
 
 The typing system introduced in Figure~\ref{fig:hl-typing-rules} extends the original $\lamBLL$ type system with logical annotations in the style of Hoare logic, describing the preconditions and postconditions of computations. These annotations do not alter the operational behavior of programs, but rather make explicit the logical invariants of the program state. Equation~\ref{eq:mu} reflects this by mapping standard types into types decorated with a predicate $P$, threading the invariant through the computations. As demonstrated in Lemma~\ref{lemma:hoare-lifting}, any typing derivation from the original calculus can be lifted to this Hoare-decorated system, provided that the precondition concerns references not present in the reference context of the evaluated terms. From a semantic perspective, one would show that whenever a computation starts in a state satisfying the precondition, the resulting state satisfies the postcondition described by the Hoare triple. In this sense, the Hoare rules are sound because they track properties that are preserved by the semantic interpretation of the terms. A full proof of soundness could be obtained by extending the logical relations developed for $\lamBLL$, although as said, such a development lies beyond the scope of this work.
