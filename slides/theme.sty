@@ -1,0 +1,144 @@
+\ProvidesPackage{unibotheme}
+
+% color
+\definecolor{unibo-red}{RGB}{187, 46, 41}
+\definecolor{unibo-gray}{RGB}{83, 86, 90}
+
+\setbeamercolor{structure}{fg=unibo-red}
+
+\setbeamertemplate{navigation symbols}{}
+
+% \hypersetup{
+%     colorlinks=true,
+%     linkcolor=blue,
+%     citecolor=blue,
+%     urlcolor=blue
+% }
+
+\hypersetup{
+    colorlinks=true,
+    allcolors=unibo-red
+}
+
+\setbeamertemplate{caption}[numbered]
+
+% \usetheme[shadow=true]{Boadilla}
+% \usetheme{Madrid}
+% \usetheme{Montpellier}
+% \usetheme{Darmstadt}
+
+\usetheme[compress, subsection=false]{Singapore}
+
+% \usecolortheme{seahorse}
+% \usecolortheme{beaver}
+% \usecolortheme{beetle}
+% \usecolortheme{wolverine}
+
+\setbeamercolor{section in head/foot}{bg=white, fg=unibo-gray}
+\setbeamercolor{mini frame}{fg=white}
+\setbeamercolor{mini frame}{bg=white, fg=unibo-gray}
+
+% \setbeamertemplate{headline}{}
+% \makeatletter
+% \setbeamertemplate{footline}{%
+%   \begin{beamercolorbox}[wd=\paperwidth, ht=4ex, dp=2.5ex, center]{section in head/foot}
+%     \insertnavigation{\paperwidth}
+%   \end{beamercolorbox}%
+% }
+% \makeatother
+
+% dots in outline
+\setbeamertemplate{sections/subsections in toc}[circle]
+\setbeamertemplate{section in toc}[sections default]
+\setbeamertemplate{subsection in toc}[subsections default]
+\setbeamercolor{section number projected}{bg=unibo-red, fg=white}
+\setbeamercolor{subsection number projected}{bg=unibo-gray, fg=white}
+
+% blocks
+\setbeamercolor{block title theorem}{fg=white, bg=unibo-red!80}
+\setbeamercolor{block body theorem}{fg=black, bg=unibo-gray!10}
+
+\newcounter{constructioncount}[section]
+\renewcommand{\theconstructioncount}{\thesection.\arabic{constructioncount}}
+
+\newcounter{theoremcount}[section]
+\renewcommand{\thetheoremcount}{\thesection.\arabic{theoremcount}}
+
+\setbeamercolor{block title construction}{fg=white, bg=unibo-red!80}
+\setbeamercolor{block body construction}{fg=black, bg=unibo-gray!10}
+
+\newenvironment{unibotheorem}[1][]{%
+    \refstepcounter{theoremcount}% 
+    \par\vskip\medskipamount%
+    \begin{beamercolorbox}[wd=\textwidth, ht=2.5ex, dp=1ex, leftskip=0.5em]{block title theorem}
+        \usebeamerfont*{block title theorem}\textbf{Theorem:} #1%
+    \end{beamercolorbox}%
+    {\nointerlineskip\vskip-0.5pt}%
+    % Body Box (Slightly Gray)
+    \usebeamerfont{block body theorem}%
+    \begin{beamercolorbox}[wd=\textwidth, sep=0.5em, vmode]{block body theorem}%
+        \setbeamercolor{itemize item}{fg=unibo-red}%
+        \setbeamercolor{itemize subitem}{fg=unibo-red}%
+        \itshape
+}{%
+    \end{beamercolorbox}\vskip\smallskipamount%
+}
+
+\newenvironment{construction}[1][]{
+    \refstepcounter{constructioncount}
+    \par\vskip\medskipamount%
+    \begin{beamercolorbox}[wd=\textwidth, ht=2.5ex, dp=1ex, leftskip=0.5em]{block title construction}
+    \usebeamerfont*{block title construction}\textbf{Construction:} #1%
+    \end{beamercolorbox}%
+    {\nointerlineskip\vskip-0.5pt}%
+    \usebeamerfont{block body construction}%
+    \begin{beamercolorbox}[wd=\textwidth, sep=0.5em, vmode]{block body construction}%
+    \setbeamercolor{itemize item}{fg=unibo-red}%
+    \setbeamercolor{itemize subitem}{fg=unibo-red}%
+}{%
+  \end{beamercolorbox}\vskip\smallskipamount%
+}
+
+% \useoutertheme{infolines}
+
+% \setbeamercolor*{block title}{fg=unibo-red}
+% \setbeamercolor*{block title example}{fg=unibo-gray}
+
+% This changes the three segments in the footer/header (right, middle, left)
+% \setbeamercolor*{palette primary}{fg=unibo-red}
+% \setbeamercolor*{palette secondary}{fg=unibo-red}
+% \setbeamercolor*{palette tertiary}{fg=unibo-red}
+
+% \setbeamercolor{frametitle}{fg=unibo-red}
+% \setbeamercolor{titlelike}{fg=unibo-red}
+% \setbeamercolor{title}{fg=UniBoRed}
+% % \setbeamercolor{section in toc}{fg=UniBoRed}
+% % \setbeamercolor{item}{fg=UniBoRed}
+
+% \usecolortheme{lily}
+
+% notes
+\setbeameroption{show notes=bottom}
+% \setbeameroption{show notes on second screen=bottom}
+
+% font
+\usefonttheme{professionalfonts}
+\usefonttheme[stillsansserifmath]{serif}
+\renewcommand{\footnotesize}{\scriptsize}
+
+% \useinnertheme{default}
+
+% \AtBeginSection[]{
+%   \begin{frame}
+%   \vfill
+%   \centering
+%   \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+%     \usebeamerfont{title}\insertsectionhead\par%
+%   \end{beamercolorbox}
+%   \vfill
+%   \end{frame}
+% }
+
+\setbeamertemplate{itemize item}{\scriptsize\raise1.25pt\hbox{\donotcoloroutermaths$\blacktriangleright$}}
+\setbeamertemplate{itemize subitem}{$\bullet$}
+\setbeamertemplate{itemize subsubitem}{--}

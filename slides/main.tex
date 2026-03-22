@@ -1,0 +1,377 @@
+\documentclass{beamer}[aspectratio=169]
+
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows,arrows.meta,positioning}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{mathpartir}
+\usepackage{adjustbox}
+
+\usepackage[style=authoryear, backend=biber]{biblatex}
+\addbibresource{refs.bib}
+
+\usepackage[]{hyperref}
+\usepackage{theme}
+
+\newcommand{\lamBLL}{{\lambda}\mathbf{BLL}}
+
+\title{On Proving the Security of \\ 
+Message Authentication Codes \\ 
+Using \texorpdfstring{$\lamBLL$}{lambda-BLL} and Hoare Logic}
+% \subtitle{Subtitle}
+\author[Michele Dinelli]
+{Michele Dinelli\inst{1} \texorpdfstring{\\[2ex]}{\and} \small{Supervisor: Prof.~Ugo Dal Lago\inst{1} \texorpdfstring{\\}{\and} Co-Supervisor: Dr.~Rémy Cerda \inst{1}}}
+\institute[] 
+{
+  \inst{1}%
+  Department of Computer Science and Engineering \\
+  University of Bologna
+}
+\date{\small{\today}}
+
+\begin{document}
+
+\input{macros}
+
+\begin{frame}[plain]
+    \titlepage
+\end{frame}
+
+\begin{frame}[plain]
+    \frametitle{Outline}
+    % \tableofcontents[pausesections]
+    \tableofcontents
+\end{frame}
+
+\section{Motivation}
+
+\begin{frame}{Cryptography: Symbolic vs Computational Model}
+    \begin{itemize}
+        \setlength\itemsep{.7em}
+        \item \textbf{Symbolic Model} \footcite{on-the-security-of-pk-protocols}
+        \begin{itemize}
+            \setlength\itemsep{.7em}
+            \item Treats cryptographic primitives as \textbf{black-box} operations.
+            \item Enables \textbf{automated}, scalable verification of security protocols. Many formal tools have been developed \footcite{tamarin, xin2024deepseekproveradvancingtheoremproving, Abadi2007SecurityPP}.
+        \end{itemize}
+        \item<2-> \textbf{Computational Model} \footcite{compuational-complexity, introduction-to-modern-cryptography}
+        \begin{itemize}
+            \setlength\itemsep{.7em}
+            \item Adveraries are Probabilistic Polynomial-Time Turing Machines (\textbf{PPTM}).
+            \item Keys, messages and ciphertexts are \textbf{bitstrings} and cryptographic operations are functions on bitstrings.
+            \item Security properties are defined in terms of the \textbf{probability} and \textbf{computational complexity} of the attackers.
+        \end{itemize}
+    \end{itemize}
+
+    % \begin{itemize}
+    %     \item Cryptographic proofs are usually reduction-based.
+    %     \begin{align*}
+    %         P \implies& Q \\
+    %         \ArrowBetweenLines[\Updownarrow]
+    %         \neg\,Q \implies& \neg\,P
+    %     \end{align*}
+    %     \item Doing these proofs by hand is error-prone. 
+    %     \item Formalizing them is hard.
+    %     % \item Existing tools struggle to enforce these bounds and handle higher-order logic.
+    % \end{itemize}
+    % \note{
+    %     \begin{enumerate}
+    %         \item Proofs by contradiction using the contrapositive.
+    %         \item Formalizing them is hard because they involve probabilistic reasoning, adversarial interaction, and strict polynomial time resource bounds.
+    %     \end{enumerate}
+    % }
+\end{frame}
+
+\begin{frame}{The Formalization Challenge}
+    \begin{itemize}
+        \setlength\itemsep{.7em}
+        \item \textbf{Symbolic Model}
+        \begin{itemize}
+            \setlength\itemsep{.7em}
+            \item The application of classic verification methodologies in the symbolic model is \textbf{natural}.
+            % The symbolic model does not account for complexity nor for probability, the application of classic verification methodologies is natural.
+        \end{itemize}
+        
+        \item \textbf{Computational Model}
+        \begin{itemize}
+            \setlength\itemsep{.7em}
+            \item Involve probabilities, adversarial interaction and explicit reasoning about resource bounds and computational efficiency.
+            \item<2-> It is \textbf{harder}!
+            \item<3-> But still formal tools exist: EasyCrypt, Squirrel and CryptoVerif~\footcite{easy-crypy-a-tutorial, a-computationally-sound-automatic-prover-for-cryptographic-protocols,the-squirrel-prover-and-its-logic}.
+        \end{itemize}
+    \end{itemize}
+    % Managing complexity aspects and higher-order functions at the same time is hard. But higher-order reasoning is important for modeling cryptographic experiments
+    % Explicit reasoning on higher-order functions is important to resason about the binding between adversaries and different oracles for example.
+\end{frame}
+
+\section{Background}
+
+\begin{frame}{$\lamBLL$\footcite{lago2024computationalindistinguishabilitylogicalrelations}}
+    \begin{figure}[h]
+	\begin{adjustbox}{minipage=\linewidth,scale=.9}
+		\centering 
+		\vspace*{-5mm}
+		\begin{align*}
+			& \textbf{Polynomials} \; && p ::= 1 \mid i \mid p + p \mid p\times p \\ \\
+			&\textbf{Ground types}  && G ::= \UU \mid \BB \mid \SS[p] \\
+			&\textbf{Positive types} \; && P ::= G \mid P \otimes P \mid \bang_p^{\Theta} A \\
+			&\textbf{Types} \; && A ::= P \mid P \arrowRef{\Theta} A \\ \\
+			&\textbf{Variable contexts} && \Gamma ::= \varnothing \mid x :P, \Gamma \\
+			&\textbf{Reference contexts} && \Theta ::= \varnothing \mid r : G , \Theta
+		\end{align*}
+		\vspace*{-0.5cm}
+	\end{adjustbox}
+	\caption{Syntax of $\lamBLL$}
+	\label{fig:syntax}
+\end{figure}
+\end{frame}
+
+\begin{frame}{$\lamBLL$}
+
+\begin{itemize}
+    \item Polynomials index resources, they \textbf{bound} input sizes, number of oracle queries, and overall runtime as functions of the security parameter $i$.
+    \item Supports references, probabilistic choice and captures the complexity constraints through a graded modality.
+    \item PPT adversaries modelled as \textbf{higher-order} terms with oracle access:
+    \[
+    \vdash_c^\varnothing Adv: \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap (\SS[i] \otimes \SS[i])
+    \]
+    \item Security proofs become \emph{equational reasoning} between $\lamBLL$ terms via logical relations.
+    \begin{align*}
+	\return{} \false \sim \letin{y = M}{\letin{x= \random}{\mathtt{eq}(x,y)}}
+    \end{align*}
+    % The logical metric is approximate and therefore manages to capture programs that do not behave exactly the same way.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Message Authentication Codes (MAC)}
+MAC is a triple $\Pi = (Gen, Mac, \vrfy)$ of PPT algorithms such that:
+\begin{construction}[PRF-Induced MAC]\label{construction:prf-mac}
+    \begin{itemize}
+        \item $Gen$ takes as input the security parameter $1^n$ and outputs a secret key $k$;
+        \item<2-> $Mac$ takes as input a key $k$ and a message $m$, and outputs a tag $F_k(m)=t$, where $F$ is a pseudorandom function;
+        \item<3-> $\vrfy$ takes as input a key $k$, a message $m$, and a tag $t$, and outputs a bit $b$, with $b = 1$ meaning valid and $b = 0$ meaning invalid.
+        \begin{align*}
+            \vrfy_k(m,Mac_k(m))=1
+        \end{align*}
+    \end{itemize}
+\end{construction}
+\end{frame}
+
+\begin{frame}{$\mathtt{MacForge}$ Experiment}
+\begin{figure}[htpb]
+    \centering
+    \begin{align*}
+    &\macforge(n): \\
+    &\quad k \gets Gen(1^n) \\
+    &\quad (m,t) \gets A^{Mac_k(\cdot)}(1^n) \\
+    &\quad \mathbb{Q} \gets \{m \ | \ A \ \text{queries} \ Mac_k(m) \} \\
+    &\quad \mathtt{return}\,\,(m \notin \mathbb{Q} \land \vrfy_k(m,t) = 1)
+    \end{align*}
+    \caption{Pseudocode for $\mathtt{MacForge}$ experiment.}
+    \label{fig:macforge}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Security Proof of MAC}
+    \begin{unibotheorem}[MAC Security]
+         A MAC $\Pi$ is secure if for all PPT adversaries $A$, there is a negligible function $\epsilon$ such that:
+        \begin{align*}
+            \mathrm{Pr}\bigl[ \macforge(n) = 1 \bigr] \leq \epsilon(n)
+        \end{align*}
+    \end{unibotheorem}
+    \begin{unibotheorem}[PRF-Induced MAC Security]
+    If $F$ is a pseudorandom function, then Construction~\ref{construction:prf-mac} is a secure fixed-length MAC for messages of length n.
+    \end{unibotheorem}
+\end{frame}
+
+\begin{frame}{Security Proof of MAC}
+    Let $\widetilde{\Pi}$ be an idealized scheme using a truly random function and $D$ a distinguisher that runs $A$ as subroutine.
+    \begin{figure}[htpb]
+	\centering
+	\begin{tikzpicture}[xscale=1.6, yscale=1.8]
+		\node at (0,0) {$\epsilon(n)$};
+
+		\node[rotate=45] (A) at (-.55,-0.3) {$\not\leq$};
+		\node[rotate=-45] at (.55,-0.3) {$\geq$};
+
+		\node at (-2,-1) {$\mathrm{Pr}[\mathtt{MacForge}_{A,\Pi_F}(n) = 1]$};
+		\node at (2,-1) {$\mathrm{Pr}[\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1]$};
+
+		\node[rotate=90] at (-2,-1.4) {$=$};
+		\node[rotate=90] at (2,-1.4) {$=$};
+
+		\node at (-2,-1.8) {$\mathrm{Pr}[D_A^{F_k(\cdot)}(1^n) = 1]$};
+		\node at (2,-1.8) {$\mathrm{Pr}[D_A^{f(\cdot)}(1^n) = 1]$};
+
+		\node (B) at (0,-1.8) {$|\Delta| \geq \epsilon(n)$};
+
+		\draw[-{Implies},double] (A) to (B);
+	\end{tikzpicture}
+	\caption{Outline Proof of Security for $\mathtt{MacForge}$.}
+	\label{fig:proofscheme}
+    \end{figure}
+\end{frame}
+
+\section{Formalization of MAC Security in \texorpdfstring{$\lamBLL$}{Lambda-BLL}}
+
+\begin{frame}{Hoare Logic}
+    \begin{figure}
+        \begin{align*}
+         &\textbf{Propositions} &&\Phi ::= \phi \mid \Phi \land \Phi \mid \Phi \lor \Phi \\
+         &\textbf{Hoare Triples} &&\{P\}\, e \,\{Q\} \\ \\
+         &\textbf{Lifting} && \mu(A, P) := \mu(\UU, P) = \UU \mid \mu(\BB, P) = \BB \\
+         & &&\mid \mu(\SS[p], P) = \SS[p] \\
+         & &&\mid \mu(A \otimes B, P) = \mu(A, P) \otimes \mu(B, P) \\
+         & &&\mid \mu(\bang_q A, P) = \bang_q^{P,P} \mu(A, P) \\
+         & &&\mid\mu(A \multimap B, P) = \mu(A, P) \underset{P, \lambda x.P}{\multimap} \mu(B, P)
+        \end{align*}
+        \caption{Hoare Logic extension in $\lamBLL$.}
+        \label{fig:placeholder}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Hoare Logic}
+    \begin{center} \scriptsize
+    \begin{mathpar}\mprset{sep=1em,  vskip =-0.1ex}
+     \inferrule* [right=\scriptsize \labelrule{h-get}{rule:h-get}]{r:G\in \Theta}{\Gamma \vdashtheta{c} \{P(r)\}\,\get r \,\{\lambda x.P(x)\}: G}
+    \quad
+    \inferrule* [right=\scriptsize \labelrule{h-set}{rule:h-set}]{\Gamma \vdashtheta{v} Z: G \\ r:G\in \Theta}{ \Gamma \vdashtheta{c} \{P[Z/r]\}\, \setr{r}{Z} \,\{P\}: \UU }
+    \and
+    \inferrule* [right=\scriptsize \labelrule{h-bang}{rule:h-bang}]{ \Gamma \vdashtheta{c} \{P\} M \{\lambda v. Q(v)\}: A \\ Q \models P}{ p \ast \Gamma \vdashtheta{v} \bang M: \bang_p^{P, Q} A}
+    \and
+    \inferrule* [right=\scriptsize \labelrule{h-app}{rule:h-app}]{ \Gamma \vdashtheta{c} \{P\} M \{\lambda f. Q(f)\} : A \underset{R, S}{\multimap} B \\ \Delta \vdashtheta{v} Z : A \\ Q \models R }{ \Gamma \boxplus \Delta \vdashtheta{c} \{P\} \, MZ \, \{\lambda v. S(v)\} : B }
+    \and
+    \inferrule* [right=\scriptsize \labelrule{h-let}{rule:h-let}]{\Gamma \vdashtheta{c} \{P\}\, M \,\{\lambda v.Q(v)\}:A \\ \Delta, x:A \vdashtheta{c} \{Q(x)\}\, N \,\{S\}: B}{\Gamma \boxplus \Delta \vdashtheta{c} \{P\}\, \letin{x=M}{N} \,\{S\}: B}
+    \and
+    \inferrule* [right=\scriptsize \labelrule{h-cons}{rule:h-cons}]{P' \models P \quad Q \models Q' \\ \Gamma \vdashtheta{c} \{P\}\, M \,\{\lambda v.Q(v)\}: A }{\Gamma \vdashtheta{c} \{P'\}\, M \,\{\lambda v.Q'(v)\} : A}
+    \end{mathpar}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Security Proof of MAC in $\lamBLL$}
+    \begin{figure}[htpb]
+	\centering
+	\begin{tikzpicture}[xscale=1.6, yscale=1.8]
+		\node at (0,0) {$\false$};
+
+		\node[rotate=45]  (A) at (-1,-0.5) {$\not\sim_{\Xi\subseteq\Upsilon}$};
+		\node[rotate=-45] at (1,-0.5) {$\sim_{\Xi\subseteq\Upsilon}$};
+
+		\node at (-2,-1) {$\mathit{MacForge}^F$};
+		\node at (2,-1) {$\widetilde{\mathit{MacForge}}$};
+
+		\node[rotate=90] at (-2,-1.6) {$\sim_{\Xi\subseteq\Upsilon}$};
+		\node[rotate=90] at (2,-1.6) {$\sim_{\Xi\subseteq\Upsilon}$};
+
+		\node at (-2,-2.2) {$D^F$};
+		\node at (2,-2.2) {$\widetilde{D}$};
+
+		\node (B) at (0,-2.2) {$\not\sim_{\Xi\subseteq\Upsilon}$};
+
+		\draw[-{Implies},double] (A) to (B);
+	\end{tikzpicture}
+	\caption{Outline Proof of Security for $\mathtt{MacForge}$ in $\lamBLL$.}
+	\label{fig:proofscheme-lam-bll}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Formalization of MAC Security in $\lamBLL$}
+    \begin{align*}
+    &\widetilde{MacForge} \triangleq \\
+    &\quad\letin{k = \widetilde{Gen} \star}{} \\
+    &\quad\letin{o = \widetilde{Oracle}\, k}{} \\
+    &\quad\letin{\lis{m,tag} = Adv\, o}{} \\
+    &\quad\letin{queries = \get Q}{} \\
+    &\quad\letin{c=\mathtt{contains}(queries, m)}{} \\
+    &\quad\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
+    &\quad\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,tag)}
+    \end{align*}
+    % &\quad\color{blue} \{\, c = \false \,\} \onslide<2-> \\
+\end{frame}
+
+\begin{frame}{The Role of Assertions}
+    \scriptsize
+    \begin{align*}
+        &\letin{k = \widetilde{Gen} \star}{} \\
+        &\dots \\
+        &\letin{c=\mathtt{contains}(queries, m)}{} \\
+        & \mathtt{if}\, c\, \mathtt{then}\, \return \false\\
+        &\mathtt{else} \\
+        &\quad\letin{q=\get Q}{} \\
+        &\quad\letin{t=\mathtt{contains}(q,m)}{} \\
+        &\quad \uncover<2->{\color{blue} \{ t = \false \}} \\ % Appears on slide 2, stays on 2+
+        &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then}\,\mathtt{set}\,Q\;\mathtt{modifyQ}(q, m) \\
+        &\quad \mathtt{else}\,\mathtt{skip}; \\
+        &\dots
+    \end{align*}
+\end{frame}
+
+\begin{frame}{The Role of Assertions}
+    \scriptsize
+    \begin{align*}
+    &\letin{k = \widetilde{Gen} \star}{} \\
+    &\dots \\
+    &\mathtt{else} \\
+    &\dots \\
+    &\quad\letin{tab = \mathtt{get}\,rand}{} \\
+    &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+    &\quad  \uncover<2->{\color{blue} \{ b = \false \}} \\
+    &\quad\mathtt{if}\, b\, \mathtt{then} \\
+    &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+    &\quad\quad \mathtt{eq}(x,tag) \\
+    &\quad\mathtt{else} \\
+    &\dots
+    \end{align*}
+\end{frame}
+
+\begin{frame}{Conclusion of the Proof}
+    \scriptsize
+    \begin{align*}
+    \begin{aligned}
+        &\letin{\lis{m,tag} = Adv\,O}{} \\
+        &\letin{queries = \get Q}{} \\
+        &\letin{c=\mathtt{contains}(queries, m)}{} \\
+        & \mathtt{if}\, c\, \mathtt{then} \, \return \false \\
+        &\mathtt{else} \\
+        &\quad \letin{x = \random}{} \\
+        &\quad \mathtt{eq}(x,tag)
+    \end{aligned}
+    \quad\underset{\text{randF}}{\simcontext}\quad
+    \begin{aligned}
+        &\letin{\lis{m,tag} = Adv\,O}{} \\
+        &\letin{queries = \get Q}{} \\
+        &\letin{c=\mathtt{contains}(queries, m)}{} \\
+        & \mathtt{if}\, c\, \mathtt{then} \, \return \false \\
+        &\mathtt{else} \, \return \false
+    \end{aligned}
+    \end{align*}
+\end{frame}
+
+\section{Conclusions}
+
+\begin{frame}{Conclusions}
+\begin{itemize}
+    \item $\lamBLL$ is a higher order calculus with probabilistic effects and references. A powerful formal framework in the computational model. 
+    \item Hoare extension enables reasoning about state and invariants.
+    \item MAC security proof have been carried out in a purely \textbf{equational} way with the help of assertions and an extended type systems.
+\end{itemize}
+
+\textbf{Future work}
+\begin{itemize}
+    \item Formalize the soundness of the Hoare extension.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks, plain]{References}
+    \printbibliography
+\end{frame}
+% \begin{frame}[allowframebreaks, plain]
+%     \frametitle{References}
+%     \bibliographystyle{alpha}
+%     % \bibliographystyle{abbrv}
+%     \bibliography{refs.bib}
+% \end{frame}
+
+\end{document}

@@ -1,4 +1,4 @@
-name: compile and publish
+name: Compile and Publish
 
 on:
   push:
@@ -11,9 +11,11 @@ permissions:
   id-token: write
 
 jobs:
-  compile:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,32 +30,36 @@ jobs:
         uses: xu-cheng/latex-action@v4
         with:
           root_file: main.tex
-          working_directory: .
+
+      - name: Compile slides
+        uses: xu-cheng/latex-action@v4
+        with:
+          root_file: main.tex
+          working_directory: ./slides
 
       - name: Install pdftk
         run: sudo apt-get update && sudo apt-get install -y pdftk-java
 
-      - name: Concatenate title page and main document
+      - name: Prepare Public Folder
         run: |
-          pdftk titlepage/front.pdf main.pdf cat output thesis.pdf
+          mkdir -p public
+          pdftk titlepage/front.pdf main.pdf cat output public/thesis.pdf
+          cp slides/main.pdf public/presentation-slides.pdf
 
-      - name: Prepare artifact directory
-        run: |
-          mkdir artfact-out
-          mv thesis.pdf artfact-out/
+      - name: Generate Directory Index
+        uses: gacts/directory-listing@v1
+        with:
+          target: ./public
 
-      - name: Upload as artifact
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: artfact-out
+          path: ./public
 
-  publish:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: compile
-    steps:
-      - name: Publish to ghp
+      - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
