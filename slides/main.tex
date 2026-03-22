@@ -9,8 +9,8 @@
 \usepackage{mathpartir}
 \usepackage{adjustbox}
 
-\usepackage[style=authoryear, backend=biber]{biblatex}
-\addbibresource{refs.bib}
+% \usepackage[style=authoryear, backend=biber]{biblatex}
+% \addbibresource{refs.bib}
 
 \usepackage[]{hyperref}
 \usepackage{theme}
@@ -50,13 +50,13 @@ Using \texorpdfstring{$\lamBLL$}{lambda-BLL} and Hoare Logic}
 \begin{frame}{Cryptography: Symbolic vs Computational Model}
     \begin{itemize}
         \setlength\itemsep{.7em}
-        \item \textbf{Symbolic Model} \footcite{on-the-security-of-pk-protocols}
+        \item \textbf{Symbolic Model} \cite{on-the-security-of-pk-protocols}
         \begin{itemize}
             \setlength\itemsep{.7em}
             \item Treats cryptographic primitives as \textbf{black-box} operations.
-            \item Enables \textbf{automated}, scalable verification of security protocols. Many formal tools have been developed \footcite{tamarin, xin2024deepseekproveradvancingtheoremproving, Abadi2007SecurityPP}.
+            \item Enables \textbf{automated}, scalable verification of security protocols. Many formal tools have been developed \cite{tamarin, xin2024deepseekproveradvancingtheoremproving, Abadi2007SecurityPP}.
         \end{itemize}
-        \item<2-> \textbf{Computational Model} \footcite{compuational-complexity, introduction-to-modern-cryptography}
+        \item<2-> \textbf{Computational Model} \cite{compuational-complexity, introduction-to-modern-cryptography}
         \begin{itemize}
             \setlength\itemsep{.7em}
             \item Adveraries are Probabilistic Polynomial-Time Turing Machines (\textbf{PPTM}).
@@ -79,7 +79,7 @@ Using \texorpdfstring{$\lamBLL$}{lambda-BLL} and Hoare Logic}
     % \note{
     %     \begin{enumerate}
     %         \item Proofs by contradiction using the contrapositive.
-    %         \item Formalizing them is hard because they involve probabilistic reasoning, adversarial interaction, and strict polynomial time resource bounds.
+    %         \item Formalizing them is hard because they involve probabilistic reasoning, adversarial interaction and strict polynomial time resource bounds.
     %     \end{enumerate}
     % }
 \end{frame}
@@ -99,7 +99,7 @@ Using \texorpdfstring{$\lamBLL$}{lambda-BLL} and Hoare Logic}
             \setlength\itemsep{.7em}
             \item Involve probabilities, adversarial interaction and explicit reasoning about resource bounds and computational efficiency.
             \item<2-> It is \textbf{harder}!
-            \item<3-> But still formal tools exist: EasyCrypt, Squirrel and CryptoVerif~\footcite{easy-crypy-a-tutorial, a-computationally-sound-automatic-prover-for-cryptographic-protocols,the-squirrel-prover-and-its-logic}.
+            \item<3-> But still formal tools exist: EasyCrypt, Squirrel and CryptoVerif~\cite{easy-crypy-a-tutorial, a-computationally-sound-automatic-prover-for-cryptographic-protocols,the-squirrel-prover-and-its-logic}.
         \end{itemize}
     \end{itemize}
     % Managing complexity aspects and higher-order functions at the same time is hard. But higher-order reasoning is important for modeling cryptographic experiments
@@ -108,7 +108,7 @@ Using \texorpdfstring{$\lamBLL$}{lambda-BLL} and Hoare Logic}
 
 \section{Background}
 
-\begin{frame}{$\lamBLL$\footcite{lago2024computationalindistinguishabilitylogicalrelations}}
+\begin{frame}{$\lamBLL$}
     \begin{figure}[h]
 	\begin{adjustbox}{minipage=\linewidth,scale=.9}
 		\centering 
@@ -123,15 +123,14 @@ Using \texorpdfstring{$\lamBLL$}{lambda-BLL} and Hoare Logic}
 		\end{align*}
 		\vspace*{-0.5cm}
 	\end{adjustbox}
-	\caption{Syntax of $\lamBLL$}
+	\caption{Syntax of $\lamBLL$ \cite{lago2024computationalindistinguishabilitylogicalrelations}.}
 	\label{fig:syntax}
 \end{figure}
 \end{frame}
 
 \begin{frame}{$\lamBLL$}
-
 \begin{itemize}
-    \item Polynomials index resources, they \textbf{bound} input sizes, number of oracle queries, and overall runtime as functions of the security parameter $i$.
+    \item Polynomials index resources, they \textbf{bound} input sizes, number of oracle queries and overall runtime as functions of the security parameter $i$.
     \item Supports references, probabilistic choice and captures the complexity constraints through a graded modality.
     \item PPT adversaries modelled as \textbf{higher-order} terms with oracle access:
     \[
@@ -150,8 +149,8 @@ MAC is a triple $\Pi = (Gen, Mac, \vrfy)$ of PPT algorithms such that:
 \begin{construction}[PRF-Induced MAC]\label{construction:prf-mac}
     \begin{itemize}
         \item $Gen$ takes as input the security parameter $1^n$ and outputs a secret key $k$;
-        \item<2-> $Mac$ takes as input a key $k$ and a message $m$, and outputs a tag $F_k(m)=t$, where $F$ is a pseudorandom function;
-        \item<3-> $\vrfy$ takes as input a key $k$, a message $m$, and a tag $t$, and outputs a bit $b$, with $b = 1$ meaning valid and $b = 0$ meaning invalid.
+        \item<2-> $Mac$ takes as input a key $k$ and a message $m$ and outputs a tag $F_k(m)=t$, where $F$ is a pseudorandom function;
+        \item<3-> $\vrfy$ takes as input a key $k$, a message $m$ and a tag $t$ and outputs a bit $b$, with $b = 1$ meaning valid and $b = 0$ meaning invalid.
         \begin{align*}
             \vrfy_k(m,Mac_k(m))=1
         \end{align*}
@@ -188,7 +187,7 @@ MAC is a triple $\Pi = (Gen, Mac, \vrfy)$ of PPT algorithms such that:
 
 \begin{frame}{Security Proof of MAC}
     Let $\widetilde{\Pi}$ be an idealized scheme using a truly random function and $D$ a distinguisher that runs $A$ as subroutine.
-    \begin{figure}[htpb]
+    \uncover<2->{\begin{figure}[htpb]
 	\centering
 	\begin{tikzpicture}[xscale=1.6, yscale=1.8]
 		\node at (0,0) {$\epsilon(n)$};
@@ -211,7 +210,7 @@ MAC is a triple $\Pi = (Gen, Mac, \vrfy)$ of PPT algorithms such that:
 	\end{tikzpicture}
 	\caption{Outline Proof of Security for $\mathtt{MacForge}$.}
 	\label{fig:proofscheme}
-    \end{figure}
+    \end{figure}}
 \end{frame}
 
 \section{Formalization of MAC Security in \texorpdfstring{$\lamBLL$}{Lambda-BLL}}
@@ -288,7 +287,6 @@ MAC is a triple $\Pi = (Gen, Mac, \vrfy)$ of PPT algorithms such that:
     &\quad\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
     &\quad\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,tag)}
     \end{align*}
-    % &\quad\color{blue} \{\, c = \false \,\} \onslide<2-> \\
 \end{frame}
 
 \begin{frame}{The Role of Assertions}
@@ -296,6 +294,7 @@ MAC is a triple $\Pi = (Gen, Mac, \vrfy)$ of PPT algorithms such that:
     \begin{align*}
         &\letin{k = \widetilde{Gen} \star}{} \\
         &\dots \\
+        &\letin{queries = \get Q}{} \\
         &\letin{c=\mathtt{contains}(queries, m)}{} \\
         & \mathtt{if}\, c\, \mathtt{then}\, \return \false\\
         &\mathtt{else} \\
@@ -313,6 +312,8 @@ MAC is a triple $\Pi = (Gen, Mac, \vrfy)$ of PPT algorithms such that:
     \begin{align*}
     &\letin{k = \widetilde{Gen} \star}{} \\
     &\dots \\
+    &\letin{queries = \get Q}{} \\
+    & \mathtt{if}\, c\, \mathtt{then}\, \return \false\\
     &\mathtt{else} \\
     &\dots \\
     &\quad\letin{tab = \mathtt{get}\,rand}{} \\
@@ -364,14 +365,14 @@ MAC is a triple $\Pi = (Gen, Mac, \vrfy)$ of PPT algorithms such that:
 \end{itemize}
 \end{frame}
 
-\begin{frame}[allowframebreaks, plain]{References}
-    \printbibliography
-\end{frame}
-% \begin{frame}[allowframebreaks, plain]
-%     \frametitle{References}
-%     \bibliographystyle{alpha}
-%     % \bibliographystyle{abbrv}
-%     \bibliography{refs.bib}
+% \begin{frame}[allowframebreaks, plain]{References}
+%     \printbibliography
 % \end{frame}
+\begin{frame}[allowframebreaks, plain]
+    \frametitle{References}
+    \bibliographystyle{ieeetr}
+    % \bibliographystyle{abbrv}
+    \bibliography{refs.bib}
+\end{frame}
 
 \end{document}
