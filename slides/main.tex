@@ -2,7 +2,7 @@
 
 \usepackage{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{arrows,arrows.meta,positioning}
+\usetikzlibrary{arrows,arrows.meta,positioning, shapes.geometric, fit}
 \usepackage{mathtools}
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -22,7 +22,7 @@ Message Authentication Codes \\
 Using \texorpdfstring{$\lamBLL$}{lambda-BLL} and Hoare Logic}
 % \subtitle{Subtitle}
 \author[Michele Dinelli]
-{Michele Dinelli\inst{1} \texorpdfstring{\\[2ex]}{\and} \small{Supervisor: Prof.~Ugo Dal Lago\inst{1} \texorpdfstring{\\}{\and} Co-Supervisor: Dr.~Rémy Cerda \inst{1}}}
+{Michele Dinelli \texorpdfstring{\\[2ex]}{\and} \small{Supervisor: Prof.~Ugo Dal Lago\inst{1} \texorpdfstring{\\}{\and} Co-Supervisor: Dr.~Rémy Cerda \inst{1}}}
 \institute[] 
 {
   \inst{1}%
@@ -50,38 +50,20 @@ Using \texorpdfstring{$\lamBLL$}{lambda-BLL} and Hoare Logic}
 \begin{frame}{Cryptography: Symbolic vs Computational Model}
     \begin{itemize}
         \setlength\itemsep{.7em}
-        \item \textbf{Symbolic Model} \cite{on-the-security-of-pk-protocols}
+        \item \textbf{Symbolic Model}
         \begin{itemize}
             \setlength\itemsep{.7em}
             \item Treats cryptographic primitives as \textbf{black-box} operations.
-            \item Enables \textbf{automated}, scalable verification of security protocols. Many formal tools have been developed \cite{tamarin, xin2024deepseekproveradvancingtheoremproving, Abadi2007SecurityPP}.
+            \item Enables \textbf{automated}, scalable verification of security protocols. Many formal tools have been developed.
         \end{itemize}
-        \item<2-> \textbf{Computational Model} \cite{compuational-complexity, introduction-to-modern-cryptography}
+        \item<2-> \textbf{Computational Model}
         \begin{itemize}
             \setlength\itemsep{.7em}
             \item Adveraries are Probabilistic Polynomial-Time Turing Machines (\textbf{PPTM}).
-            \item Keys, messages and ciphertexts are \textbf{bitstrings} and cryptographic operations are functions on bitstrings.
+            \item Keys, messages and ciphertexts are \textbf{bitstrings} and cryptographic operations are \textbf{random} functions on bitstrings.
             \item Security properties are defined in terms of the \textbf{probability} and \textbf{computational complexity} of the attackers.
         \end{itemize}
     \end{itemize}
-
-    % \begin{itemize}
-    %     \item Cryptographic proofs are usually reduction-based.
-    %     \begin{align*}
-    %         P \implies& Q \\
-    %         \ArrowBetweenLines[\Updownarrow]
-    %         \neg\,Q \implies& \neg\,P
-    %     \end{align*}
-    %     \item Doing these proofs by hand is error-prone. 
-    %     \item Formalizing them is hard.
-    %     % \item Existing tools struggle to enforce these bounds and handle higher-order logic.
-    % \end{itemize}
-    % \note{
-    %     \begin{enumerate}
-    %         \item Proofs by contradiction using the contrapositive.
-    %         \item Formalizing them is hard because they involve probabilistic reasoning, adversarial interaction and strict polynomial time resource bounds.
-    %     \end{enumerate}
-    % }
 \end{frame}
 
 \begin{frame}{The Formalization Challenge}
@@ -99,7 +81,7 @@ Using \texorpdfstring{$\lamBLL$}{lambda-BLL} and Hoare Logic}
             \setlength\itemsep{.7em}
             \item Involve probabilities, adversarial interaction and explicit reasoning about resource bounds and computational efficiency.
             \item<2-> It is \textbf{harder}!
-            \item<3-> But still formal tools exist: EasyCrypt, Squirrel and CryptoVerif~\cite{easy-crypy-a-tutorial, a-computationally-sound-automatic-prover-for-cryptographic-protocols,the-squirrel-prover-and-its-logic}.
+            \item<3-> But still formal tools exist: EasyCrypt, Squirrel and CryptoVerif.
         \end{itemize}
     \end{itemize}
     % Managing complexity aspects and higher-order functions at the same time is hard. But higher-order reasoning is important for modeling cryptographic experiments
@@ -109,126 +91,133 @@ Using \texorpdfstring{$\lamBLL$}{lambda-BLL} and Hoare Logic}
 \section{Background}
 
 \begin{frame}{$\lamBLL$}
-    \begin{figure}[h]
-	\begin{adjustbox}{minipage=\linewidth,scale=.9}
-		\centering 
-		\vspace*{-5mm}
-		\begin{align*}
-			& \textbf{Polynomials} \; && p ::= 1 \mid i \mid p + p \mid p\times p \\ \\
-			&\textbf{Ground types}  && G ::= \UU \mid \BB \mid \SS[p] \\
-			&\textbf{Positive types} \; && P ::= G \mid P \otimes P \mid \bang_p^{\Theta} A \\
-			&\textbf{Types} \; && A ::= P \mid P \arrowRef{\Theta} A \\ \\
-			&\textbf{Variable contexts} && \Gamma ::= \varnothing \mid x :P, \Gamma \\
-			&\textbf{Reference contexts} && \Theta ::= \varnothing \mid r : G , \Theta
-		\end{align*}
-		\vspace*{-0.5cm}
-	\end{adjustbox}
-	\caption{Syntax of $\lamBLL$ \cite{lago2024computationalindistinguishabilitylogicalrelations}.}
-	\label{fig:syntax}
-\end{figure}
+    \small
+    \begin{align*}
+        & \textbf{Polynomials} \; && p ::= 1 \mid i \mid p + p \mid p\times p \\ \\
+        &\textbf{Ground types}  && G ::= \UU \mid \BB \mid \SS[p] \\
+        &\textbf{Positive types} \; && P ::= G \mid P \otimes P \mid \bang_p A \\
+        &\textbf{Types} \; && A ::= P \mid P \multimap A \\ \\
+        &\textbf{Variable contexts} && \Gamma ::= \varnothing \mid x :P, \Gamma \\
+        &\textbf{Reference contexts} && \Theta ::= \varnothing \mid r : G , \Theta
+    \end{align*}
 \end{frame}
 
 \begin{frame}{$\lamBLL$}
 \begin{itemize}
     \item Polynomials index resources, they \textbf{bound} input sizes, number of oracle queries and overall runtime as functions of the security parameter $i$.
-    \item Supports references, probabilistic choice and captures the complexity constraints through a graded modality.
+    \item Supports references, probabilistic choice and captures the complexity constraints through graded modalities.
     \item PPT adversaries modelled as \textbf{higher-order} terms with oracle access:
     \[
     \vdash_c^\varnothing Adv: \bang_{q}\bigl(\SS[i] \multimap \SS[i]\bigr) \multimap (\SS[i] \otimes \SS[i])
     \]
-    \item Security proofs become \textbf{equational reasoning} between $\lamBLL$ terms via logical relations.
-    \begin{align*}
-	\return{} \false \sim \letin{y = M}{\letin{x= \random}{\mathtt{eq}(x,y)}}
-    \end{align*}
+    \item Security proofs become \textbf{equational reasoning} between $\lamBLL$ terms, proved sound via logical relations.
+    \small
+    \begin{align}
+	\return{} \false \sim \letin{y = M}{\letin{x= \random}{\mathtt{eq}(x,y)}} \label{randF} \tag{randF}
+    \end{align}
     % The logical metric is approximate and therefore manages to capture programs that do not behave exactly the same way.
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Message Authentication Codes (MAC)}
-MAC is a triple $\Pi = (Gen, Mac, \vrfy)$ of PPT algorithms such that:
+MAC ensures message authentication: each party can verify that a received message was sent by the claimed sender.
 \begin{construction}[PRF-Induced MAC]\label{construction:prf-mac}
     \begin{itemize}
-        \item $Gen$ takes as input the security parameter $1^n$ and outputs a secret key $k$;
-        \item<2-> $Mac$ takes as input a key $k$ and a message $m$ and outputs a tag $F_k(m)=t$, where $F$ is a pseudorandom function;
-        \item<3-> $\vrfy$ takes as input a key $k$, a message $m$ and a tag $t$ and outputs a bit $b$, with $b = 1$ meaning valid and $b = 0$ meaning invalid.
-        \begin{align*}
-            \vrfy_k(m,Mac_k(m))=1
-        \end{align*}
+        \item $Gen$ takes the security parameter $1^n$ as input and outputs a secret key $k$.
+        \item<2-> $Mac$ takes a key $k$ and message $m$ as input and outputs a tag $t = F_k(m)$, where $F$ is a pseudorandom function.
+        \item<3-> $\vrfy$ takes a key $k$, message $m$, and tag $t$ as input and outputs a bit $b$. The tag is valid if $\vrfy_k(m,Mac_k(m))=1$.
     \end{itemize}
 \end{construction}
+\uncover<4->{\begin{unibotheorem}[PRF-Induced MAC Security]
+    If $F$ is a pseudorandom function, then Construction~\ref{construction:prf-mac} is a secure fixed-length MAC for messages of length n.
+\end{unibotheorem}}
 \end{frame}
 
 \begin{frame}{$\mathtt{MacForge}$ Experiment}
-\begin{figure}[htpb]
-    \centering
-    \begin{align*}
+\begin{align*}
     &\macforge(n): \\
     &\quad k \gets Gen(1^n) \\
     &\quad (m,t) \gets A^{Mac_k(\cdot)}(1^n) \\
     &\quad \mathbb{Q} \gets \{m \ | \ A \ \text{queries} \ Mac_k(m) \} \\
     &\quad \mathtt{return}\,\,(m \notin \mathbb{Q} \land \vrfy_k(m,t) = 1)
-    \end{align*}
-    \caption{Pseudocode for $\mathtt{MacForge}$ experiment.}
-    \label{fig:macforge}
-\end{figure}
+\end{align*}
+
+\uncover<2->{
+\begin{unibodefintion}[MAC Security]
+A MAC $\Pi$ is secure if for all PPT adversaries $A$, there is a negligible function $\epsilon$ such that:
+\begin{align*}
+    \mathrm{Pr}\bigl[ \macforge(n) = 1 \bigr] \leq \epsilon(n)
+\end{align*}
+\end{unibodefintion}
+}
+
 \end{frame}
 
-\begin{frame}{Security Proof of MAC}
-    \begin{unibotheorem}[MAC Security]
-         A MAC $\Pi$ is secure if for all PPT adversaries $A$, there is a negligible function $\epsilon$ such that:
-        \begin{align*}
-            \mathrm{Pr}\bigl[ \macforge(n) = 1 \bigr] \leq \epsilon(n)
-        \end{align*}
-    \end{unibotheorem}
-    \begin{unibotheorem}[PRF-Induced MAC Security]
-    If $F$ is a pseudorandom function, then Construction~\ref{construction:prf-mac} is a secure fixed-length MAC for messages of length n.
-    \end{unibotheorem}
-\end{frame}
+% \begin{frame}{Security Proof of MAC}
+%     Let $\widetilde{\Pi}$ be an idealized scheme using a truly random function and $D$ a distinguisher that runs $A$ as subroutine.
+%     \uncover<2->{\begin{figure}[htpb]
+% 	\centering
+% 	\begin{tikzpicture}[xscale=1.6, yscale=1.8]
+% 		\node at (0,0) {$\epsilon(n)$};
 
-\begin{frame}{Security Proof of MAC}
-    Let $\widetilde{\Pi}$ be an idealized scheme using a truly random function and $D$ a distinguisher that runs $A$ as subroutine.
-    \uncover<2->{\begin{figure}[htpb]
-	\centering
-	\begin{tikzpicture}[xscale=1.6, yscale=1.8]
-		\node at (0,0) {$\epsilon(n)$};
+% 		\node[rotate=45] (A) at (-.55,-0.3) {$\not\leq$};
+% 		\node[rotate=-45] at (.55,-0.3) {$\geq$};
 
-		\node[rotate=45] (A) at (-.55,-0.3) {$\not\leq$};
-		\node[rotate=-45] at (.55,-0.3) {$\geq$};
+% 		\node at (-2,-1) {$\mathrm{Pr}[\mathtt{MacForge}_{A,\Pi_F}(n) = 1]$};
+% 		\node at (2,-1) {$\mathrm{Pr}[\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1]$};
 
-		\node at (-2,-1) {$\mathrm{Pr}[\mathtt{MacForge}_{A,\Pi_F}(n) = 1]$};
-		\node at (2,-1) {$\mathrm{Pr}[\mathtt{MacForge}_{A,\widetilde{\Pi}}(n) = 1]$};
+% 		\node[rotate=90] at (-2,-1.4) {$=$};
+% 		\node[rotate=90] at (2,-1.4) {$=$};
 
-		\node[rotate=90] at (-2,-1.4) {$=$};
-		\node[rotate=90] at (2,-1.4) {$=$};
+% 		\node at (-2,-1.8) {$\mathrm{Pr}[D_A^{F_k(\cdot)}(1^n) = 1]$};
+% 		\node at (2,-1.8) {$\mathrm{Pr}[D_A^{f(\cdot)}(1^n) = 1]$};
 
-		\node at (-2,-1.8) {$\mathrm{Pr}[D_A^{F_k(\cdot)}(1^n) = 1]$};
-		\node at (2,-1.8) {$\mathrm{Pr}[D_A^{f(\cdot)}(1^n) = 1]$};
+% 		\node (B) at (0,-1.8) {$|\Delta| \geq \epsilon(n)$};
 
-		\node (B) at (0,-1.8) {$|\Delta| \geq \epsilon(n)$};
-
-		\draw[-{Implies},double] (A) to (B);
-	\end{tikzpicture}
-	\caption{Outline Proof of Security for $\mathtt{MacForge}$.}
-	\label{fig:proofscheme}
-    \end{figure}}
-\end{frame}
+% 		\draw[-{Implies},double] (A) to (B);
+% 	\end{tikzpicture}
+% 	\caption{Outline Proof of Security for $\mathtt{MacForge}$.}
+% 	\label{fig:proofscheme}
+%     \end{figure}}
+% \end{frame}
 
 \section{Formalization of MAC Security in \texorpdfstring{$\lamBLL$}{Lambda-BLL}}
 
+\begin{frame}{Security Proof of MAC in $\lamBLL$}
+	\centering
+	\begin{tikzpicture}[xscale=1.6, yscale=1.8]
+		\node (FalseNode) at (0,0) {$\false$};
+
+		\node[rotate=45] (A) at (-1,-0.5) {$\not\sim_{\Xi\subseteq\Upsilon}$};
+		\node[rotate=-45] (SimNode) at (1,-0.5) {$\sim_{\Xi\subseteq\Upsilon}$};
+
+		\node at (-2,-1) {$\mathit{MacForge}^F$};
+		\node (MacNode) at (2,-1) {$\widetilde{\mathit{MacForge}}$};
+
+		\node[rotate=90] at (-2,-1.6) {$\sim_{\Xi\subseteq\Upsilon}$};
+		\node[rotate=90] at (2,-1.6) {$\sim_{\Xi\subseteq\Upsilon}$};
+
+		\node at (-2,-2.2) {$D^F$};
+		\node at (2,-2.2) {$\widetilde{D}$};
+
+		\node (B) at (0,-2.2) {$\not\sim_{\Xi\subseteq\Upsilon}$};
+
+		\draw[-{Implies},double] (A) to (B);
+
+        \uncover<2->{
+            \node[draw=unibo-red, ellipse, line width=1.5pt, fit=(SimNode), inner sep=-2pt, label={[unibo-red]right:Hard}] {};
+        }
+	\end{tikzpicture}
+\end{frame}
+
 \begin{frame}{Hoare Logic}
-    \begin{figure}
-        \begin{align*}
-         &\textbf{Propositions} &&\Phi ::= \phi \mid \Phi \land \Phi \mid \Phi \lor \Phi \\
-         &\textbf{Hoare Triples} &&\{P\}\, e \,\{Q\} \\ \\
-         &\textbf{Lifting} && \mu(A, P) := \mu(\UU, P) = \UU \mid \mu(\BB, P) = \BB \\
-         & &&\mid \mu(\SS[p], P) = \SS[p] \\
-         & &&\mid \mu(A \otimes B, P) = \mu(A, P) \otimes \mu(B, P) \\
-         & &&\mid \mu(\bang_q A, P) = \bang_q^{P,P} \mu(A, P) \\
-         & &&\mid\mu(A \multimap B, P) = \mu(A, P) \underset{P, \lambda x.P}{\multimap} \mu(B, P)
-        \end{align*}
-        \caption{Hoare Logic extension in $\lamBLL$.}
-        \label{fig:placeholder}
-    \end{figure}
+    \begin{itemize}
+        \item Programs behaviour expressed by \textbf{partial correctness specifications}, written as triples of the form
+        \[ \{P\}\, e \,\{Q\}. \]
+        \item If execution of $e$ starts in a program state satisfying $P$, then every \textbf{terminating} execution of $e$ produces a state satisfying $Q$.
+        \item \textbf{Propositions} used in Hoare triples are generated by the following grammar:
+        \[ \Phi ::= \phi \mid \Phi \land \Phi \mid \Phi \lor \Phi  \]
+    \end{itemize}    
 \end{frame}
 
 \begin{frame}{Hoare Logic}
@@ -249,48 +238,128 @@ MAC is a triple $\Pi = (Gen, Mac, \vrfy)$ of PPT algorithms such that:
     \end{center}
 \end{frame}
 
-\begin{frame}{Security Proof of MAC in $\lamBLL$}
-    \begin{figure}[htpb]
-	\centering
-	\begin{tikzpicture}[xscale=1.6, yscale=1.8]
-		\node at (0,0) {$\false$};
-
-		\node[rotate=45]  (A) at (-1,-0.5) {$\not\sim_{\Xi\subseteq\Upsilon}$};
-		\node[rotate=-45] at (1,-0.5) {$\sim_{\Xi\subseteq\Upsilon}$};
-
-		\node at (-2,-1) {$\mathit{MacForge}^F$};
-		\node at (2,-1) {$\widetilde{\mathit{MacForge}}$};
-
-		\node[rotate=90] at (-2,-1.6) {$\sim_{\Xi\subseteq\Upsilon}$};
-		\node[rotate=90] at (2,-1.6) {$\sim_{\Xi\subseteq\Upsilon}$};
-
-		\node at (-2,-2.2) {$D^F$};
-		\node at (2,-2.2) {$\widetilde{D}$};
-
-		\node (B) at (0,-2.2) {$\not\sim_{\Xi\subseteq\Upsilon}$};
-
-		\draw[-{Implies},double] (A) to (B);
-	\end{tikzpicture}
-	\caption{Outline Proof of Security for $\mathtt{MacForge}$ in $\lamBLL$.}
-	\label{fig:proofscheme-lam-bll}
-    \end{figure}
-\end{frame}
-
 \begin{frame}{Formalization of MAC Security in $\lamBLL$}
     \begin{align*}
-    &\widetilde{MacForge} \triangleq \\
-    &\quad\letin{k = \widetilde{Gen} \star}{} \\
-    &\quad\letin{o = \widetilde{Oracle}\, k}{} \\
-    &\quad\letin{\lis{m,tag} = Adv\, o}{} \\
-    &\quad\letin{queries = \get Q}{} \\
-    &\quad\letin{c=\mathtt{contains}(queries, m)}{} \\
-    &\quad\mathtt{if}\, c\, \mathtt{then}\, \return \false \\
-    &\quad\mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,tag)}
+    &MacForge \triangleq \\
+    &\quad \letin{k = Gen \star}{} \\
+    &\quad \letin{o = Oracle\, k}{} \\
+    &\quad \letin{\lis{m,tag} = Adv\, o}{} \\
+    &\quad \letin{queries = \get Q}{} \\
+    &\quad \letin{c=\mathtt{contains}(queries, m)}{} \\
+    &\quad \mathtt{if}\, c\, \mathtt{then}\, \return \false \\
+    &\quad \mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,tag)}
     \end{align*}
 \end{frame}
 
-\begin{frame}{The Role of Assertions}
-    \scriptsize
+\begin{frame}{MAC Algorithms as \texorpdfstring{$\lamBLL$-Terms}{Lambda-BLL-Terms}}
+    \footnotesize{
+    \begin{align*}
+        \begin{aligned}
+            &\widetilde{Gen} \triangleq \\
+            &\quad \lambda u. \\
+            &\quad\letin{q=\mathtt{initQ}}{} \\
+            &\quad \mathtt{set}\,Q\,q; \\
+            &\quad \letin{tab=\mathtt{initTable}}{} \\
+            &\quad \mathtt{set}\,rand\,tab; \\
+            &\quad \letin{z=\mathtt{zero}}{} \\
+            &\quad \return z
+        \end{aligned}
+        \qquad\qquad\qquad
+        \begin{aligned}
+            &\widetilde{\mathit{Mac}} \triangleq \\
+            &\quad\lambda e. \\
+            &\quad\letin{\lis{k,m} = e}{} \\
+            &\quad\letin{tab = \mathtt{get}\,rand}{} \\
+            &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
+            &\quad\mathtt{if}\, b\, \mathtt{then} \\
+            &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
+            &\quad\quad \return x \\
+            &\quad\mathtt{else} \\
+            &\quad\quad \letin{x = \random}{} \\
+            &\quad\quad \letin{newtab = \mathtt{modify}(tab, m, x)}{} \\
+            &\quad\quad \mathtt{set}\,rand\,newtab; \\
+            &\quad\quad \return x
+        \end{aligned}
+    \end{align*}
+    }
+\end{frame}
+
+\begin{frame}{MAC Algorithms as \texorpdfstring{$\lamBLL$-Terms}{Lambda-BLL-Terms}}
+    \footnotesize{
+     \begin{align*}
+     \begin{aligned}
+        &\widetilde{Oracle} \triangleq \\
+        &\quad \return(\lambda k.\return \bang(\return \lambda m. \\
+        &\quad\quad \letin{q=\get Q}{} \\
+        &\quad\quad \letin{t=\mathtt{contains}(q,m)}{} \\
+        &\quad\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then} \,\mathtt{set}\,Q\;\mathtt{modifyQ}(q,m) \\
+        &\quad\quad \mathtt{else}\ \mathtt{skip}; \\
+        &\quad\quad \mathit{\widetilde{Mac}}\lis{k,m}))
+    \end{aligned}
+    \qquad\quad
+    \begin{aligned}
+        &D \triangleq \\
+        &\quad \return(\lambda o. \\
+        &\quad \letin{\lis{m,tag} = Adv\, o}{} \\
+        &\quad \letin{queries = \get Q}{} \\
+        &\quad \letin{c=\mathtt{contains}(queries, m)}{} \\
+        &\quad \mathtt{if}\, c\, \mathtt{then}\, \return \false \\
+        &\quad \mathtt{else}\,\letin{x=\mathtt{der}(o)\, m}{\mathtt{eq}(x,tag))}
+    \end{aligned}
+    \end{align*}
+    \begin{align*}
+        D^F &\triangleq \letin{k=Gen^F \star} \letin{o=M^F k} \letin{e=\mathit{MacOracle}\,o}{D\,e} \\  
+        \widetilde{D} &\triangleq \letin{k=\widetilde{Gen} \star} \letin{o=\widetilde{M} k} \letin{e=\mathit{MacOracle}\,o}{D\,e} \label{eq:d-tilde}
+    \end{align*}
+    }
+\end{frame}
+
+\begin{frame}{From \texorpdfstring{$\widetilde{D}$}{MacOracle} to \texorpdfstring{$\widetilde{MacForge}$}{MacForge}}
+\begin{lemma}\label{lemma:MacOracle-to-tilde-oracle}
+\[ \letin{o=\widetilde{M}\,k}{MacOracle\,o} \simcontext \widetilde{Oracle}\,k \]
+\end{lemma}
+
+\footnotesize
+\begin{align*}
+    \widetilde{D}\triangleq\,& \letin{k=\widetilde{Gen} \star} \letin{o=\widetilde{M} k} \letin{e=\mathit{MacOracle}\,o}{D\,e}      
+    \\[2ex]
+    \quad \overset{\text{letAss}}{\simcontext}\quad&
+    \begin{aligned}
+        &\letin{k=\widetilde{Gen} \star}\letin{e=(\letin{o=\widetilde{M}\,k}{MacOracle}\,o)}{D\,e}
+    \end{aligned}
+    \\[2ex]
+    \quad \overset{\text{Lemma ~\ref{lemma:MacOracle-to-tilde-oracle}}} {\simcontext} \quad&
+    \begin{aligned}
+        &\letin{k=\widetilde{Gen}\star} \\&\letin{e=\widetilde{Oracle}\,k}{} 
+        \\&{D\,e}
+    \end{aligned}
+\end{align*}
+\end{frame}
+
+\begin{frame}{From \texorpdfstring{$D^F$}{D} to \texorpdfstring{$MacForge^F$}{MacForge}}
+    \begin{lemma}\label{lemma:MacOracle-to-oracleF}
+    \[ \letin{o=M^F}{MacOracle\,o}\simcontext Oracle^F\,k \]
+    \end{lemma}
+    \footnotesize
+    \begin{align*}
+        D^F \quad\triangleq\quad& \letin{k=Gen^F \star} \letin{o=M^F k}\letin{e=\mathit{MacOracle}\,o}{D\,e}
+    \\[2ex]
+    \quad\overset{\text{letAss}}{\simcontext}\quad&
+    \begin{aligned}
+        &\letin{k=Gen^F \star}{\letin{e=(\letin{o=M^F\,k}{MacOracle\,o)}}{D\,e}}
+    \end{aligned}
+    \\[2ex]
+     \quad\overset{\text{Lemma ~\ref{lemma:MacOracle-to-oracleF}}}{\simcontext}\quad&
+    \begin{aligned} 
+        &\letin{k=Gen^F \star}{} \\
+        &\letin{e=Oracle^F\,k}{} \\
+        &{D\,e}
+    \end{aligned}
+    \end{align*}
+\end{frame}
+
+\begin{frame}{From \texorpdfstring{$\widetilde{MacForge}$}{MacForge} to \texorpdfstring{$\false$}{false} - The Role of Assertions}
+    \footnotesize
     \begin{align*}
         &\letin{k = \widetilde{Gen} \star}{} \\
         &\dots \\
@@ -307,8 +376,8 @@ MAC is a triple $\Pi = (Gen, Mac, \vrfy)$ of PPT algorithms such that:
     \end{align*}
 \end{frame}
 
-\begin{frame}{The Role of Assertions}
-    \scriptsize
+\begin{frame}{From \texorpdfstring{$\widetilde{MacForge}$}{MacForge} to \texorpdfstring{$\false$}{false} - The Role of Assertions}
+    \footnotesize
     \begin{align*}
     &\letin{k = \widetilde{Gen} \star}{} \\
     &\dots \\
@@ -327,7 +396,7 @@ MAC is a triple $\Pi = (Gen, Mac, \vrfy)$ of PPT algorithms such that:
     \end{align*}
 \end{frame}
 
-\begin{frame}{Conclusion of the Proof}
+\begin{frame}{From \texorpdfstring{$\widetilde{MacForge}$}{MacForge} to \texorpdfstring{$\false$}{false}}
     \scriptsize
     \begin{align*}
     \begin{aligned}
@@ -339,7 +408,7 @@ MAC is a triple $\Pi = (Gen, Mac, \vrfy)$ of PPT algorithms such that:
         &\quad \letin{x = \random}{} \\
         &\quad \mathtt{eq}(x,tag)
     \end{aligned}
-    \quad\underset{\text{randF}}{\simcontext}\quad
+    \quad\overset{\text{\ref{randF}}}{\simcontext}\quad
     \begin{aligned}
         &\letin{\lis{m,tag} = Adv\,O}{} \\
         &\letin{queries = \get Q}{} \\
@@ -353,6 +422,7 @@ MAC is a triple $\Pi = (Gen, Mac, \vrfy)$ of PPT algorithms such that:
 \section{Conclusions}
 
 \begin{frame}{Conclusions}
+\textbf{Summary}
 \begin{itemize}
     \item $\lamBLL$ is a higher order calculus with probabilistic effects and references. A powerful formal framework in the computational model. 
     \item Hoare extension enables reasoning about state and invariants.
@@ -368,11 +438,11 @@ MAC is a triple $\Pi = (Gen, Mac, \vrfy)$ of PPT algorithms such that:
 % \begin{frame}[allowframebreaks, plain]{References}
 %     \printbibliography
 % \end{frame}
-\begin{frame}[allowframebreaks, plain]
-    \frametitle{References}
-    \bibliographystyle{ieeetr}
-    % \bibliographystyle{abbrv}
-    \bibliography{refs.bib}
-\end{frame}
+% \begin{frame}[allowframebreaks, plain]
+%     \frametitle{References}
+%     \bibliographystyle{ieeetr}
+%     % \bibliographystyle{abbrv}
+%     \bibliography{refs.bib}
+% \end{frame}
 
 \end{document}

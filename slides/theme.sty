@@ -55,8 +55,14 @@
 \setbeamercolor{subsection number projected}{bg=unibo-gray, fg=white}
 
 % blocks
+\setbeamertemplate{theorems}[numbered]
+
 \setbeamercolor{block title theorem}{fg=white, bg=unibo-red!80}
 \setbeamercolor{block body theorem}{fg=black, bg=unibo-gray!10}
+\setbeamercolor{block title definition}{fg=white, bg=unibo-red!80}
+\setbeamercolor{block body definition}{fg=black, bg=unibo-gray!10}
+\setbeamercolor{block title lemma}{fg=white, bg=unibo-red!80}
+\setbeamercolor{block body lemma}{fg=black, bg=unibo-gray!10}
 
 \newcounter{constructioncount}[section]
 \renewcommand{\theconstructioncount}{\thesection.\arabic{constructioncount}}
@@ -64,8 +70,46 @@
 \newcounter{theoremcount}[section]
 \renewcommand{\thetheoremcount}{\thesection.\arabic{theoremcount}}
 
+\newcounter{defcount}[section]
+\renewcommand{\thedefinition}{\arabic{chapter}.\arabic{section}.\arabic{definition}}
+
+\newcounter{lemmacount}[section]
+\renewcommand{\thelemma}{\arabic{chapter}.\arabic{section}.\arabic{lemma}}
+
 \setbeamercolor{block title construction}{fg=white, bg=unibo-red!80}
 \setbeamercolor{block body construction}{fg=black, bg=unibo-gray!10}
+
+\newenvironment{unibodefintion}[1][]{%
+    \refstepcounter{defcount}% 
+    \par\vskip\medskipamount%
+    \begin{beamercolorbox}[wd=\textwidth, ht=2.5ex, dp=1ex, leftskip=0.5em]{block title definition}
+        \usebeamerfont*{block title definition}\textbf{Defintion:} #1%
+    \end{beamercolorbox}%
+    {\nointerlineskip\vskip-0.5pt}%
+    \usebeamerfont{block body defintion}%
+    \begin{beamercolorbox}[wd=\textwidth, sep=0.5em, vmode]{block body definition}%
+        \setbeamercolor{itemize item}{fg=unibo-red}%
+        \setbeamercolor{itemize subitem}{fg=unibo-red}%
+        \itshape
+}{%
+    \end{beamercolorbox}\vskip\smallskipamount%
+}
+
+\newenvironment{unibolemma}[1][]{%
+    \refstepcounter{lemmacount}% 
+    \par\vskip\medskipamount%
+    \begin{beamercolorbox}[wd=\textwidth, ht=2.5ex, dp=1ex, leftskip=0.5em]{block title lemma}
+        \usebeamerfont*{block title lemma}\textbf{Lemma:} #1%
+    \end{beamercolorbox}%
+    {\nointerlineskip\vskip-0.5pt}%
+    \usebeamerfont{block body lemma}%
+    \begin{beamercolorbox}[wd=\textwidth, sep=0.5em, vmode]{block body lemma}%
+        \setbeamercolor{itemize item}{fg=unibo-red}%
+        \setbeamercolor{itemize subitem}{fg=unibo-red}%
+        \itshape
+}{%
+    \end{beamercolorbox}\vskip\smallskipamount%
+}
 
 \newenvironment{unibotheorem}[1][]{%
     \refstepcounter{theoremcount}% 
@@ -84,19 +128,20 @@
     \end{beamercolorbox}\vskip\smallskipamount%
 }
 
-\newenvironment{construction}[1][]{
-    \refstepcounter{constructioncount}
+\newenvironment{construction}[1][]{%
+    \only<1>{\refstepcounter{constructioncount}}% 
     \par\vskip\medskipamount%
     \begin{beamercolorbox}[wd=\textwidth, ht=2.5ex, dp=1ex, leftskip=0.5em]{block title construction}
-    \usebeamerfont*{block title construction}\textbf{Construction:} #1%
+        % Use \theconstructioncount to display the number
+        \usebeamerfont*{block title construction}\textbf{Construction \theconstructioncount:} #1%
     \end{beamercolorbox}%
     {\nointerlineskip\vskip-0.5pt}%
     \usebeamerfont{block body construction}%
     \begin{beamercolorbox}[wd=\textwidth, sep=0.5em, vmode]{block body construction}%
-    \setbeamercolor{itemize item}{fg=unibo-red}%
-    \setbeamercolor{itemize subitem}{fg=unibo-red}%
+        \setbeamercolor{itemize item}{fg=unibo-red}%
+        \setbeamercolor{itemize subitem}{fg=unibo-red}%
 }{%
-  \end{beamercolorbox}\vskip\smallskipamount%
+    \end{beamercolorbox}\vskip\smallskipamount%
 }
 
 % \useoutertheme{infolines}
