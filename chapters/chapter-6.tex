@@ -1700,7 +1700,7 @@ In order to conclude, we leave assertions aside and we start to simplify the ter
     \end{aligned}
     % \\[2ex]
     % &\quad\underset{\text{\ref{letCom}}}{\simcontext}\quad
-    \quad\underset{\text{\ref{letCom}}}{\simcontext}\quad
+    \quad\overset{\text{\ref{letCom}}}{\simcontext}\quad
     \begin{aligned}
         &\letin{k = \widetilde{Gen} \star}{} \\
         &\letin{\lis{m,tag} = Adv\,O}{} \\
@@ -1719,7 +1719,7 @@ In order to conclude, we leave assertions aside and we start to simplify the ter
         &\quad \mathtt{eq}(x,tag)
     \end{aligned}
     \\[2ex]
-    &\quad\underset{\text{\ref{letAss}}}{\simcontext}\quad
+    &\quad\overset{\text{\ref{letAss}}}{\simcontext}\quad
     \begin{aligned}
         &\letin{k = \widetilde{Gen} \star}{} \\
         &\letin{\lis{m,tag} = Adv\,O}{} \\
@@ -1742,7 +1742,7 @@ In order to conclude, we leave assertions aside and we start to simplify the ter
         &\quad \mathtt{eq}(x,tag)
     \end{aligned}
     \\[2ex]
-    &\quad\underset{\text{\ref{safeDisc1}}}{\simcontext}\quad
+    &\quad\overset{\text{\ref{safeDisc1}}}{\simcontext}\quad
     \begin{aligned}
         &\letin{k = \widetilde{Gen} \star}{} \\
         &\letin{\lis{m,tag} = Adv\,O}{} \\
@@ -1754,7 +1754,7 @@ In order to conclude, we leave assertions aside and we start to simplify the ter
         &\quad \mathtt{eq}(x,tag)
     \end{aligned}
     \\[2ex]
-    &\quad\underset{\text{\ref{safeDisc1}}}{\simcontext}\quad
+    &\quad\overset{\text{\ref{safeDisc1}}}{\simcontext}\quad
     \begin{aligned}
         &\letin{\lis{m,tag} = Adv\,O}{} \\
         &\letin{queries = \get Q}{} \\
@@ -1764,7 +1764,7 @@ In order to conclude, we leave assertions aside and we start to simplify the ter
         &\quad \letin{x = \random}{} \\
         &\quad \mathtt{eq}(x,tag)
     \end{aligned}
-    \quad\underset{\text{\ref{randF}}}{\simcontext}\quad
+    \quad\overset{\text{\ref{randF}}}{\simcontext}\quad
     \begin{aligned}
         &\letin{\lis{m,tag} = Adv\,O}{} \\
         &\letin{queries = \get Q}{} \\
@@ -1773,14 +1773,14 @@ In order to conclude, we leave assertions aside and we start to simplify the ter
         &\mathtt{else} \, \return \false
     \end{aligned}
     \\[2ex]
-    &\quad\underset{\text{\ref{ifConst}}}{\simcontext}\quad
+    &\quad\overset{\text{\ref{ifConst}}}{\simcontext}\quad
     \begin{aligned}
         &\letin{\lis{m,tag} = Adv\,O}{} \\
         &\letin{queries = \get Q}{} \\
         &\letin{c=\mathtt{contains}(queries, m)}{} \\
         & \return \false
     \end{aligned}
-    \quad\underset{\text{\ref{safeDisc1}}}{\simcontext}\quad
+    \quad\overset{\text{\ref{safeDisc1}}}{\simcontext}\quad
     \begin{aligned}
         &\return \false
     \end{aligned}
