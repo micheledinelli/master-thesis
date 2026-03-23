@@ -22,14 +22,14 @@ Message Authentication Codes \\
 Using \texorpdfstring{$\lamBLL$}{lambda-BLL} and Hoare Logic}
 % \subtitle{Subtitle}
 \author[Michele Dinelli]
-{Michele Dinelli \texorpdfstring{\\[2ex]}{\and} \small{Supervisor: Prof.~Ugo Dal Lago\inst{1} \texorpdfstring{\\}{\and} Co-Supervisor: Dr.~Rémy Cerda \inst{1}}}
+{\large{Michele Dinelli} \texorpdfstring{\\[2ex]}{\and} \small{Supervisor: Prof.~Ugo Dal Lago \texorpdfstring{\\}{\and} Co-Supervisor: Dr.~Rémy Cerda}}
 \institute[] 
 {
-  \inst{1}%
+  \inst{}%
   Department of Computer Science and Engineering \\
   University of Bologna
 }
-\date{\small{\today}}
+\date{\small{March 26, 2026}}
 
 \begin{document}
 
@@ -321,7 +321,7 @@ A MAC $\Pi$ is secure if for all PPT adversaries $A$, there is a negligible func
 
 \footnotesize
 \begin{align*}
-    \widetilde{D}\triangleq\,& \letin{k=\widetilde{Gen} \star} \letin{o=\widetilde{M} k} \letin{e=\mathit{MacOracle}\,o}{D\,e}      
+    \widetilde{D}\quad\triangleq\quad& \letin{k=\widetilde{Gen} \star} \letin{o=\widetilde{M} k} \letin{e=\mathit{MacOracle}\,o}{D\,e}      
     \\[2ex]
     \quad \overset{\text{letAss}}{\simcontext}\quad&
     \begin{aligned}
@@ -369,7 +369,8 @@ A MAC $\Pi$ is secure if for all PPT adversaries $A$, there is a negligible func
         &\mathtt{else} \\
         &\quad\letin{q=\get Q}{} \\
         &\quad\letin{t=\mathtt{contains}(q,m)}{} \\
-        &\quad \uncover<2->{\color{blue} \{ t = \false \}} \\ % Appears on slide 2, stays on 2+
+        &\quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (q=Q) \land (m \not\in q) \land t = (m \in q)\} \\
+        &\qquad \uncover<2->{\implies \color{blue} \{  t = \false \}} \\
         &\quad \mathtt{if}\ \mathtt{not}(t)\,\mathtt{then}\,\mathtt{set}\,Q\;\mathtt{modifyQ}(q, m) \\
         &\quad \mathtt{else}\,\mathtt{skip}; \\
         &\dots
@@ -387,7 +388,9 @@ A MAC $\Pi$ is secure if for all PPT adversaries $A$, there is a negligible func
     &\dots \\
     &\quad\letin{tab = \mathtt{get}\,rand}{} \\
     &\quad\letin{b = \mathtt{isdefined}(tab, m)}{} \\
-    &\quad  \uncover<2->{\color{blue} \{ b = \false \}} \\
+    &\quad \color{blue} \{ \mathtt{coherent}(q, rand) \land (Q = q \cup \{m\}) \land (m \notin q) \\
+    &\qquad \color{blue} \land (tab=rand) \land (b=(m \in tab)) \} \\
+    &\qquad\quad \uncover<2->{\implies \color{blue} \{ b = \false \}} \\
     &\quad\mathtt{if}\, b\, \mathtt{then} \\
     &\quad\quad \letin{x = \mathtt{getValue}(tab, m)}{} \\
     &\quad\quad \mathtt{eq}(x,tag) \\
